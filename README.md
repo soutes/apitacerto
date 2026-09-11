@@ -17,8 +17,14 @@ Ver spec completa em [`_docs/specs.md`](_docs/specs.md).
 - `backend/` — FastAPI + uv + SQLAlchemy + SQLite
 - `openapi.yaml` — contrato entre frontend e backend
 
-## Rodando (preencher conforme cada fase é implementada)
+## Rodando
 
-- Frontend: _TBD_
-- Backend: _TBD_
-- Testes: _TBD_
+- Frontend: `npm --prefix frontend run dev` (ou `cd frontend && npm run dev`) — http://localhost:5173
+- Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
+- Testes: `cd backend && uv run pytest`
+
+Frontend fala com o backend em `http://localhost:8000` (configurável via
+`VITE_BACKEND_URL`, ver `frontend/src/api.js`).
+
+Dados hoje: mock store (Fase 3/4), mesma lógica que a ingestão real (Fase 5)
+vai popular a partir da API-Football.

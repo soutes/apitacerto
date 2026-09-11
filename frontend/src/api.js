@@ -6,7 +6,7 @@ import { TEAMS, REFEREES, SEASONS, buildHeatmap, kpisFor, timeseriesFor } from "
 
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
-const USE_MOCK = true; // Fase 4 vira false (ou some, quando o fetch real entrar)
+const USE_MOCK = false; // Fase 4: conectado ao backend real (ver _docs/specs.md)
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));

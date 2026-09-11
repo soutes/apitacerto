@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: ApitaCerto API
+  version: "1.0"
+  description: >
+    Backend do dashboard ApitaCerto. Serve dados agregados do Brasileirao
+    Serie A (2022-2024) segmentados por time e arbitro, incluindo o Indice
+    de Favorecimento (ver _docs/specs.md secao 6).
+
+servers:
+  - url: http://localhost:8000
+
+paths:
+  /filters:
+    get:
+      summary: Opcoes disponiveis para os filtros do dashboard
+      operationId: getFilters
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilterOptions"
+
+  /dashboard:
+    get:
+      summary: Dados agregados do dashboard para o recorte de filtros dado
+      operationId: getDashboard
+      parameters:
+        - name: season
+          in: query
+          required: true
+          schema:
+            type: integer
+            enum: [2022, 2023, 2024]
+        - name: team
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: referee
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardResponse"
+
+components:
+  schemas:
+    FilterOptions:
+      type: object
+      required: [teams, referees, seasons]
+      properties:
+        teams:
+          type: array
+          items: { type: string }
+        referees:
+          type: array
+          items: { type: string }
+        seasons:
+          type: array
+          items: { type: integer }
+
+    Kpis:
+      type: object
+      required:
+        [games, wins, draws, losses, winRatePct, goalsFor, goalsAgainst, yellow, red]
+      properties:
+        games: { type: integer }
+        wins: { type: integer }
+        draws: { type: integer }
+        losses: { type: integer }
+        winRatePct: { type: number }
+        goalsFor: { type: integer }
+        goalsAgainst: { type: integer }
+        yellow: { type: integer }
+        red: { type: integer }
+
+    TimeseriesPoint:
+      type: object
+      required: [round, winRatePct, yellow, red]
+      properties:
+        round: { type: integer }
+        winRatePct: { type: number }
+        yellow: { type: integer }
+        red: { type: integer }
+
+    HeatmapCell:
+      type: object
+      required: [team, referee, n, insufficientSample]
+      properties:
+        team: { type: string }
+        referee: { type: string }
+        n: { type: integer, description: "jogos do par time-arbitro na temporada" }
+        wins: { type: integer }
+        draws: { type: integer }
+        losses: { type: integer }
+        yellow: { type: integer }
+        red: { type: integer }
+        insufficientSample:
+          type: boolean
+          description: "true quando n < 5 (piso de amostra, spec secao 6)"
+        index:
+          type: number
+          nullable: true
+          description: "Indice de Favorecimento; null quando insufficientSample"
+
+    DashboardResponse:
+      type: object
+      required: [kpis, timeseries, heatmap]
+      properties:
+        kpis:
+          $ref: "#/components/schemas/Kpis"
+        timeseries:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeseriesPoint"
+        heatmap:
+          type: array
+          items:
+            $ref: "#/components/schemas/HeatmapCell"

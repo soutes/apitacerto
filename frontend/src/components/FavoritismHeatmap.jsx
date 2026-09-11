@@ -1,5 +1,3 @@
-import { TEAMS, REFEREES } from "../mockData";
-
 // Escala de cor: vermelho (indice alto, possivel favorecimento) -> branco (0)
 // -> azul (indice baixo/negativo). Cinza = amostra insuficiente (n < 5).
 function colorFor(row) {
@@ -15,6 +13,19 @@ function colorFor(row) {
 
 export default function FavoritismHeatmap({ rows, onSelect }) {
   const byKey = new Map(rows.map((r) => [`${r.team}|${r.referee}`, r]));
+  // eixos vem dos dados reais (nem toda temporada/ingestao tem os mesmos
+  // times e arbitros) -- nao usa mais uma lista fixa de mock.
+  const teams = [...new Set(rows.map((r) => r.team))].sort();
+  const referees = [...new Set(rows.map((r) => r.referee))].sort();
+
+  if (teams.length === 0) {
+    return (
+      <div className="chart-box">
+        <h3>Indice de Favorecimento — time x arbitro</h3>
+        <p className="hint">Sem dados para este recorte ainda.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="chart-box">
@@ -29,16 +40,16 @@ export default function FavoritismHeatmap({ rows, onSelect }) {
           <thead>
             <tr>
               <th></th>
-              {REFEREES.map((r) => (
+              {referees.map((r) => (
                 <th key={r} title={r}>{r.split(" ")[0]}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {TEAMS.map((team) => (
+            {teams.map((team) => (
               <tr key={team}>
                 <th>{team}</th>
-                {REFEREES.map((referee) => {
+                {referees.map((referee) => {
                   const row = byKey.get(`${team}|${referee}`);
                   if (!row) return <td key={referee} />;
                   const title = row.insufficientSample

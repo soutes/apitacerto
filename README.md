@@ -26,5 +26,9 @@ Ver spec completa em [`_docs/specs.md`](_docs/specs.md).
 Frontend fala com o backend em `http://localhost:8000` (configurável via
 `VITE_BACKEND_URL`, ver `frontend/src/api.js`).
 
-Dados hoje: mock store (Fase 3/4), mesma lógica que a ingestão real (Fase 5)
-vai popular a partir da API-Football.
+Dados: SQLAlchemy + SQLite (Fase 5), populado por
+`cd backend && uv run python scripts/ingest.py --max-requests 90`. Respeita
+o limite de 100 req/dia (e um limite por minuto do free tier) da
+API-Football — rodar 1x/dia até completar as 3 temporadas (2022-2024).
+Temporada/time/árbitro sem dado real ainda ingerido cai automaticamente no
+mock determinístico (não quebra o dashboard enquanto a ingestão progride).

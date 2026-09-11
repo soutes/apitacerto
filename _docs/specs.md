@@ -162,8 +162,16 @@ Ordem de construção (igual ao HW2):
   seção 3. Decisão: v1 usa 2022-2024 fechado, não temporada atual.
 - Drill-down (clicar numa célula do heatmap e filtrar o resto do dashboard)
   é stretch goal, não obrigatório pro HW2.
-- Ainda não testado: `/fixtures/events` pro conjunto completo das 1140
-  partidas custa ~1140 requests (1 por fixture) — free tier é 100/dia, então
-  a ingestão precisa rodar em lotes ao longo de vários dias, ou usar algum
-  endpoint em lote se existir. Validar isso antes de implementar o script de
-  ingestão (Fase 5).
+- ~~Validar custo de `/fixtures/events` em lote~~ — feito em 2026-09-10/11:
+  não existe endpoint em lote, é 1 request por partida (1140 no total). Além
+  do limite de 100/dia, o free tier também tem **limite por minuto** (achado
+  em produção, não documentado claramente na doc pública) — o script de
+  ingestão (`backend/scripts/ingest.py`) throttla 7s entre chamadas e faz
+  1 retry com backoff de 65s se estourar. Rodando `--max-requests 90`/dia
+  isso dá pra cobrir ~90 partidas por dia — 3 temporadas completas (1140
+  jogos) levam ~13 dias corridos rodando 1x/dia.
+- Estado real em 2026-09-11: 34/380 partidas de 2023 com eventos
+  ingeridos. Dashboard já funciona sobre esse dado parcial (a maioria dos
+  pares time-árbitro ainda cai no piso de amostra `n<5`, corretamente).
+  Continuar rodando `uv run python scripts/ingest.py --max-requests 90`
+  diariamente até completar as 3 temporadas.

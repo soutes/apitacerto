@@ -38,7 +38,7 @@ export default function OverviewTab({ options, team, referee, onChangeTeam, onCh
         <p className="hint">
           Escolha um time e/ou um arbitro acima pra ver os indicadores desse
           recorte. Pra visao agregada de todos os times e arbitros, use as
-          abas Tabela Geral ou Classificacao.
+          telas Clubes ou Classificacao.
         </p>
       )}
 

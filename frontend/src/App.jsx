@@ -141,7 +141,7 @@ export default function App() {
               <div className="screen">
                 <ScreenHeader
                   title="Árbitros"
-                  subtitle={`Ranking por rigor — Série A ${season} · ${overview?.allReferees?.length ?? 0} árbitros com amostra suficiente`}
+                  subtitle={`Ranking por rigor — Série A ${season}`}
                   season={season}
                   seasons={options.seasons}
                   onChangeSeason={setSeason}

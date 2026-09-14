@@ -63,9 +63,10 @@ export default function FavoritismTab({ seasons, onSelect }) {
       <p className="hint">
         Vermelho = possivel favorecimento ao time. Azul = possivel prejuizo.
         Cinza = amostra insuficiente (menos de 5 jogos do par na temporada
-        escolhida, ou em todas juntas se "Todos"). Sinalizacao exploratoria,
-        nao prova de manipulacao — ver <code>_docs/specs.md</code> secao 6.
-        Clique numa celula pra ver o detalhe na aba Visao Geral.
+        escolhida, ou em todas juntas se "Todos"). E um sinal estatistico
+        pra investigar, nao uma acusacao nem prova de manipulacao — um
+        numero alto pode vir de coincidencia, calendario ou amostra pequena.
+        Clique numa celula pra ver o detalhe.
       </p>
       {loading ? <p>Carregando...</p> : <PairMatrix rows={rows} cellFor={cellFor} onSelect={onSelect} />}
     </div>

@@ -62,7 +62,7 @@ export default function MatrixTab({ rows, onSelect }) {
       <p className="hint">
         Cada celula e o par time x arbitro na temporada selecionada. Cor mais
         forte = valor mais alto (ou saldo mais negativo, em azul, pro saldo de
-        gols). Clique numa celula pra ver o detalhe na aba Visao Geral.
+        gols). Clique numa celula pra ver o detalhe.
       </p>
       <PairMatrix rows={rows} cellFor={cellFor} onSelect={onSelect} />
     </div>

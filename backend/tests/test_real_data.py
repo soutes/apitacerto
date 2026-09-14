@@ -103,3 +103,39 @@ def test_filters_include_real_teams_once_ingested(db_session):
     assert "Time A" in body["teams"]
     assert "Arbitro X" in body["referees"]
     assert SEASON in body["seasons"]
+
+
+def test_scored_fixtures_count_before_cards_are_ingested(db_session):
+    """Regressao: um jogo com placar real mas sem /fixtures/events buscado
+    ainda (events_ingested=False) tinha sido excluido do V/E/D/gols so por
+    faltar cartao -- isso fazia a temporada inteira cair no mock ate a
+    ingestao de cartao terminar (bug reportado: "Sao Paulo campeao 2024"
+    vinha do fallback mock, nao de dado real)."""
+    team_a = Team(api_id=10, name="Time C")
+    team_b = Team(api_id=20, name="Time D")
+    ref = Referee(name="Arbitro Z")
+    db_session.add_all([team_a, team_b, ref])
+    db_session.flush()
+
+    for i in range(6):
+        db_session.add(Fixture(
+            api_id=2000 + i, season=SEASON, round=f"Regular Season - {i + 1}",
+            date="2023-06-01", home_team_id=team_a.id, away_team_id=team_b.id,
+            referee_id=ref.id, home_score=1, away_score=0,
+            events_ingested=False,  # cartao ainda nao buscado -- so o placar existe
+        ))
+    db_session.commit()
+
+    res = client.get("/dashboard", params={"season": SEASON})
+    assert res.status_code == 200
+    body = res.json()
+
+    # dado real (nao caiu no mock) mesmo sem nenhum cartao ainda ingerido
+    assert body["dataCompleteness"]["isReal"] is True
+    assert body["dataCompleteness"]["fixtures"] == 6
+    assert body["dataCompleteness"]["fixturesWithCards"] == 0
+
+    row = next(c for c in body["heatmap"] if c["team"] == "Time C" and c["referee"] == "Arbitro Z")
+    assert row["n"] == 6
+    assert row["wins"] == 6  # Time C venceu os 6 -- contado mesmo sem cartao
+    assert row["yellow"] == 0  # cartao genuinamente desconhecido ainda, nao inventado

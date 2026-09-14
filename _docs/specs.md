@@ -198,3 +198,19 @@ Ordem de construção (igual ao HW2):
   pares time-árbitro ainda cai no piso de amostra `n<5`, corretamente).
   Continuar rodando `uv run python scripts/ingest.py --max-requests 90`
   diariamente até completar as 3 temporadas.
+- **Bug real encontrado e corrigido em 2026-09-14**: `build_heatmap` e
+  `timeseries_for` só consideravam fixtures com `events_ingested=True`,
+  excluindo até V/E/D/gols (que já existem desde o `/fixtures`, sem
+  depender de cartão nenhum) de qualquer partida ainda sem cartão buscado.
+  Como as temporadas 2022 e 2024 nunca tinham tido nem o `/fixtures`
+  rodado, isso fazia o dashboard cair 100% no mock sintético pra elas —
+  reportado pelo usuário como "São Paulo campeão 2024" (São Paulo não foi
+  campeão; era dado fake). Corrigido: `_scored_fixtures` (placar) alimenta
+  V/E/D/gols/pontos incondicionalmente; só cartões dependem de
+  `events_ingested`. `has_ingested_data` também passou a checar placar, não
+  cartão — evita o fallback mock assim que `/fixtures` roda, mesmo antes de
+  `/fixtures/events` começar. Resposta do `/dashboard` ganhou
+  `dataCompleteness` (`isReal`, `fixtures`, `fixturesWithCards`) e o
+  frontend mostra um banner com isso — nunca mais silenciar que o dado é
+  parcial ou sintético. Validado: 2024 real bate com a Série A de verdade
+  (Botafogo campeão, 23V-10E-5D); 2022 idem (Palmeiras campeão, 23V-12E-3D).

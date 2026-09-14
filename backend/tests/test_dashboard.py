@@ -30,7 +30,7 @@ def test_dashboard_shape_no_filters():
     res = client.get("/dashboard", params={"season": 2023})
     assert res.status_code == 200
     body = res.json()
-    assert set(body.keys()) == {"kpis", "timeseries", "heatmap"}
+    assert set(body.keys()) == {"kpis", "timeseries", "heatmap", "dataCompleteness"}
 
     kpis = body["kpis"]
     assert set(kpis.keys()) == {

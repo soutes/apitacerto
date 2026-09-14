@@ -6,6 +6,7 @@ import OverviewTab from "./components/OverviewTab";
 import FavoritismTab from "./components/FavoritismTab";
 import MatrixTab from "./components/MatrixTab";
 import StandingsTab from "./components/StandingsTab";
+import DataCompletenessBanner from "./components/DataCompletenessBanner";
 import "./App.css";
 
 const TABS = [
@@ -86,6 +87,7 @@ export default function App() {
         <p>Carregando...</p>
       ) : (
         <div role="tabpanel" className="tab-panel">
+          <DataCompletenessBanner completeness={dashboard.dataCompleteness} />
           {activeTab === "overview" && (
             <OverviewTab
               options={{ teams: availableTeams, referees: availableReferees }}

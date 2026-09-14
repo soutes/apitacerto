@@ -66,6 +66,17 @@ header h1 { margin-bottom: 4px; font-size: 1.6rem; }
 
 .tab-panel { min-height: 320px; }
 
+.data-banner {
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+.data-banner-mock { background: #fff3cd; color: #7a5b00; border: 1px solid #f0d888; }
+.data-banner-partial { background: #eaf2fb; color: #1f4e79; border: 1px solid #cfe0f3; }
+.data-banner-complete { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+
 /* ---- local filters (Aba 1) ---- */
 .filters {
   display: flex;

@@ -112,9 +112,23 @@ components:
           nullable: true
           description: "Indice de Favorecimento; null quando insufficientSample"
 
+    DataCompleteness:
+      type: object
+      required: [isReal, fixtures, fixturesWithCards]
+      properties:
+        isReal:
+          type: boolean
+          description: "false = temporada ainda sem nenhum jogo real ingerido, dashboard mostrando dado sintetico (mock)"
+        fixtures:
+          type: integer
+          description: "jogos reais com placar no banco pra essa temporada"
+        fixturesWithCards:
+          type: integer
+          description: "desses, quantos ja tiveram /fixtures/events processado (cartoes completos)"
+
     DashboardResponse:
       type: object
-      required: [kpis, timeseries, heatmap]
+      required: [kpis, timeseries, heatmap, dataCompleteness]
       properties:
         kpis:
           $ref: "#/components/schemas/Kpis"
@@ -126,3 +140,5 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/HeatmapCell"
+        dataCompleteness:
+          $ref: "#/components/schemas/DataCompleteness"

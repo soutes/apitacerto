@@ -52,12 +52,22 @@ def get_dashboard(
     if queries.has_ingested_data(db, season):
         heatmap = queries.build_heatmap(db, season)
         timeseries = queries.timeseries_for(db, team, season)
+        progress = queries.ingestion_progress(db, season)
+        data_completeness = {
+            "isReal": True,
+            "fixtures": progress["fixtures"],
+            "fixturesWithCards": progress["fixturesWithCards"],
+        }
     else:
         # ainda sem dado real ingerido pra essa temporada (spec secao 8:
         # ingestao e limitada por request/dia) -- cai pro mock deterministico
         # ao inves de devolver dashboard vazio.
         heatmap = mock_store.build_heatmap(season)
         timeseries = mock_store.timeseries_for(team, season)
+        data_completeness = {"isReal": False, "fixtures": 0, "fixturesWithCards": 0}
 
     kpis = queries.kpis_for(heatmap, team, referee)
-    return {"kpis": kpis, "timeseries": timeseries, "heatmap": heatmap}
+    return {
+        "kpis": kpis, "timeseries": timeseries, "heatmap": heatmap,
+        "dataCompleteness": data_completeness,
+    }

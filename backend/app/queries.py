@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import Fixture, MatchEvent, Referee, Team
@@ -30,12 +30,27 @@ def _round_number(round_label: str | None) -> int:
     return int(m.group(1)) if m else 0
 
 
-def _ingested_fixtures(db: Session, season: int) -> list[Fixture]:
+def _scored_fixtures(db: Session, season: int) -> list[Fixture]:
+    """Fixtures com placar (vem de /fixtures, 1 request pra temporada
+    inteira) -- V/E/D/gols usam isso, independente de cartao ja ter sido
+    buscado ou nao. So CARTAO depende de events_ingested (spec secao 8:
+    /fixtures/events e 1 request por partida, ingestao e gradual)."""
     stmt = (
         select(Fixture)
-        .where(Fixture.season == season, Fixture.events_ingested.is_(True))
+        .where(Fixture.season == season, Fixture.home_score.is_not(None), Fixture.away_score.is_not(None))
     )
     return list(db.scalars(stmt).unique())
+
+
+def ingestion_progress(db: Session, season: int) -> dict:
+    total = db.scalar(
+        select(func.count()).select_from(Fixture).where(Fixture.season == season)
+    ) or 0
+    with_cards = db.scalar(
+        select(func.count()).select_from(Fixture)
+        .where(Fixture.season == season, Fixture.events_ingested.is_(True))
+    ) or 0
+    return {"fixtures": total, "fixturesWithCards": with_cards}
 
 
 def _card_counts(db: Session, fixture_ids: list[int]) -> dict[tuple[int, int], tuple[int, int]]:
@@ -58,12 +73,14 @@ def _card_counts(db: Session, fixture_ids: list[int]) -> dict[tuple[int, int], t
 
 def has_ingested_data(db: Session, season: int) -> bool:
     return db.scalar(
-        select(Fixture.id).where(Fixture.season == season, Fixture.events_ingested.is_(True)).limit(1)
+        select(Fixture.id)
+        .where(Fixture.season == season, Fixture.home_score.is_not(None))
+        .limit(1)
     ) is not None
 
 
 def build_heatmap(db: Session, season: int) -> list[dict]:
-    fixtures = _ingested_fixtures(db, season)
+    fixtures = _scored_fixtures(db, season)
     if not fixtures:
         return []
     cards = _card_counts(db, [f.id for f in fixtures])
@@ -118,7 +135,7 @@ def build_heatmap(db: Session, season: int) -> list[dict]:
 
 
 def timeseries_for(db: Session, team: str | None, season: int) -> list[dict]:
-    fixtures = _ingested_fixtures(db, season)
+    fixtures = _scored_fixtures(db, season)
     if team:
         fixtures = [f for f in fixtures if f.home_team.name == team or f.away_team.name == team]
     if not fixtures:

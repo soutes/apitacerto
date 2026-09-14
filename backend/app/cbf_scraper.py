@@ -35,14 +35,24 @@ COMPETITION_IDS = {
 
 CARD_RESULT_MAP = {
     "AMARELO": "YELLOW_CARD",
+    # "VERMELHO2AMARELO" e o rotulo que a CBF usa pra QUALQUER expulsao, nao
+    # so pra segundo amarelo -- varrendo 150 jogos de 2022-2026 nao aparece
+    # nenhum "VERMELHO" avulso, e 669 expulsoes na base sao todas desse
+    # rotulo. Ou seja: NAO da pra separar vermelho direto de segundo amarelo
+    # com esta fonte. "VERMELHO" fica mapeado como rede de seguranca caso a
+    # CBF passe a distinguir.
     "VERMELHO": "RED_CARD",
-    "VERMELHO2AMARELO": "RED_CARD",  # segundo amarelo -> expulso
+    "VERMELHO2AMARELO": "RED_CARD",
 }
 
 GOAL_DETAIL_MAP = {
     "NR": "normal",
     "PN": "penalti",
     "CT": "contra",  # gol contra -- o autor e do time que SOFREU o gol
+    # "FT" nao esta documentado pela CBF; inferido como falta direta pela
+    # frequencia (82 de 4395 gols = 1,9%, compativel com gol de falta) e
+    # pelo padrao de sigla de 2 letras das outras chaves.
+    "FT": "falta",
 }
 
 # A CBF nao usa o mesmo nome pro mesmo clube em todas as temporadas (virou
@@ -56,6 +66,22 @@ TEAM_NAME_ALIASES = {
     "Atlético Goianiense Saf": "Atlético Goianiense",
     "Fortaleza SAF": "Fortaleza Esporte Clube",  # 2025: virou SAF
 }
+
+
+_warned_unknown: set[tuple[str, str | None]] = set()
+
+
+def _warn_unknown(tipo: str, resultado: str | None) -> None:
+    """Avisa uma vez por valor novo de 'resultado' vindo da CBF. Sem isso um
+    rotulo novo (ex.: a CBF passar a distinguir vermelho direto) entraria
+    cru no banco -- ou sumiria -- sem ninguem notar, ja que o scraper roda
+    num cron semanal sem supervisao."""
+    key = (tipo, resultado)
+    if key in _warned_unknown:
+        return
+    _warned_unknown.add(key)
+    print(f"  [aviso] resultado '{resultado}' desconhecido em {tipo} "
+          f"(confira CARD_RESULT_MAP/GOAL_DETAIL_MAP em app/cbf_scraper.py)")
 
 
 def _canonical_team_name(name: str) -> str:
@@ -139,22 +165,29 @@ def parse_round(payload: dict, season: int) -> list[dict]:
                     if m:
                         minute = int(m.group(1))
 
+                resultado = p.get("resultado")
                 if p["tipo"] == "GOL":
+                    if resultado not in GOAL_DETAIL_MAP:
+                        _warn_unknown("GOL", resultado)
                     events.append({
                         "type": "GOAL", "team_cbf_id": team_id,
                         "player_name": p.get("atleta_nome"), "minute": minute,
-                        "detail": GOAL_DETAIL_MAP.get(p.get("resultado"), p.get("resultado")),
+                        "detail": GOAL_DETAIL_MAP.get(resultado, resultado),
                     })
                 elif p["tipo"] == "PENALIDADE":
-                    card_type = CARD_RESULT_MAP.get(p.get("resultado"))
+                    card_type = CARD_RESULT_MAP.get(resultado)
                     if card_type:
                         events.append({
                             "type": card_type, "team_cbf_id": team_id,
                             "player_name": p.get("atleta_nome"), "minute": minute,
-                            "detail": p.get("resultado"),
+                            "detail": resultado,
                         })
-                    # outros resultados (ex.: pênalti perdido) fora do
-                    # escopo do modelo MatchEvent (so GOAL/YELLOW/RED).
+                    else:
+                        # varrendo 2022-2026 so aparecem AMARELO e
+                        # VERMELHO2AMARELO -- qualquer outro valor e novidade
+                        # da fonte e nao pode sumir em silencio (cron roda sem
+                        # supervisao).
+                        _warn_unknown("PENALIDADE", resultado)
 
             matches.append({
                 "cbf_id": int(jogo["id_jogo"]),

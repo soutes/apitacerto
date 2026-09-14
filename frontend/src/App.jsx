@@ -109,7 +109,7 @@ export default function App() {
             />
           )}
           {activeTab === "favoritism" && (
-            <FavoritismTab rows={dashboard.heatmap} onSelect={selectFromMatrix} />
+            <FavoritismTab seasons={options.seasons} onSelect={selectFromMatrix} />
           )}
           {activeTab === "matrix" && (
             <MatrixTab rows={dashboard.heatmap} onSelect={selectFromMatrix} />

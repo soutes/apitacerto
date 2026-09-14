@@ -1,7 +1,32 @@
+import { useEffect, useState } from "react";
+import { getFavoritism } from "../api";
 import PairMatrix from "./PairMatrix";
 import { divergingColor, INSUFFICIENT_SAMPLE_COLOR } from "../colorScales";
 
-export default function FavoritismTab({ rows, onSelect }) {
+// Slicer de temporada proprio dessa aba (independente do global no topo da
+// pagina) -- so aqui "Todos" faz sentido, porque o indice de favorecimento
+// e um par time x arbitro que ganha amostra juntando anos; classificacao e
+// serie temporal (outras abas) nao podem ser agregadas entre temporadas.
+export default function FavoritismTab({ seasons, onSelect }) {
+  const [season, setSeason] = useState(undefined); // undefined = "Todos"
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getFavoritism({ season })
+      .then((data) => {
+        if (!cancelled) setRows(data.heatmap);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [season]);
+
   function cellFor(row) {
     if (row.insufficientSample) {
       return {
@@ -24,14 +49,26 @@ export default function FavoritismTab({ rows, onSelect }) {
   return (
     <div className="chart-box">
       <h2>Indice de Favorecimento</h2>
+      <label className="season-picker">
+        Temporada (amostra)
+        <select
+          value={season ?? ""}
+          onChange={(e) => setSeason(e.target.value ? Number(e.target.value) : undefined)}
+        >
+          <option value="">Todos</option>
+          {seasons.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      </label>
       <p className="hint">
         Vermelho = possivel favorecimento ao time. Azul = possivel prejuizo.
-        Cinza = amostra insuficiente (menos de 5 jogos do par nesta temporada).
-        Sinalizacao exploratoria, nao prova de manipulacao — ver{" "}
-        <code>_docs/specs.md</code> secao 6. Clique numa celula pra ver o
-        detalhe na aba Visao Geral.
+        Cinza = amostra insuficiente (menos de 5 jogos do par na temporada
+        escolhida, ou em todas juntas se "Todos"). Sinalizacao exploratoria,
+        nao prova de manipulacao — ver <code>_docs/specs.md</code> secao 6.
+        Clique numa celula pra ver o detalhe na aba Visao Geral.
       </p>
-      <PairMatrix rows={rows} cellFor={cellFor} onSelect={onSelect} />
+      {loading ? <p>Carregando...</p> : <PairMatrix rows={rows} cellFor={cellFor} onSelect={onSelect} />}
     </div>
   );
 }

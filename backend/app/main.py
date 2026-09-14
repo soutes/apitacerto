@@ -42,6 +42,17 @@ def get_filters(season: Optional[int] = None, db: Session = Depends(get_db)):
     }
 
 
+@app.get("/favoritism")
+def get_favoritism(season: Optional[int] = None, db: Session = Depends(get_db)):
+    # so pra aba Indice de Favorecimento: season omitido = "Todos", junta
+    # todas as temporadas ja ingeridas nos pares time x arbitro (ganha
+    # amostra pro n>=5). As outras abas continuam presas ao /dashboard,
+    # que exige season -- classificacao/serie temporal nao fazem sentido
+    # agregadas entre anos.
+    heatmap = queries.build_heatmap(db, season)
+    return {"heatmap": heatmap}
+
+
 @app.get("/dashboard")
 def get_dashboard(
     season: int = Query(..., ge=2022, le=2026),

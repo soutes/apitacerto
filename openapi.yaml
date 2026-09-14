@@ -33,6 +33,33 @@ paths:
               schema:
                 $ref: "#/components/schemas/FilterOptions"
 
+  /favoritism:
+    get:
+      summary: >-
+        Heatmap time x arbitro pra aba Indice de Favorecimento. Season
+        omitido = "Todos", agrega todas as temporadas ja ingeridas (so
+        essa aba faz isso -- ganha amostra pro n>=5 do indice).
+      operationId: getFavoritism
+      parameters:
+        - name: season
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [heatmap]
+                properties:
+                  heatmap:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/HeatmapCell"
+
   /dashboard:
     get:
       summary: Dados agregados do dashboard para o recorte de filtros dado

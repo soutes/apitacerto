@@ -39,15 +39,19 @@ def _round_number(round_label: str | None) -> int:
     return int(m.group(1)) if m else 0
 
 
-def _scored_fixtures(db: Session, season: int) -> list[Fixture]:
+def _scored_fixtures(db: Session, season: int | None) -> list[Fixture]:
     """Fixtures com placar (vem de /fixtures, 1 request pra temporada
     inteira) -- V/E/D/gols usam isso, independente de cartao ja ter sido
     buscado ou nao. So CARTAO depende de events_ingested (spec secao 8:
-    /fixtures/events e 1 request por partida, ingestao e gradual)."""
-    stmt = (
-        select(Fixture)
-        .where(Fixture.season == season, Fixture.home_score.is_not(None), Fixture.away_score.is_not(None))
-    )
+    /fixtures/events e 1 request por partida, ingestao e gradual).
+
+    season=None junta todas as temporadas ja ingeridas (usado so pelo
+    Indice de Favorecimento com "Todos" no slicer -- ganha amostra, mas
+    so faz sentido pra pares time x arbitro, nunca pra classificacao."""
+    conds = [Fixture.home_score.is_not(None), Fixture.away_score.is_not(None)]
+    if season is not None:
+        conds.append(Fixture.season == season)
+    stmt = select(Fixture).where(*conds)
     return list(db.scalars(stmt).unique())
 
 
@@ -101,7 +105,7 @@ def has_ingested_data(db: Session, season: int) -> bool:
     ) is not None
 
 
-def build_heatmap(db: Session, season: int) -> list[dict]:
+def build_heatmap(db: Session, season: int | None) -> list[dict]:
     fixtures = _scored_fixtures(db, season)
     if not fixtures:
         return []

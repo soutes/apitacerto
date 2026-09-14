@@ -21,6 +21,18 @@ export async function getFilters() {
   return res.json();
 }
 
+export async function getFavoritism({ season } = {}) {
+  if (USE_MOCK) {
+    await delay(120);
+    return { heatmap: buildHeatmap(season) };
+  }
+  const params = new URLSearchParams();
+  if (season) params.set("season", season); // omitido = "Todos" (backend agrega)
+  const res = await fetch(`${BACKEND_URL}/favoritism?${params.toString()}`);
+  if (!res.ok) throw new Error(`favoritism fetch failed: ${res.status}`);
+  return res.json();
+}
+
 export async function getDashboard({ season, team, referee }) {
   if (USE_MOCK) {
     await delay(150);

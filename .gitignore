@@ -21,3 +21,7 @@ dist/
 
 # os
 .DS_Store
+
+# artefatos de processo do design handoff, nao pertencem ao repo
+_docs/*.zip
+_docs/flip7-2-DESIGN.md

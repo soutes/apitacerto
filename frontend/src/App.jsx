@@ -48,13 +48,22 @@ export default function App() {
 
   // slicer dependente (estilo Power BI): so oferece arbitro que ja apitou
   // esse time (e vice-versa) -- evita escolher uma combinacao sem jogo.
+  // Base sempre vem do heatmap da temporada selecionada (dashboard.heatmap
+  // ja veio filtrado por season) -- nunca do options.* global, que lista
+  // time/arbitro de todo ano ja ingerido (misturaria time rebaixado).
   const heatmapRows = dashboard?.heatmap || [];
+  const seasonTeams = [...new Set(heatmapRows.map((r) => r.team))].sort();
+  const seasonReferees = [...new Set(heatmapRows.map((r) => r.referee))].sort();
   const availableReferees = team
     ? [...new Set(heatmapRows.filter((r) => r.team === team).map((r) => r.referee))].sort()
-    : options.referees;
+    : seasonReferees.length
+      ? seasonReferees
+      : options.referees;
   const availableTeams = referee
     ? [...new Set(heatmapRows.filter((r) => r.referee === referee).map((r) => r.team))].sort()
-    : options.teams;
+    : seasonTeams.length
+      ? seasonTeams
+      : options.teams;
 
   function changeTeam(t) {
     setTeam(t);

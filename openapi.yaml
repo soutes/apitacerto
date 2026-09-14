@@ -15,6 +15,16 @@ paths:
     get:
       summary: Opcoes disponiveis para os filtros do dashboard
       operationId: getFilters
+      parameters:
+        - name: season
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: >-
+            Quando informado, o campo "teams" volta so com os times que
+            jogaram essa temporada (evita listar time rebaixado/de outro
+            ano no slicer).
       responses:
         "200":
           description: OK

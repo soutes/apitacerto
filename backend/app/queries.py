@@ -16,8 +16,17 @@ from app.stats import favoritism_index, kpis_for  # re-exported for main.py
 CARD_TYPES = ("YELLOW_CARD", "RED_CARD")
 
 
-def get_filter_options(db: Session) -> dict:
-    teams = db.scalars(select(Team.name).order_by(Team.name)).all()
+def get_filter_options(db: Session, season: int | None = None) -> dict:
+    if season is not None:
+        # so os times que de fato jogaram a temporada escolhida (evita
+        # misturar time rebaixado/acessado de outro ano no slicer)
+        home = select(Fixture.home_team_id).where(Fixture.season == season)
+        away = select(Fixture.away_team_id).where(Fixture.season == season)
+        team_ids = home.union(away).subquery()
+        teams_stmt = select(Team.name).where(Team.id.in_(select(team_ids))).order_by(Team.name)
+    else:
+        teams_stmt = select(Team.name).order_by(Team.name)
+    teams = db.scalars(teams_stmt).all()
     referees = db.scalars(select(Referee.name).order_by(Referee.name)).all()
     seasons = db.scalars(select(Fixture.season).distinct().order_by(Fixture.season)).all()
     return {"teams": list(teams), "referees": list(referees), "seasons": list(seasons)}

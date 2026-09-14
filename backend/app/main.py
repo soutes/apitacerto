@@ -26,8 +26,8 @@ app.add_middleware(
 
 
 @app.get("/filters")
-def get_filters(db: Session = Depends(get_db)):
-    real = queries.get_filter_options(db)
+def get_filters(season: Optional[int] = None, db: Session = Depends(get_db)):
+    real = queries.get_filter_options(db, season)
     if real["seasons"]:
         # une o que ja foi ingerido com as temporadas que o free tier cobre,
         # pra o filtro de temporada nao encolher enquanto a ingestao roda

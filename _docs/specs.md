@@ -91,11 +91,12 @@ ser negativo). Clicar numa célula também dá drill-down pra Aba 1.
 temporada, com filtro próprio de árbitro (independente do drill da Aba 1).
 Linhas = clubes, colunas = jogos, cartões amarelos, cartões vermelhos,
 vitórias, empates, derrotas, aproveitamento %, saldo de gols, ordenada por
-**pontos = vitórias + empates** (métrica simplificada pedida pelo usuário,
-não é o 3-1-0 oficial da CBF), desempate por saldo de gols e depois gols
-pró. Sem árbitro selecionado, soma todos; com árbitro selecionado, mostra
-como cada clube se saiu especificamente sob aquele árbitro. Clube sem jogo
-no recorte aparece zerado, no fim da tabela.
+**pontos = vitória×3 + empate×1** (regra oficial — v1 usava
+vitórias+empates por pedido inicial, corrigido em 2026-09-14 depois de
+conferir contra a tabela real de 2024 e não bater), desempate por saldo de
+gols e depois gols pró. Sem árbitro selecionado, soma todos; com árbitro
+selecionado, mostra como cada clube se saiu especificamente sob aquele
+árbitro. Clube sem jogo no recorte aparece zerado, no fim da tabela.
 
 Toda célula/KPI sempre mostra o número junto da cor (cor nunca é a única
 pista, WCAG/skill data-visualization). Navegação de abas acessível

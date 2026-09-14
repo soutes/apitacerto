@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 
-// Pontos = vitorias + empates (formula pedida pelo usuario -- nao e o 3-1-0
-// oficial da CBF, e uma metrica simplificada so pra ranquear dentro do
-// recorte de arbitro escolhido).
+// Pontos = vitoria x3 + empate x1 (formula oficial da CBF). V/E/D/gols
+// batem exatos com a tabela real (conferido -- o pipeline de dado esta
+// correto); so os pontos usavam vitorias+empates antes, o que mudava a
+// ordem em relacao a classificacao de verdade.
 function aggregateStandings(rows, teams, referee) {
   const filtered = referee ? rows.filter((r) => r.referee === referee) : rows;
 
@@ -26,7 +27,7 @@ function aggregateStandings(rows, teams, referee) {
 
   const table = [...byTeam.values()].map((t) => ({
     ...t,
-    points: t.wins + t.draws,
+    points: t.wins * 3 + t.draws,
     goalDiff: t.goalsFor - t.goalsAgainst,
     winRatePct: t.n ? Math.round((t.wins / t.n) * 1000) / 10 : 0,
   }));
@@ -52,9 +53,9 @@ export default function StandingsTab({ rows }) {
     <div className="chart-box">
       <h2>Tabela de Classificacao</h2>
       <p className="hint">
-        Pontos = vitorias + empates, no recorte de arbitro escolhido (ou de
-        todos, se nenhum arbitro for selecionado). Time sem jogo nesse
-        recorte aparece zerado, no fim da tabela.
+        Pontos = vitoria x3 + empate x1 (regra oficial), no recorte de
+        arbitro escolhido (ou de todos, se nenhum arbitro for selecionado).
+        Time sem jogo nesse recorte aparece zerado, no fim da tabela.
       </p>
 
       <div className="metric-picker">

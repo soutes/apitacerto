@@ -10,40 +10,35 @@ function formatUpdated(iso) {
   }
 }
 
+// Rodape discreto (nao e o conteudo da pagina, e proveniencia do dado --
+// nao devia competir visualmente com o titulo/KPIs). Fonte sempre visivel,
+// independente do estado.
 export default function DataCompletenessBanner({ completeness }) {
   if (!completeness) return null;
 
-  if (!completeness.isReal) {
-    return (
-      <p className="data-banner data-banner-mock">
-        Temporada ainda sem nenhuma partida real ingerida — estes números são
-        dado sintético (mock) só pra visualizar o layout, não resultado de
-        jogo de verdade.
-      </p>
-    );
-  }
-
-  const { fixtures, fixturesWithCards, lastUpdated } = completeness;
+  const { isReal, fixtures, fixturesWithCards, lastUpdated } = completeness;
   const updatedText = formatUpdated(lastUpdated);
-  const suffix = updatedText ? ` Atualizado em ${updatedText}.` : "";
 
-  if (fixturesWithCards < fixtures) {
+  let statusClass = "footer-dot-complete";
+  let message;
+
+  if (!isReal) {
+    statusClass = "footer-dot-mock";
+    message = "Temporada sem partida real ingerida ainda — números de demonstração (mock), não resultado de jogo de verdade.";
+  } else if (fixturesWithCards < fixtures) {
     const pct = fixtures ? Math.round((fixturesWithCards / fixtures) * 100) : 0;
-    return (
-      <p className="data-banner data-banner-partial">
-        Dado real: {fixtures} partidas já jogadas nesta temporada. Cartões
-        (amarelo/vermelho) processados em {fixturesWithCards} delas ({pct}%)
-        — o resto ainda está na fila de ingestão. Vitória/empate/derrota/gols
-        já refletem todas as {fixtures} partidas; cartões e o Índice de
-        Favorecimento ainda vão crescer.{suffix}
-      </p>
-    );
+    statusClass = "footer-dot-partial";
+    message = `${fixtures} partidas já jogadas · cartões processados em ${fixturesWithCards} (${pct}%), resto na fila de ingestão`;
+  } else {
+    message = `${fixtures} partidas já jogadas, cartões processados em todas`;
   }
 
   return (
-    <p className="data-banner data-banner-complete">
-      Dado real completo: {fixtures} partidas já jogadas, cartões processados
-      em todas.{suffix}
-    </p>
+    <footer className="app-footer">
+      <span className={`footer-dot ${statusClass}`} />
+      <span>{message}</span>
+      {updatedText && <span>· Atualizado em {updatedText}</span>}
+      <span>· Fonte: <a href="https://www.cbf.com.br/futebol-brasileiro" target="_blank" rel="noreferrer">CBF</a></span>
+    </footer>
   );
 }

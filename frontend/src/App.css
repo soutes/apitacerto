@@ -252,13 +252,17 @@ body { margin: 0; background: var(--page-bg); font-family: var(--font-ui); }
   font: 700 13px/1 var(--font-ui); color: var(--teal); padding: 0;
 }
 
-/* ====== data completeness banner ====== */
-.data-banner {
-  font-size: 0.8rem; padding: 8px 12px; border-radius: 6px; margin: 0; line-height: 1.5;
+/* ====== rodape de proveniencia do dado (discreto, nao e conteudo) ====== */
+.app-footer {
+  margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--border-soft);
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  font: 500 11px/1.5 var(--font-ui); color: var(--muted);
 }
-.data-banner-mock { background: #fff3cd; color: #7a5b00; border: 1px solid #f0d888; }
-.data-banner-partial { background: #eaf2fb; color: #1f4e79; border: 1px solid #cfe0f3; }
-.data-banner-complete { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+.app-footer a { color: var(--muted); text-decoration: underline; }
+.footer-dot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+.footer-dot-complete { background: var(--positive); }
+.footer-dot-partial { background: var(--amber-dot); }
+.footer-dot-mock { background: var(--coral); }
 
 /* ====== local filters (Visao Geral / detail) ====== */
 .filters { display: flex; gap: 20px; margin: 0 0 4px; flex-wrap: wrap; }

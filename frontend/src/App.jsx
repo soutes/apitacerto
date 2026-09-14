@@ -96,8 +96,6 @@ export default function App() {
           <p className="loading-text">Carregando…</p>
         ) : (
           <>
-            <DataCompletenessBanner completeness={dashboard.dataCompleteness} />
-
             {activeTab === "dashboard" && (
               <DashboardTab
                 season={season}
@@ -195,6 +193,8 @@ export default function App() {
                 )}
               </div>
             )}
+
+            <DataCompletenessBanner completeness={dashboard.dataCompleteness} />
           </>
         )}
       </main>

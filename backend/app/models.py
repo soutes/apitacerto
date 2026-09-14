@@ -17,14 +17,16 @@ class Referee(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, unique=True)
+    cbf_id: Mapped[int] = mapped_column(Integer, nullable=True, unique=True)
 
 
 class Fixture(Base):
     __tablename__ = "fixtures"
-    __table_args__ = (UniqueConstraint("api_id", name="uq_fixture_api_id"),)
+    __table_args__ = (UniqueConstraint("source", "api_id", name="uq_fixture_source_api_id"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     api_id: Mapped[int] = mapped_column(index=True)
+    source: Mapped[str] = mapped_column(String, default="api-football", index=True)  # "cbf" | "api-football"
     competition: Mapped[str] = mapped_column(String, default="Brasileirao Serie A")
     season: Mapped[int] = mapped_column(Integer, index=True)
     round: Mapped[str] = mapped_column(String, nullable=True)
@@ -37,9 +39,15 @@ class Fixture(Base):
     home_score: Mapped[int] = mapped_column(Integer, nullable=True)
     away_score: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    # true assim que a ingestao ja tentou buscar /fixtures/events para esta
-    # partida (mesmo que o resultado tenha sido zero eventos) -- distingue
-    # "0 cartoes de verdade" de "ainda nao ingerido" (spec secao 8).
+    venue_stadium: Mapped[str] = mapped_column(String, nullable=True)
+    venue_city: Mapped[str] = mapped_column(String, nullable=True)
+    venue_state: Mapped[str] = mapped_column(String, nullable=True)
+
+    # true assim que a ingestao ja tentou buscar cartao/gol pra essa partida
+    # (mesmo que o resultado tenha sido zero eventos) -- distingue "0
+    # cartoes de verdade" de "ainda nao ingerido" (spec secao 8). O scraper
+    # da CBF preenche isso no mesmo request que traz o resto (nao precisa de
+    # segunda chamada como o ingest.py da API-Football).
     events_ingested: Mapped[bool] = mapped_column(Boolean, default=False)
 
     home_team: Mapped["Team"] = relationship(foreign_keys=[home_team_id])

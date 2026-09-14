@@ -1,24 +1,27 @@
 `apitacerto` is a dashboard showing Brasileirão Série A team performance
-broken down by referee (goals, cards, W/D/L, win rate). See
-[_docs/specs.md](_docs/specs.md) for the full spec.
+broken down by referee (goals, cards, W/D/L, win rate, favoritism index).
+See [_docs/specs.md](_docs/specs.md) for the full spec.
 
 This folder is independent from the rest of this repo (the `weekly` app at
 repo root) — separate stack, separate deps, separate AGENTS.md.
 
 ## Commands
 
-- Frontend: _TBD once `frontend/` exists_
-- Backend: _TBD once `backend/` exists_
-- Tests: _TBD_
+- Frontend: `cd frontend && npm run dev` — http://localhost:5173
+- Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
+- Tests: `cd backend && uv run pytest`
+- Ingest (primary, CBF scraper, no daily limit): `cd backend && uv run python scripts/scrape_cbf.py --season 2022 --season 2023 --season 2024`
+- Ingest (fallback, API-Football, rate-limited): `cd backend && uv run python scripts/ingest.py --max-requests 90`
 
 ## Rules
 
-- Follow HW2 build order exactly: frontend prototype with mocked backend
-  first, then `openapi.yaml`, then FastAPI backend with a mock store and
-  tests, then connect frontend↔backend, then swap the mock store for
-  SQLAlchemy + SQLite.
 - The dashboard reads only from the database. Nothing in the request path
-  calls the API-Football API directly — ingestion is a separate script/job.
+  scrapes/calls an external source directly — ingestion is a separate
+  script/job (`scripts/scrape_cbf.py`, `scripts/ingest.py`).
+- Match a Team by **name**, not by the source's numeric id — the CBF
+  assigns different ids/names to the same club across seasons (SAF
+  conversion, truncated names some years). See `TEAM_NAME_ALIASES` in
+  `app/cbf_scraper.py` before assuming a "new" club is real.
 - `API_FOOTBALL_KEY` comes from the environment only. Never commit it, never
   hardcode it.
 - Keep the backend database-agnostic (SQLAlchemy), per HW2 Question 7.

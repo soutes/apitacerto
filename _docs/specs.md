@@ -28,32 +28,65 @@ exportação.
 
 ## 3. Fonte de dados
 
-**API-Football** (api-sports.io / RapidAPI), plano free (100 req/dia, todos os
-endpoints liberados):
+### Primária (desde 2026-09-14): scraping da API JSON pública da CBF
 
-- `GET /fixtures` — retorna `referee` (nome do árbitro), times, placar, data,
-  liga, temporada.
-- `GET /fixtures/events` — retorna eventos por partida: gol (`Goal`), cartão
-  (`Card`, detail `Yellow Card` / `Red Card` / `Yellow Red Card`), com minuto,
-  time e jogador.
+A CBF não documenta uma API pública, mas o site (`cbf.com.br`, Next.js) busca
+os dados de tabelas/jogos via endpoints JSON abertos, achados inspecionando
+a rede da página de tabelas. Sem autenticação, **sem limite diário
+conhecido** (ao contrário da API-Football abaixo).
 
-**Validado em 2026-09-10** com key real (`league=71`, cada temporada testada
-individualmente): free plan libera exatamente `season=2022`, `2023` e `2024`
-(380 jogos cada, `referee` presente em 100% dos jogos finalizados, eventos de
-gol/cartão completos com minuto e jogador). `2021` e `2025`/`2026` (atual)
-retornam erro de plano: `"Free plans do not have access to this season, try
-from 2022 to 2024."` — confirma que **não dá pra ter temporada atual/ao vivo
-no free tier**; o dashboard é sobre histórico 2022-2024, não "atualização em
-tempo real" como pensado originalmente.
+- Mapa ano → `competitionId` (extraído do payload SSR da página de tabelas,
+  hardcoded em `app/cbf_scraper.py::COMPETITION_IDS`): 2018→12414,
+  2019→12430, 2020→12464, 2021→12487, 2022→12518, 2023→12555, 2024→12584,
+  2025→12606, 2026→1260611.
+- `GET /api/cbf/jogos/campeonato/{competitionId}/rodada/{n}/fase` — **um
+  request por rodada** (38 por temporada) já traz times, placar, `arbitros`
+  (com `funcao`; filtramos só `"Arbitro"`, ignora assistente/quarto
+  árbitro/VAR/assessor) e `penalidades` (gol e cartão de TODAS as partidas
+  da rodada) — não precisa de uma segunda chamada por partida como a
+  API-Football precisava.
+- `penalidades[].tipo`: `GOL` ou `PENALIDADE`. Para `PENALIDADE`,
+  `resultado` é `AMARELO`, `VERMELHO` ou `VERMELHO2AMARELO` (segundo
+  amarelo). Para `GOL`, `resultado` é `NR` (normal), `PN` (pênalti) ou `CT`
+  (gol contra — o `atleta`/`clube` listado é de quem marcou contra o
+  próprio time, não de quem "ganhou" o gol).
+- **Achado de qualidade de dado**: o mesmo clube pode ter `cod_time`
+  diferente entre temporadas (ex.: Atlético Mineiro), e o campo `nome` do
+  clube muda entre temporadas (conversão pra SAF, ou nome truncado num ano
+  específico — ex.: "Atlético" sozinho em 2022 era Atlético Goianiense,
+  identificado pelo `local` do jogo = Goiânia-GO). `TEAM_NAME_ALIASES` em
+  `app/cbf_scraper.py` normaliza os casos conhecidos; time é casado por
+  **nome** (não por id), justamente por causa disso.
+- Rodado de verdade em 2026-09-14: as 3 temporadas (2022, 2023, 2024) — 1140
+  partidas, 100% com árbitro e cartão/gol, ~9360 eventos — em menos de 2
+  minutos (`uv run python scripts/scrape_cbf.py --season 2022 --season 2023
+  --season 2024`). Sem restrição de temporada como a API-Football: 2025 e
+  2026 (em andamento) já funcionam do mesmo jeito, só não estão na v1
+  porque `main.py`/`openapi.yaml` ainda travam `season` em 2022-2024.
 
-Chave de API fica em variável de ambiente (`API_FOOTBALL_KEY`), nunca commitada.
+### Secundária / historico: API-Football (api-sports.io / RapidAPI)
+
+Usada na Fase 5 original antes de achar o scraping da CBF. Mantida em
+`scripts/ingest.py` como fallback caso o endpoint da CBF pare de funcionar
+um dia (não documentado oficialmente, pode mudar sem aviso).
+
+- Free tier: 100 req/dia **+ limite por minuto não documentado**, só
+  `season=2022/2023/2024`, evento = 1 request por partida (1140 no total —
+  levaria ~13 dias pra completar 3 temporadas, contra ~2 minutos do
+  scraping da CBF).
+- Chave em variável de ambiente (`API_FOOTBALL_KEY`), nunca commitada.
+- Estado quando foi abandonada: 116/1140 partidas com cartão real
+  (34 de 2023 + 82 de 2022), 2022/2024 sem nem a lista de partidas.
 
 ## 4. Modelo de dados (SQLAlchemy)
 
-- `Team(id, api_id, name)`
-- `Referee(id, api_id, name)`
-- `Fixture(id, api_id, competition, season, round, date, home_team_id,
-  away_team_id, referee_id, home_score, away_score)`
+- `Team(id, api_id, name)` — `name` é a identidade real (ver seção 3 sobre
+  clube com id/nome inconsistente entre temporadas na CBF)
+- `Referee(id, name, cbf_id)`
+- `Fixture(id, api_id, source [cbf|api-football], competition, season,
+  round, date, home_team_id, away_team_id, referee_id, home_score,
+  away_score, venue_stadium, venue_city, venue_state, events_ingested)` —
+  único por `(source, api_id)`
 - `MatchEvent(id, fixture_id, team_id, player_name, minute, type
   [GOAL|YELLOW_CARD|RED_CARD], detail)`
 
@@ -215,3 +248,23 @@ Ordem de construção (igual ao HW2):
   frontend mostra um banner com isso — nunca mais silenciar que o dado é
   parcial ou sintético. Validado: 2024 real bate com a Série A de verdade
   (Botafogo campeão, 23V-10E-5D); 2022 idem (Palmeiras campeão, 23V-12E-3D).
+- **Migração pra scraping da CBF, 2026-09-14** (ver seção 3): a API-Football
+  levaria ~13 dias corridos pra completar 3 temporadas por causa dos
+  limites de request. Achado que `cbf.com.br` tem uma API JSON pública não
+  documentada com tudo numa chamada por rodada, sem limite diário — as 3
+  temporadas (1140 partidas, ~9360 eventos) foram completadas em menos de
+  2 minutos. `scripts/scrape_cbf.py` é a ingestão principal agora;
+  `scripts/ingest.py` (API-Football) fica só como fallback documentado.
+  Dois bugs reais pegos e corrigidos durante a implementação (cobertos por
+  teste, `tests/test_cbf_scraper.py`): (1) `clube_id` do evento vinha como
+  string vs `Team.api_id` inteiro — comparação sempre falhava,
+  descartando TODO cartão/gol silenciosamente; (2) mesmo clube com
+  `cod_time` ou nome diferente entre temporadas (SAF, nome truncado)
+  duplicava o clube em vez de casar — resolvido casando por nome com alias
+  conhecido (`TEAM_NAME_ALIASES`) em vez de por id externo.
+- Em aberto: `season` ainda trava em 2022-2024 (`main.py`, `openapi.yaml`)
+  por causa do limite antigo da API-Football, que não existe mais pra CBF.
+  2025 e 2026 (Brasileirão em andamento) já funcionam com o mesmo scraper
+  — extender é so tirar o `ge=2022, le=2024` do `Query` e rodar
+  `scrape_cbf.py --season 2025 --season 2026`. Não fiz isso ainda pra não
+  mudar o escopo da v1 sem confirmar com o usuário.

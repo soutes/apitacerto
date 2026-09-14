@@ -1,0 +1,532 @@
+{
+  "grupos": [
+    "GRUPO UNICO"
+  ],
+  "jogos": [
+    {
+      "grupo": "GRUPO UNICO",
+      "jogo": [
+        {
+          "id_jogo": "832158",
+          "num_jogo": "268",
+          "rodada": "27",
+          "grupo": "GRUPO ÚNICO",
+          "mandante": {
+            "id": "61590",
+            "nome": "Coritiba SAF",
+            "url_escudo": "https://conteudo.cbf.com.br/clubes/61590/escudo.jpg",
+            "gols": "3",
+            "panaltis": "0"
+          },
+          "visitante": {
+            "id": "20052",
+            "nome": "Athletico Paranaense",
+            "url_escudo": "https://conteudo.cbf.com.br/clubes/20052/escudo.jpg",
+            "gols": "3",
+            "panaltis": "0"
+          },
+          "local": "Couto Pereira - Curitiba - PR",
+          "campeonato": "Campeonato Brasileiro",
+          "data": " 11/09/2026",
+          "hora": "21:00",
+          "qtd_alteracoes_jogo": 0,
+          "documentos": [
+            {
+              "url": "https://conteudo.cbf.com.br/sumulas/2026/142268se.pdf",
+              "title": "Súmula"
+            },
+            {
+              "url": "https://conteudo.cbf.com.br/sumulas/2026/142268b.pdf",
+              "title": "Boletim Financeiro"
+            },
+            {
+              "url": "https://conteudo.cbf.com.br/sumulas/2026/142268rdj.pdf",
+              "title": "Relatório de Jogo"
+            }
+          ],
+          "arbitros": [
+            {
+              "id": "885",
+              "nome": "Wagner do Nascimento Magalhaes",
+              "funcao": "Arbitro",
+              "uf": "RJ",
+              "categoria": "MASTER-PRO"
+            },
+            {
+              "id": "14600",
+              "nome": "Victor Hugo Imazu dos Santos",
+              "funcao": "Arbitro Assistente 1",
+              "uf": "PR",
+              "categoria": "FIFA-PRO"
+            },
+            {
+              "id": "14697",
+              "nome": "Brigida Cirilo Ferreira",
+              "funcao": "Arbitro Assistente 2",
+              "uf": "AL",
+              "categoria": "FIFA-PRO"
+            },
+            {
+              "id": "17430",
+              "nome": "Felipe da Silva Goncalves Paludo",
+              "funcao": "Quarto Arbitro",
+              "uf": "RJ",
+              "categoria": "CD"
+            },
+            {
+              "id": "1191",
+              "nome": "Antonio Pereira da Silva",
+              "funcao": "Assessor",
+              "uf": "GO",
+              "categoria": "MASTER"
+            },
+            {
+              "id": "883",
+              "nome": "Rodrigo Nunes de Sa",
+              "funcao": "VAR",
+              "uf": "RJ",
+              "categoria": "VAR-FIFA-PRO"
+            },
+            {
+              "id": "998",
+              "nome": "Michael Correia",
+              "funcao": "AVAR",
+              "uf": "RJ",
+              "categoria": "AB"
+            },
+            {
+              "id": "154",
+              "nome": "Elmo Alves Resende Cunha",
+              "funcao": "AVAR2",
+              "uf": "GO",
+              "categoria": "MASTER"
+            },
+            {
+              "id": "685",
+              "nome": "Claudio Jose de Oliveira Soares",
+              "funcao": "Observador de VAR",
+              "uf": "BR",
+              "categoria": "CBF"
+            },
+            {
+              "id": "192",
+              "nome": "Joel Tolentino Damata Junior",
+              "funcao": "Quality manager",
+              "uf": "MG",
+              "categoria": "CBF"
+            }
+          ],
+          "penalidades": [
+            {
+              "id": "93044",
+              "tipo": "GOL",
+              "resultado": "NR",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20052/escudo.jpg",
+              "clube": "Athletico Paranaense - PR",
+              "clube_id": "20052",
+              "atleta_nome": "Luiz Gustavo Dias",
+              "atleta_apelido": "Luiz Gustavo",
+              "atleta_camisa": "14",
+              "atleta_id": "172368",
+              "tempo_jogo": "1",
+              "minutos": "13:00"
+            },
+            {
+              "id": "93045",
+              "tipo": "GOL",
+              "resultado": "NR",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20052/escudo.jpg",
+              "clube": "Athletico Paranaense - PR",
+              "clube_id": "20052",
+              "atleta_nome": "Arthur dos Santos Barbosa Dias",
+              "atleta_apelido": "Arthur Dias",
+              "atleta_camisa": "4",
+              "atleta_id": "745104",
+              "tempo_jogo": "1",
+              "minutos": "29:00"
+            },
+            {
+              "id": "93047",
+              "tipo": "GOL",
+              "resultado": "NR",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/61590/escudo.jpg",
+              "clube": "Coritiba SAF - PR",
+              "clube_id": "61590",
+              "atleta_nome": "Tiago Coser",
+              "atleta_apelido": "Tiago Coser",
+              "atleta_camisa": "23",
+              "atleta_id": "617418",
+              "tempo_jogo": "1",
+              "minutos": "45:00"
+            },
+            {
+              "id": "93046",
+              "tipo": "GOL",
+              "resultado": "PN",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20052/escudo.jpg",
+              "clube": "Athletico Paranaense - PR",
+              "clube_id": "20052",
+              "atleta_nome": "Kevin Estiben Viveros Rodallega",
+              "atleta_apelido": "Kevin Viveros",
+              "atleta_camisa": "9",
+              "atleta_id": "922690",
+              "tempo_jogo": "2",
+              "minutos": "17:00"
+            },
+            {
+              "id": "93048",
+              "tipo": "GOL",
+              "resultado": "NR",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/61590/escudo.jpg",
+              "clube": "Coritiba SAF - PR",
+              "clube_id": "61590",
+              "atleta_nome": "Rodrigo Modesto da Silva Moledo",
+              "atleta_apelido": "Rodrigo Moledo",
+              "atleta_camisa": "4",
+              "atleta_id": "173551",
+              "tempo_jogo": "2",
+              "minutos": "45:00"
+            },
+            {
+              "id": "93049",
+              "tipo": "GOL",
+              "resultado": "NR",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/61590/escudo.jpg",
+              "clube": "Coritiba SAF - PR",
+              "clube_id": "61590",
+              "atleta_nome": "Rodrigo Modesto da Silva Moledo",
+              "atleta_apelido": "Rodrigo Moledo",
+              "atleta_camisa": "4",
+              "atleta_id": "173551",
+              "tempo_jogo": "2",
+              "minutos": "45:00"
+            },
+            {
+              "id": "435838",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/61590/escudo.jpg",
+              "clube": "Coritiba SAF - PR",
+              "clube_id": "61590",
+              "atleta_nome": "Pedro Rocha Neves",
+              "atleta_apelido": "Pedro Rocha",
+              "atleta_camisa": "32",
+              "atleta_id": "379462",
+              "tempo_jogo": "AC1",
+              "minutos": "45:0011:00"
+            },
+            {
+              "id": "435841",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20052/escudo.jpg",
+              "clube": "Athletico Paranaense - PR",
+              "clube_id": "20052",
+              "atleta_nome": "Joao Vitor Silva Dantas de Oliveira",
+              "atleta_apelido": "João Dantas",
+              "atleta_camisa": "25",
+              "atleta_id": "776773",
+              "tempo_jogo": "AC1",
+              "minutos": "45:004:00"
+            },
+            {
+              "id": "435837",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/61590/escudo.jpg",
+              "clube": "Coritiba SAF - PR",
+              "clube_id": "61590",
+              "atleta_nome": "Joao Pedro Chermont Crema",
+              "atleta_apelido": "JP Chermont",
+              "atleta_camisa": "44",
+              "atleta_id": "693399",
+              "tempo_jogo": "AC1",
+              "minutos": "45:008:00"
+            },
+            {
+              "id": "435842",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20052/escudo.jpg",
+              "clube": "Athletico Paranaense - PR",
+              "clube_id": "20052",
+              "atleta_nome": "Luiz Gustavo Dias",
+              "atleta_apelido": "Luiz Gustavo",
+              "atleta_camisa": "14",
+              "atleta_id": "172368",
+              "tempo_jogo": "AC2",
+              "minutos": "45:002:00"
+            },
+            {
+              "id": "435836",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/61590/escudo.jpg",
+              "clube": "Coritiba SAF - PR",
+              "clube_id": "61590",
+              "atleta_nome": "Joaquin Lavega Colzada",
+              "atleta_apelido": "Lavega",
+              "atleta_camisa": "7",
+              "atleta_id": "894275",
+              "tempo_jogo": "TN1",
+              "minutos": "27:00"
+            },
+            {
+              "id": "435839",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20052/escudo.jpg",
+              "clube": "Athletico Paranaense - PR",
+              "clube_id": "20052",
+              "atleta_nome": "Kevin Estiben Viveros Rodallega",
+              "atleta_apelido": "Kevin Viveros",
+              "atleta_camisa": "9",
+              "atleta_id": "922690",
+              "tempo_jogo": "TN1",
+              "minutos": "33:00"
+            },
+            {
+              "id": "435840",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20052/escudo.jpg",
+              "clube": "Athletico Paranaense - PR",
+              "clube_id": "20052",
+              "atleta_nome": "João Victor Machado Cruz",
+              "atleta_apelido": "João Cruz",
+              "atleta_camisa": "8",
+              "atleta_id": "650809",
+              "tempo_jogo": "TN1",
+              "minutos": "41:00"
+            },
+            {
+              "id": "435844",
+              "tipo": "PENALIDADE",
+              "resultado": "VERMELHO2AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/61590/escudo.jpg",
+              "clube": "Coritiba SAF - PR",
+              "clube_id": "61590",
+              "atleta_nome": "Breno Henrique Vasconcelos Lopes",
+              "atleta_apelido": "Breno",
+              "atleta_camisa": "77",
+              "atleta_id": "389378",
+              "tempo_jogo": "TN1",
+              "minutos": "45:00"
+            }
+          ]
+        },
+        {
+          "id_jogo": "832156",
+          "num_jogo": "266",
+          "rodada": "27",
+          "grupo": "GRUPO ÚNICO",
+          "mandante": {
+            "id": "62194",
+            "nome": "Atlético Mineiro",
+            "url_escudo": "https://conteudo.cbf.com.br/clubes/62194/escudo.jpg",
+            "gols": "3",
+            "panaltis": "0"
+          },
+          "visitante": {
+            "id": "20014",
+            "nome": "Fluminense",
+            "url_escudo": "https://conteudo.cbf.com.br/clubes/20014/escudo.jpg",
+            "gols": "1",
+            "panaltis": "0"
+          },
+          "local": "ARENA MRV - Belo Horizonte - MG",
+          "campeonato": "Campeonato Brasileiro",
+          "data": " 12/09/2026",
+          "hora": "16:00",
+          "qtd_alteracoes_jogo": 0,
+          "documentos": [
+            {
+              "url": "https://conteudo.cbf.com.br/sumulas/2026/142266se.pdf",
+              "title": "Súmula"
+            },
+            {
+              "url": "https://conteudo.cbf.com.br/sumulas/2026/142266b.pdf",
+              "title": "Boletim Financeiro"
+            },
+            {
+              "url": "https://conteudo.cbf.com.br/sumulas/2026/142266rdj.pdf",
+              "title": "Relatório de Jogo"
+            }
+          ],
+          "arbitros": [
+            {
+              "id": "19842",
+              "nome": "Matheus Delgado Candançan",
+              "funcao": "Arbitro",
+              "uf": "SP",
+              "categoria": "FIFA-PRO"
+            },
+            {
+              "id": "14563",
+              "nome": "Alex Ang Ribeiro",
+              "funcao": "Arbitro Assistente 1",
+              "uf": "SP",
+              "categoria": "FIFA-PRO"
+            },
+            {
+              "id": "17335",
+              "nome": "Joverton Wesley De Souza Lima",
+              "funcao": "Arbitro Assistente 2",
+              "uf": "RO",
+              "categoria": "AB-PRO"
+            },
+            {
+              "id": "16277",
+              "nome": "Maguielson Lima Barbosa",
+              "funcao": "Quarto Arbitro",
+              "uf": "DF",
+              "categoria": "AB"
+            },
+            {
+              "id": "825",
+              "nome": "Aldeilma Luzia da Silva",
+              "funcao": "Assessor",
+              "uf": "RN",
+              "categoria": "CBF"
+            },
+            {
+              "id": "1299",
+              "nome": "Rodolpho Toski Marques",
+              "funcao": "VAR",
+              "uf": "PR",
+              "categoria": "VAR-FIFA-PRO"
+            },
+            {
+              "id": "1106",
+              "nome": "Fabricio Porfirio de Moura",
+              "funcao": "AVAR",
+              "uf": "SP",
+              "categoria": "AVAR-MASTER"
+            },
+            {
+              "id": "975",
+              "nome": "Adriano Milczvski",
+              "funcao": "AVAR2",
+              "uf": "PR",
+              "categoria": "AB"
+            },
+            {
+              "id": "567",
+              "nome": "Marcelo Carvalho Van Gasse",
+              "funcao": "Observador de VAR",
+              "uf": "SP",
+              "categoria": "MASTER"
+            },
+            {
+              "id": "20827",
+              "nome": "Larissa Ramos Monteiro",
+              "funcao": "Quality manager",
+              "uf": "BR",
+              "categoria": "CBF"
+            }
+          ],
+          "penalidades": [
+            {
+              "id": "93054",
+              "tipo": "GOL",
+              "resultado": "NR",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/62194/escudo.jpg",
+              "clube": "Atlético Mineiro - MG",
+              "clube_id": "62194",
+              "atleta_nome": "Reinier Jesus Carvalho",
+              "atleta_apelido": "Reinier",
+              "atleta_camisa": "19",
+              "atleta_id": "546383",
+              "tempo_jogo": "2",
+              "minutos": "15:00"
+            },
+            {
+              "id": "93056",
+              "tipo": "GOL",
+              "resultado": "NR",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/62194/escudo.jpg",
+              "clube": "Atlético Mineiro - MG",
+              "clube_id": "62194",
+              "atleta_nome": "Tomas Esteban Cuello",
+              "atleta_apelido": "Cuello",
+              "atleta_camisa": "28",
+              "atleta_id": "695547",
+              "tempo_jogo": "2",
+              "minutos": "18:00"
+            },
+            {
+              "id": "93058",
+              "tipo": "GOL",
+              "resultado": "NR",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/62194/escudo.jpg",
+              "clube": "Atlético Mineiro - MG",
+              "clube_id": "62194",
+              "atleta_nome": "Vitor Fernandes Chaves Teixeira",
+              "atleta_apelido": "Vitor Fernandes",
+              "atleta_camisa": "40",
+              "atleta_id": "706135",
+              "tempo_jogo": "2",
+              "minutos": "35:00"
+            },
+            {
+              "id": "93060",
+              "tipo": "GOL",
+              "resultado": "NR",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20014/escudo.jpg",
+              "clube": "Fluminense - RJ",
+              "clube_id": "20014",
+              "atleta_nome": "Rodrigo Castillo",
+              "atleta_apelido": "Castillo",
+              "atleta_camisa": "19",
+              "atleta_id": "948678",
+              "tempo_jogo": "2",
+              "minutos": "45:00"
+            },
+            {
+              "id": "435845",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/62194/escudo.jpg",
+              "clube": "Atlético Mineiro - MG",
+              "clube_id": "62194",
+              "atleta_nome": "Alan Steven Franco Palma",
+              "atleta_apelido": "Alan Franco",
+              "atleta_camisa": "21",
+              "atleta_id": "699171",
+              "tempo_jogo": "TN1",
+              "minutos": "18:00"
+            },
+            {
+              "id": "435860",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20014/escudo.jpg",
+              "clube": "Fluminense - RJ",
+              "clube_id": "20014",
+              "atleta_nome": "Rodrigo Castillo",
+              "atleta_apelido": "Castillo",
+              "atleta_camisa": "19",
+              "atleta_id": "948678",
+              "tempo_jogo": "TN2",
+              "minutos": "22:00"
+            },
+            {
+              "id": "435859",
+              "tipo": "PENALIDADE",
+              "resultado": "AMARELO",
+              "url_escudo": "https://conteudo.cbf.com.br/clubes/20014/escudo.jpg",
+              "clube": "Fluminense - RJ",
+              "clube_id": "20014",
+              "atleta_nome": "Otavio Henrique Passos Santos",
+              "atleta_apelido": "Otavio",
+              "atleta_camisa": "94",
+              "atleta_id": "320930",
+              "tempo_jogo": "TN2",
+              "minutos": "6:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -118,9 +118,7 @@ export default function App() {
                 <ScreenHeader
                   title="Favorecimento"
                   subtitle="Matriz clube × árbitro — Índice de Favorecimento"
-                  season={season}
-                  seasons={options.seasons}
-                  onChangeSeason={setSeason}
+                  showSeasonPicker={false}
                 />
                 <FavoritismTab seasons={options.seasons} onSelect={goToDetail} />
               </div>

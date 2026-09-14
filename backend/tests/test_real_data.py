@@ -7,7 +7,7 @@ normal sob o Arbitro Y.
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.models import Fixture, MatchEvent, Referee, Team
+from app.models import Fixture, IngestionLog, MatchEvent, Referee, Team
 
 client = TestClient(app)
 
@@ -139,3 +139,22 @@ def test_scored_fixtures_count_before_cards_are_ingested(db_session):
     assert row["n"] == 6
     assert row["wins"] == 6  # Time C venceu os 6 -- contado mesmo sem cartao
     assert row["yellow"] == 0  # cartao genuinamente desconhecido ainda, nao inventado
+
+    # sem IngestionLog gravado ainda pra essa temporada -- nao inventa data
+    assert body["dataCompleteness"]["lastUpdated"] is None
+
+
+def test_last_updated_reflects_latest_ingestion_log(db_session):
+    team = Team(api_id=777, name="Time E")
+    db_session.add(team)
+    db_session.flush()
+    db_session.add_all([
+        IngestionLog(source="cbf", season=SEASON, round=1, finished_at="2026-09-01T10:00:00+00:00", matches=10, events=50),
+        IngestionLog(source="cbf", season=SEASON, round=2, finished_at="2026-09-08T10:00:00+00:00", matches=10, events=45),
+        Fixture(source="cbf", api_id=5001, season=SEASON, home_team_id=team.id, away_team_id=team.id,
+                home_score=1, away_score=0, events_ingested=True),
+    ])
+    db_session.commit()
+
+    res = client.get("/dashboard", params={"season": SEASON})
+    assert res.json()["dataCompleteness"]["lastUpdated"] == "2026-09-08T10:00:00+00:00"

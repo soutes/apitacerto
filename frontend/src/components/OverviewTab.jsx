@@ -3,7 +3,12 @@ import WinRateLineChart from "./WinRateLineChart";
 import CardsBarChart from "./CardsBarChart";
 
 export default function OverviewTab({ options, team, referee, onChangeTeam, onChangeReferee, kpis, timeseries }) {
-  const hasData = kpis.games > 0;
+  // Aba 1 e sobre o RECORTE selecionado (spec secao 5) -- sem time nem
+  // arbitro escolhido nao ha recorte, so daria pra somar a temporada
+  // inteira contada em dobro (cada jogo entra pro mandante e o visitante).
+  // Em vez de mostrar esse total sem sentido, pede pra escolher um filtro.
+  const hasFilter = Boolean(team || referee);
+  const hasData = hasFilter && kpis.games > 0;
 
   return (
     <div>
@@ -29,20 +34,32 @@ export default function OverviewTab({ options, team, referee, onChangeTeam, onCh
         </label>
       </div>
 
-      <KpiCards kpis={kpis} />
-
-      {!hasData && (
+      {!hasFilter && (
         <p className="hint">
-          Sem jogos para esse recorte (temporada/time/arbitro) ainda ingeridos.
-          Os indicadores acima ficam zerados ate ter dado real.
+          Escolha um time e/ou um arbitro acima pra ver os indicadores desse
+          recorte. Pra visao agregada de todos os times e arbitros, use as
+          abas Tabela Geral ou Classificacao.
         </p>
       )}
 
-      {hasData && (
-        <div className="chart-row">
-          <WinRateLineChart data={timeseries} />
-          <CardsBarChart data={timeseries} />
-        </div>
+      {hasFilter && (
+        <>
+          <KpiCards kpis={kpis} />
+
+          {!hasData && (
+            <p className="hint">
+              Sem jogos para esse recorte (temporada/time/arbitro) ainda
+              ingeridos. Os indicadores acima ficam zerados ate ter dado real.
+            </p>
+          )}
+
+          {hasData && (
+            <div className="chart-row">
+              <WinRateLineChart data={timeseries} />
+              <CardsBarChart data={timeseries} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

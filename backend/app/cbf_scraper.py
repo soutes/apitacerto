@@ -54,13 +54,21 @@ TEAM_NAME_ALIASES = {
     "Coritiba SAF": "Coritiba",
     "Vasco da Gama Saf": "Vasco da Gama",
     "Atlético Goianiense Saf": "Atlético Goianiense",
+    "Fortaleza SAF": "Fortaleza Esporte Clube",  # 2025: virou SAF
 }
 
 
 def _canonical_team_name(name: str) -> str:
     if name in TEAM_NAME_ALIASES:
         return TEAM_NAME_ALIASES[name]
-    return re.sub(r"\s+Saf$", "", name, flags=re.IGNORECASE)
+    stripped = re.sub(r"\s+Saf$", "", name, flags=re.IGNORECASE)
+    if stripped != name:
+        # rede de seguranca generica pra sufixo "Saf" nao mapeado ainda --
+        # avisa pra revisar se "stripped" bate com um clube ja conhecido ou
+        # se e um clube novo de verdade (rodando sem supervisao no cron).
+        print(f"  [aviso] '{name}' sem alias explicito, usando '{stripped}' "
+              f"(confira TEAM_NAME_ALIASES em app/cbf_scraper.py)")
+    return stripped
 
 
 def make_client() -> httpx.Client:
@@ -112,6 +120,9 @@ def parse_round(payload: dict, season: int) -> list[dict]:
     """Payload de /rodada/{n}/fase -> lista de dicts prontos pra gravar,
     um por partida. Formato pensado pra alimentar direto os models
     (Team/Referee/Fixture/MatchEvent) sem mais nenhuma transformacao."""
+    if not isinstance(payload, dict):
+        return []  # rodada que nao existe (num_jogo fora do range) volta []
+
     matches = []
     for grupo in payload.get("jogos", []):
         for jogo in grupo.get("jogo", []):

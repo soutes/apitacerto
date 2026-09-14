@@ -13,15 +13,17 @@ métricas em vez de placar ao vivo.
 
 ## 2. Escopo (v1)
 
-- Competição: Brasileirão Série A, temporadas **2022, 2023 e 2024** (validado
-  em 2026-09-10 contra a API real — ver seção 3; free tier não cobre 2025/2026).
+- Competição: Brasileirão Série A, temporadas **2022 a 2026** (estendido em
+  2026-09-14 — migrar pra scraping da CBF, seção 3, tirou a trava de
+  2022-2024 que vinha do free tier da API-Football). 2026 é a temporada em
+  andamento: cresce partida a partida conforme as rodadas acontecem.
 - Todos os times da liga, todos os árbitros que apitaram partidas da liga —
   não só um time. Time e árbitro são **filtros**, não dado fixo.
 - Sem autenticação, single-user, leitura apenas (nenhuma escrita feita pelo
   usuário final).
-- Dado é histórico e fechado (não muda), não ao vivo. Ingestão é um script
-  rodado uma vez (ou sob demanda), não um cron contínuo. O dashboard sempre
-  lê do banco, nunca da API diretamente.
+- Temporada fechada (2022-2025) é histórico, não muda mais. 2026 (em
+  andamento) é atualizado por um **cron semanal** (seção 3.1) — o dashboard
+  sempre lê do banco, nunca faz scraping/chamada externa dentro do request.
 
 Fora de escopo v1: outras ligas, outras temporadas, multi-usuário, alertas,
 exportação.
@@ -57,12 +59,44 @@ conhecido** (ao contrário da API-Football abaixo).
   identificado pelo `local` do jogo = Goiânia-GO). `TEAM_NAME_ALIASES` em
   `app/cbf_scraper.py` normaliza os casos conhecidos; time é casado por
   **nome** (não por id), justamente por causa disso.
-- Rodado de verdade em 2026-09-14: as 3 temporadas (2022, 2023, 2024) — 1140
-  partidas, 100% com árbitro e cartão/gol, ~9360 eventos — em menos de 2
-  minutos (`uv run python scripts/scrape_cbf.py --season 2022 --season 2023
-  --season 2024`). Sem restrição de temporada como a API-Football: 2025 e
-  2026 (em andamento) já funcionam do mesmo jeito, só não estão na v1
-  porque `main.py`/`openapi.yaml` ainda travam `season` em 2022-2024.
+- Rodado de verdade em 2026-09-14: **5 temporadas (2022-2026)** — 1900
+  partidas cadastradas (1520 já jogadas + 380 futuras de 2026 ainda sem
+  placar), 14525 eventos, em poucos minutos
+  (`uv run python scripts/scrape_cbf.py --season 2022 --season 2023
+  --season 2024 --season 2025 --season 2026`). `_scored_fixtures`
+  (seção 5/queries.py) só usa partida com placar — rodada futura de 2026
+  não polui V/E/D/gols nem conta como "faltando cartão" (`ingestion_progress`
+  usa só jogo já jogado como denominador).
+
+### 3.1 Atualização — cron semanal
+
+2026 é a única temporada que muda (em andamento). Um scheduled task do
+Claude Code (`apitacerto-cbf-refresh`, toda segunda 06:03 local) roda:
+
+```bash
+cd backend
+uv run python scripts/scrape_cbf.py --season 2026 --season 2025 --delay 0.4
+uv run pytest -q
+```
+
+`scrape_cbf.py` é idempotente — reprocessar uma rodada já gravada só
+atualiza (upsert), nunca duplica. Cada rodada processada grava uma linha em
+`IngestionLog`, e `GET /dashboard` expõe `dataCompleteness.lastUpdated`
+(máximo `finished_at` da temporada) — o frontend mostra "Atualizado em
+DD/MM/AAAA, HH:MM" no banner.
+
+**Limitação real**: um scheduled task do Claude Code só dispara com o app
+aberto (se fechado na hora marcada, roda no próximo launch) — não é cron de
+SO de verdade. Pra produção/deploy isso vira um GitHub Actions com
+`schedule: cron` (ver conversa sobre deploy) ou uma tarefa do Windows Task
+Scheduler rodando o mesmo comando acima.
+
+Manutenção anual: `COMPETITION_IDS` em `app/cbf_scraper.py` precisa de uma
+entrada nova quando o Brasileirão de um ano novo começar (2027 em diante) —
+o valor sai do payload SSR de
+`https://www.cbf.com.br/futebol-brasileiro/tabelas/campeonato-brasileiro/serie-a/{ano}`.
+O prompt do scheduled task já instrui a IA a fazer isso sozinha se o
+scraper falhar por competitionId desconhecido.
 
 ### Secundária / historico: API-Football (api-sports.io / RapidAPI)
 
@@ -89,6 +123,10 @@ um dia (não documentado oficialmente, pode mudar sem aviso).
   único por `(source, api_id)`
 - `MatchEvent(id, fixture_id, team_id, player_name, minute, type
   [GOAL|YELLOW_CARD|RED_CARD], detail)`
+- `IngestionLog(id, source, season, round, finished_at, matches, events)` —
+  1 linha por rodada processada com sucesso; alimenta o "atualizado em"
+  (`GET /dashboard` → `dataCompleteness.lastUpdated`, max `finished_at` da
+  temporada) e dá rastro pro cron semanal (seção 3).
 
 Métricas derivadas (calculadas a partir de `Fixture` + `MatchEvent`, não
 guardadas): jogos, vitórias, empates, derrotas, gols pró, gols contra,
@@ -107,7 +145,12 @@ vazios = "Todos" por padrão). KPI cards (jogos, V/E/D, aproveitamento %,
 gols pró/contra, cartões amarelos/vermelhos) e série temporal (linha =
 aproveitamento % por rodada, coluna = cartões por rodada) para o recorte
 selecionado. Sem jogos no recorte → cards zerados e mensagem explícita, não
-gráfico vazio silencioso.
+gráfico vazio silencioso. **Sem nenhum filtro** (time e árbitro os dois em
+"Todos") a aba não mostra indicador nenhum — pede pra escolher um filtro,
+em vez de somar a temporada inteira contada em dobro (cada jogo conta pro
+mandante e pro visitante nas linhas agregadas do heatmap, então "todos os
+times" não tem uma leitura de "vitórias" que faça sentido). Visão agregada
+de todo mundo é o que as abas 3 e 4 já fazem.
 
 **Aba 2 — Índice de Favorecimento**: a matriz time × árbitro da regra de
 negócio (seção 6), cor diverging vermelho/azul, cinza = amostra
@@ -262,9 +305,22 @@ Ordem de construção (igual ao HW2):
   `cod_time` ou nome diferente entre temporadas (SAF, nome truncado)
   duplicava o clube em vez de casar — resolvido casando por nome com alias
   conhecido (`TEAM_NAME_ALIASES`) em vez de por id externo.
-- Em aberto: `season` ainda trava em 2022-2024 (`main.py`, `openapi.yaml`)
-  por causa do limite antigo da API-Football, que não existe mais pra CBF.
-  2025 e 2026 (Brasileirão em andamento) já funcionam com o mesmo scraper
-  — extender é so tirar o `ge=2022, le=2024` do `Query` e rodar
-  `scrape_cbf.py --season 2025 --season 2026`. Não fiz isso ainda pra não
-  mudar o escopo da v1 sem confirmar com o usuário.
+- ~~`season` travado em 2022-2024~~ — estendido em 2026-09-14 pra 2022-2026
+  (pedido do usuário). `main.py`/`openapi.yaml`/`mock_store.SEASONS`
+  atualizados; 2025 e 2026 scrapeados de verdade (2026 com 265/380 jogadas
+  até a data, atualizando via cron — seção 3.1).
+- **Bug real encontrado e corrigido em 2026-09-14 (2)**: mesmo problema de
+  clube duplicado por nome inconsistente apareceu de novo com temporadas
+  novas — "Fortaleza SAF" (2025) não batia com o alias que eu tinha escrito
+  errado (`"Fortaleza"` em vez de `"Fortaleza SAF"`, a chave tem que ser o
+  nome CRU que a API manda, não o nome já normalizado). `_canonical_team_name`
+  agora **avisa no log** quando cai no fallback genérico (sufixo "Saf" sem
+  alias explícito), pra não passar despercebido de novo com o cron rodando
+  sem supervisão.
+- **Aba 1 sem filtro mostrava a base inteira** (reportado pelo usuário,
+  print com "Jogos: 760" numa temporada de 380 partidas — dobrado porque a
+  agregação soma mandante+visitante). Corrigido: sem time nem árbitro
+  selecionado, a aba pede pra escolher um filtro em vez de mostrar esse
+  total sem sentido (seção 5).
+- Cron semanal criado (scheduled task do Claude Code, `apitacerto-cbf-refresh`,
+  segunda 06:03) — seção 3.1 tem o comando exato e a limitação real dele.

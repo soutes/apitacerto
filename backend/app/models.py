@@ -55,6 +55,21 @@ class Fixture(Base):
     referee: Mapped["Referee"] = relationship()
 
 
+class IngestionLog(Base):
+    """1 linha por rodada de scraping bem-sucedida. Alimenta o
+    'atualizado em' mostrado no dashboard e o cron semanal sabe por onde
+    parou sem precisar reprocessar tudo (spec secao 3)."""
+    __tablename__ = "ingestion_log"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source: Mapped[str] = mapped_column(String, index=True)
+    season: Mapped[int] = mapped_column(Integer, index=True)
+    round: Mapped[int] = mapped_column(Integer, nullable=True)
+    finished_at: Mapped[str] = mapped_column(String)  # ISO 8601 UTC
+    matches: Mapped[int] = mapped_column(Integer, default=0)
+    events: Mapped[int] = mapped_column(Integer, default=0)
+
+
 class MatchEvent(Base):
     __tablename__ = "match_events"
 

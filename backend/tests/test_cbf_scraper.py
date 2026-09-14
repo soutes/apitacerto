@@ -18,6 +18,7 @@ def test_canonical_team_name_merges_known_aliases():
     assert _canonical_team_name("Coritiba SAF") == "Coritiba"
     assert _canonical_team_name("Vasco da Gama Saf") == "Vasco da Gama"
     assert _canonical_team_name("Atlético Goianiense Saf") == "Atlético Goianiense"
+    assert _canonical_team_name("Fortaleza SAF") == "Fortaleza Esporte Clube"
     # time sem alias conhecido fica igual (so tira sufixo " Saf" generico)
     assert _canonical_team_name("Flamengo") == "Flamengo"
     assert _canonical_team_name("Botafogo Saf") == "Botafogo"

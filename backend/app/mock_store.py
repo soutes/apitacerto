@@ -20,7 +20,7 @@ REFEREES = [
     "Braulio da Silva Machado", "Edina Alves Batista", "Rodolpho Toski Marques",
 ]
 
-SEASONS = [2022, 2023, 2024]
+SEASONS = [2022, 2023, 2024, 2025, 2026]
 
 
 def _seeded_rng(key: str) -> random.Random:

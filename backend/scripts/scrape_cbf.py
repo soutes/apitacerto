@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from sqlalchemy import select
@@ -21,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # backend/ no path
 
 from app.cbf_scraper import COMPETITION_IDS, scrape_season  # noqa: E402
 from app.db import Base, SessionLocal, engine  # noqa: E402
-from app.models import Fixture, MatchEvent, Referee, Team  # noqa: E402
+from app.models import Fixture, IngestionLog, MatchEvent, Referee, Team  # noqa: E402
 
 SOURCE = "cbf"
 
@@ -137,8 +138,15 @@ def main():
                 competition_id, season, range(args.start_round, args.end_round + 1), args.delay
             ):
                 ingest_matches(db, matches)
+                n_events = sum(len(m["events"]) for m in matches)
                 total_matches += len(matches)
-                total_events += sum(len(m["events"]) for m in matches)
+                total_events += n_events
+                db.add(IngestionLog(
+                    source=SOURCE, season=season, round=round_num,
+                    finished_at=datetime.now(timezone.utc).isoformat(),
+                    matches=len(matches), events=n_events,
+                ))
+                db.commit()
                 print(f"  rodada {round_num}: {len(matches)} partidas gravadas")
             print(f"season {season}: {total_matches} partidas, {total_events} eventos (gol+cartao)")
 

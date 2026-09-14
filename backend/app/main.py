@@ -44,7 +44,7 @@ def get_filters(db: Session = Depends(get_db)):
 
 @app.get("/dashboard")
 def get_dashboard(
-    season: int = Query(..., ge=2022, le=2024),
+    season: int = Query(..., ge=2022, le=2026),
     team: Optional[str] = None,
     referee: Optional[str] = None,
     db: Session = Depends(get_db),
@@ -57,6 +57,7 @@ def get_dashboard(
             "isReal": True,
             "fixtures": progress["fixtures"],
             "fixturesWithCards": progress["fixturesWithCards"],
+            "lastUpdated": queries.last_updated(db, season),
         }
     else:
         # ainda sem dado real ingerido pra essa temporada (spec secao 8:
@@ -64,7 +65,9 @@ def get_dashboard(
         # ao inves de devolver dashboard vazio.
         heatmap = mock_store.build_heatmap(season)
         timeseries = mock_store.timeseries_for(team, season)
-        data_completeness = {"isReal": False, "fixtures": 0, "fixturesWithCards": 0}
+        data_completeness = {
+            "isReal": False, "fixtures": 0, "fixturesWithCards": 0, "lastUpdated": None,
+        }
 
     kpis = queries.kpis_for(heatmap, team, referee)
     return {

@@ -33,7 +33,7 @@ paths:
           required: true
           schema:
             type: integer
-            enum: [2022, 2023, 2024]
+            enum: [2022, 2023, 2024, 2025, 2026]
         - name: team
           in: query
           required: false
@@ -114,7 +114,7 @@ components:
 
     DataCompleteness:
       type: object
-      required: [isReal, fixtures, fixturesWithCards]
+      required: [isReal, fixtures, fixturesWithCards, lastUpdated]
       properties:
         isReal:
           type: boolean
@@ -124,7 +124,12 @@ components:
           description: "jogos reais com placar no banco pra essa temporada"
         fixturesWithCards:
           type: integer
-          description: "desses, quantos ja tiveram /fixtures/events processado (cartoes completos)"
+          description: "desses, quantos ja tiveram cartao/gol processado"
+        lastUpdated:
+          type: string
+          format: date-time
+          nullable: true
+          description: "ISO 8601 UTC da ultima rodada de scraping processada pra essa temporada; null se isReal=false"
 
     DashboardResponse:
       type: object

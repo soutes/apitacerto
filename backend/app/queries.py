@@ -10,7 +10,7 @@ import re
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models import Fixture, MatchEvent, Referee, Team
+from app.models import Fixture, IngestionLog, MatchEvent, Referee, Team
 from app.stats import favoritism_index, kpis_for  # re-exported for main.py
 
 CARD_TYPES = ("YELLOW_CARD", "RED_CARD")
@@ -43,12 +43,16 @@ def _scored_fixtures(db: Session, season: int) -> list[Fixture]:
 
 
 def ingestion_progress(db: Session, season: int) -> dict:
+    # "fixtures" conta so partidas JA JOGADAS (tem placar) -- pra temporada
+    # em andamento (2025/2026), rodada futura sem jogo nao deve contar como
+    # "cartao faltando", ela so ainda nao aconteceu.
     total = db.scalar(
-        select(func.count()).select_from(Fixture).where(Fixture.season == season)
+        select(func.count()).select_from(Fixture)
+        .where(Fixture.season == season, Fixture.home_score.is_not(None))
     ) or 0
     with_cards = db.scalar(
         select(func.count()).select_from(Fixture)
-        .where(Fixture.season == season, Fixture.events_ingested.is_(True))
+        .where(Fixture.season == season, Fixture.events_ingested.is_(True), Fixture.home_score.is_not(None))
     ) or 0
     return {"fixtures": total, "fixturesWithCards": with_cards}
 
@@ -69,6 +73,15 @@ def _card_counts(db: Session, fixture_ids: list[int]) -> dict[tuple[int, int], t
         else:
             counts[key][1] += 1
     return {k: (v[0], v[1]) for k, v in counts.items()}
+
+
+def last_updated(db: Session, season: int) -> str | None:
+    """Data/hora (ISO UTC) da ultima rodada de scraping processada pra essa
+    temporada -- vem de IngestionLog, gravado pelo scripts/scrape_cbf.py.
+    Alimenta o 'atualizado em' do dashboard e o cron semanal."""
+    return db.scalar(
+        select(func.max(IngestionLog.finished_at)).where(IngestionLog.season == season)
+    )
 
 
 def has_ingested_data(db: Session, season: int) -> bool:

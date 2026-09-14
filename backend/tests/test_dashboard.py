@@ -20,10 +20,11 @@ def test_dashboard_requires_season():
     assert res.status_code == 422
 
 
-def test_dashboard_rejects_season_outside_free_tier_coverage():
-    # spec secao 3: free tier so cobre 2022-2024
-    res = client.get("/dashboard", params={"season": 2025})
-    assert res.status_code == 422
+def test_dashboard_rejects_season_outside_supported_range():
+    # scraping da CBF cobre 2022-2026 (spec secao 3); fora disso, 422
+    assert client.get("/dashboard", params={"season": 2021}).status_code == 422
+    assert client.get("/dashboard", params={"season": 2027}).status_code == 422
+    assert client.get("/dashboard", params={"season": 2026}).status_code == 200
 
 
 def test_dashboard_shape_no_filters():

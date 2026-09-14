@@ -29,18 +29,27 @@ Frontend fala com o backend em `http://localhost:8000` (configurável via
 
 ## Dados
 
-Fonte primária: scraping da API JSON pública da CBF (sem limite diário —
-ver `_docs/specs.md` seção 3):
+Cobertura: 2022-2026 (2026 é a temporada em andamento). Fonte primária:
+scraping da API JSON pública da CBF (sem limite diário — ver
+`_docs/specs.md` seção 3):
 
 ```bash
 cd backend
-uv run python scripts/scrape_cbf.py --season 2022 --season 2023 --season 2024
+uv run python scripts/scrape_cbf.py --season 2022 --season 2023 --season 2024 --season 2025 --season 2026
 ```
 
-Leva menos de 2 minutos pras 3 temporadas completas (1140 partidas). Fonte
-secundária (fallback, caso a API da CBF pare de funcionar): API-Football,
-`uv run python scripts/ingest.py --max-requests 90` — precisa de
-`API_FOOTBALL_KEY` no `.env` e é bem mais lenta (limite de request/dia).
+Leva poucos minutos pras 5 temporadas. Idempotente — roda de novo sem medo,
+só atualiza o que mudou. **Cron semanal** (`apitacerto-cbf-refresh`, scheduled
+task do Claude Code, toda segunda) reprocessa 2025/2026 automaticamente —
+só dispara com o app aberto; ver seção 3.1 do spec pra alternativa real
+(GitHub Actions / Task Scheduler) quando isso for pra produção.
+
+`GET /dashboard` retorna `dataCompleteness.lastUpdated` (data/hora da
+última rodada processada) — o dashboard mostra isso no banner do topo.
+
+Fonte secundária (fallback, caso a API da CBF pare de funcionar):
+API-Football, `uv run python scripts/ingest.py --max-requests 90` — precisa
+de `API_FOOTBALL_KEY` no `.env` e é bem mais lenta (limite de request/dia).
 
 Temporada/time/árbitro sem dado real ainda ingerido cai automaticamente no
 mock determinístico (não quebra o dashboard enquanto a ingestão progride).

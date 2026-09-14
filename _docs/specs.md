@@ -64,19 +64,32 @@ time + árbitro + intervalo de datas.
 
 ## 5. Dashboard — telas e componentes
 
-Filtros globais (topo, afetam todos os componentes): competição (fixo em v1),
-temporada (2022 / 2023 / 2024 / todas), time, árbitro, intervalo de datas.
+Filtro global (topo, afeta as 3 abas): temporada (2022 / 2023 / 2024).
+Competição fixa em v1. Organizado em abas (redesenho 2026-09-14, guiado pela
+skill `data-visualization` — overview→zoom/filter→details on demand de
+Shneiderman):
 
-- **KPI cards**: jogos, vitórias/empates/derrotas, aproveitamento %, gols
-  pró/contra, cartões amarelos, cartões vermelhos — para o recorte de
-  filtros atual.
-- **Série temporal (linha)**: aproveitamento % por rodada, ao longo da
-  temporada, para o time filtrado.
-- **Série temporal (coluna)**: cartões (amarelo/vermelho) por rodada.
-- **Heatmap**: matriz time × árbitro, cor = aproveitamento % (ou média de
-  cartões por jogo, alternável). Tooltip na célula mostra os números exatos
-  (jogos, V/E/D, cartões).
-- Tooltip em todos os gráficos ao passar o mouse (paridade com Power BI).
+**Aba 1 — Visão Geral**: filtros locais de time e árbitro (drill-down; ficam
+vazios = "Todos" por padrão). KPI cards (jogos, V/E/D, aproveitamento %,
+gols pró/contra, cartões amarelos/vermelhos) e série temporal (linha =
+aproveitamento % por rodada, coluna = cartões por rodada) para o recorte
+selecionado. Sem jogos no recorte → cards zerados e mensagem explícita, não
+gráfico vazio silencioso.
+
+**Aba 2 — Índice de Favorecimento**: a matriz time × árbitro da regra de
+negócio (seção 6), cor diverging vermelho/azul, cinza = amostra
+insuficiente. Clicar numa célula manda pra Aba 1 já filtrada por aquele
+time+árbitro (drill-down).
+
+**Aba 3 — Tabela Geral**: mesma matriz time × árbitro, mas com um seletor de
+indicador (jogos, vitórias, empates, derrotas, aproveitamento, cartões
+amarelos, cartões vermelhos, saldo de gols) e cor sequencial (azul, um único
+matiz — seguro pra daltonismo) exceto saldo de gols, que é diverging (pode
+ser negativo). Clicar numa célula também dá drill-down pra Aba 1.
+
+Toda célula/KPI sempre mostra o número junto da cor (cor nunca é a única
+pista, WCAG/skill data-visualization). Navegação de abas acessível
+(`role="tablist"`, seta esquerda/direita, foco visível).
 
 ## 6. Regra de negócio — Índice de Favorecimento
 

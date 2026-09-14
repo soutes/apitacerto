@@ -109,15 +109,6 @@ export default function DashboardTab({ season, seasons, onChangeSeason, heatmap,
                 ))}
               </div>
 
-              <div className="long-name-card">
-                <div className="long-name-title">REGRA · NOME LONGO (50 CARACTERES)</div>
-                <div className="long-name-before">Fernando Antonio Mendes de Salles Nascimento Filho</div>
-                <span title="Fernando Antonio Mendes de Salles Nascimento Filho" className="long-name-after">
-                  {displayRefereeName("Fernando Antonio Mendes de Salles Nascimento Filho")}
-                </span>
-                <div className="long-name-rule">Primeiro nome + último(s) sobrenome(s); nome completo no tooltip.</div>
-              </div>
-
               <div className="card-v2 card-teal">
                 <div className="card-header-dashed teal small">
                   <span>Viés de mandante</span>

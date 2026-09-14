@@ -43,6 +43,30 @@ export default function App() {
     setActiveTab("overview");
   }
 
+  // slicer dependente (estilo Power BI): so oferece arbitro que ja apitou
+  // esse time (e vice-versa) -- evita escolher uma combinacao sem jogo.
+  const heatmapRows = dashboard?.heatmap || [];
+  const availableReferees = team
+    ? [...new Set(heatmapRows.filter((r) => r.team === team).map((r) => r.referee))].sort()
+    : options.referees;
+  const availableTeams = referee
+    ? [...new Set(heatmapRows.filter((r) => r.referee === referee).map((r) => r.team))].sort()
+    : options.teams;
+
+  function changeTeam(t) {
+    setTeam(t);
+    if (referee && t && !heatmapRows.some((r) => r.team === t && r.referee === referee)) {
+      setReferee(undefined);
+    }
+  }
+
+  function changeReferee(r) {
+    setReferee(r);
+    if (team && r && !heatmapRows.some((r2) => r2.team === team && r2.referee === r)) {
+      setTeam(undefined);
+    }
+  }
+
   return (
     <div className="app">
       <header>
@@ -62,11 +86,11 @@ export default function App() {
         <div role="tabpanel" className="tab-panel">
           {activeTab === "overview" && (
             <OverviewTab
-              options={options}
+              options={{ teams: availableTeams, referees: availableReferees }}
               team={team}
               referee={referee}
-              onChangeTeam={setTeam}
-              onChangeReferee={setReferee}
+              onChangeTeam={changeTeam}
+              onChangeReferee={changeReferee}
               kpis={dashboard.kpis}
               timeseries={dashboard.timeseries}
             />

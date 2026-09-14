@@ -49,7 +49,7 @@ export default function FavoritismTab({ seasons, onSelect }) {
   return (
     <div className="chart-box">
       <label className="season-picker">
-        Temporada (amostra)
+        Temporada
         <select
           value={season ?? ""}
           onChange={(e) => setSeason(e.target.value ? Number(e.target.value) : undefined)}

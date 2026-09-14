@@ -16,6 +16,7 @@ export default function App() {
   const [team, setTeam] = useState();
   const [referee, setReferee] = useState();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [previousTab, setPreviousTab] = useState("dashboard");
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState(null);
@@ -45,6 +46,7 @@ export default function App() {
   }, [season]);
 
   function goToDetail({ team: t, referee: r }) {
+    setPreviousTab((current) => (activeTab === "detail" ? current : activeTab));
     setTeam(t);
     setReferee(r);
     setActiveTab("detail");
@@ -114,7 +116,7 @@ export default function App() {
             {activeTab === "confrontos" && (
               <div className="screen">
                 <ScreenHeader
-                  title="Confrontos"
+                  title="Favorecimento"
                   subtitle="Matriz clube × árbitro — Índice de Favorecimento"
                   season={season}
                   seasons={options.seasons}
@@ -170,7 +172,7 @@ export default function App() {
 
             {activeTab === "detail" && (
               <div className="screen">
-                <button type="button" className="back-link" onClick={() => setActiveTab("dashboard")}>← Voltar</button>
+                <button type="button" className="back-link" onClick={() => setActiveTab(previousTab)}>← Voltar</button>
                 <ScreenHeader
                   title="Visão Geral"
                   subtitle="Detalhe do recorte selecionado"

@@ -40,7 +40,8 @@ uv run python scripts/scrape_cbf.py --season 2022 --season 2023 --season 2024 --
 
 Leva poucos minutos pras 5 temporadas. Idempotente — roda de novo sem medo,
 só atualiza o que mudou. **Cron semanal** (`apitacerto-cbf-refresh`, scheduled
-task do Claude Code, toda segunda) reprocessa 2025/2026 automaticamente —
+task do Claude Code, toda terça 23:59 horário do Brasil) reprocessa só o
+ano atual automaticamente —
 só dispara com o app aberto; ver seção 3.1 do spec pra alternativa real
 (GitHub Actions / Task Scheduler) quando isso for pra produção.
 

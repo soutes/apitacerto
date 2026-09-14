@@ -70,14 +70,18 @@ conhecido** (ao contrário da API-Football abaixo).
 
 ### 3.1 Atualização — cron semanal
 
-2026 é a única temporada que muda (em andamento). Um scheduled task do
-Claude Code (`apitacerto-cbf-refresh`, toda segunda 06:03 local) roda:
+Só a temporada em andamento muda. Um scheduled task do Claude Code
+(`apitacerto-cbf-refresh`, terça 23:59 horário do Brasil) roda:
 
 ```bash
 cd backend
-uv run python scripts/scrape_cbf.py --season 2026 --season 2025 --delay 0.4
+uv run python scripts/scrape_cbf.py --season <ano atual> --delay 0.4
 uv run pytest -q
 ```
+
+Só o ano atual — temporada anterior já está completa e não muda mais,
+reprocessá-la de novo seria trabalho à toa (ajustado depois de rodar o
+teste manual em 2026-09-14 e o usuário confirmar que não precisa).
 
 `scrape_cbf.py` é idempotente — reprocessar uma rodada já gravada só
 atualiza (upsert), nunca duplica. Cada rodada processada grava uma linha em
@@ -323,4 +327,7 @@ Ordem de construção (igual ao HW2):
   selecionado, a aba pede pra escolher um filtro em vez de mostrar esse
   total sem sentido (seção 5).
 - Cron semanal criado (scheduled task do Claude Code, `apitacerto-cbf-refresh`,
-  segunda 06:03) — seção 3.1 tem o comando exato e a limitação real dele.
+  terça 23:59 horário do Brasil) — seção 3.1 tem o comando exato e a
+  limitação real dele. Testado manualmente em 2026-09-14 (rodou de
+  verdade, 21 testes passaram); o usuário deu feedback direto na sessão do
+  cron pra só buscar o ano atual, já aplicado no `SKILL.md` da task.

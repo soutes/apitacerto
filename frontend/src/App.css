@@ -144,3 +144,17 @@ header h1 { margin-bottom: 4px; font-size: 1.6rem; }
 .heatmap td { min-width: 48px; }
 .heatmap td[role="button"] { cursor: pointer; }
 .heatmap td.empty-cell { background: transparent; }
+
+/* ---- tabela de classificacao (Aba 4) ---- */
+.standings { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+.standings th, .standings td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+.standings th { background: var(--surface-alt); font-weight: 600; }
+.standings .col-team { text-align: left; }
+.standings .col-strong { font-weight: 700; }
+.standings tbody tr:nth-child(even) { background: #fafafa; }
+.standings tr.no-data-row { color: var(--muted); font-style: italic; }

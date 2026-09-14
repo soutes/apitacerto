@@ -5,12 +5,14 @@ import Tabs from "./components/Tabs";
 import OverviewTab from "./components/OverviewTab";
 import FavoritismTab from "./components/FavoritismTab";
 import MatrixTab from "./components/MatrixTab";
+import StandingsTab from "./components/StandingsTab";
 import "./App.css";
 
 const TABS = [
   { key: "overview", label: "Visao Geral" },
   { key: "favoritism", label: "Indice de Favorecimento" },
   { key: "matrix", label: "Tabela Geral" },
+  { key: "standings", label: "Classificacao" },
 ];
 
 export default function App() {
@@ -100,6 +102,9 @@ export default function App() {
           )}
           {activeTab === "matrix" && (
             <MatrixTab rows={dashboard.heatmap} onSelect={selectFromMatrix} />
+          )}
+          {activeTab === "standings" && (
+            <StandingsTab rows={dashboard.heatmap} teams={options.teams} referees={options.referees} />
           )}
         </div>
       )}

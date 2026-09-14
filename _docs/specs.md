@@ -182,6 +182,62 @@ Toda célula/KPI sempre mostra o número junto da cor (cor nunca é a única
 pista, WCAG/skill data-visualization). Navegação de abas acessível
 (`role="tablist"`, seta esquerda/direita, foco visível).
 
+## 5.1 Redesign visual — handoff Claude Design (2026-09-14)
+
+Handoff em `_docs/ApitaCerto referee dashboard mockups/design_handoff_apitacerto_dashboard/`
+(`README.md`, `design-brief.md`, `ApitaCerto Mockups.dc.html`). Substitui o
+shell de abas horizontais por sidebar escura + 5 itens, tokens OKLCH,
+Plus Jakarta Sans (UI) + JetBrains Mono (números, `font-variant-numeric:
+tabular-nums`), sombras glow coloridas, divisores tracejados. Tensão
+editorial carregada no texto da UI: sinaliza **padrão estatístico**, nunca
+**acusação** (frase fixa perto de todo ranking punitivo de árbitro).
+
+Nova IA da sidebar, mapeada em cima da lógica das abas antigas (nenhuma
+regra de negócio mudou, só a casca visual + 2 telas novas):
+
+- **Dashboard** (novo, `DashboardTab.jsx`): KPIs da temporada (rodada
+  atual, cartões/jogo, aproveitamento do mandante, gols/jogo — endpoint
+  novo `GET /season-overview`), prévia da classificação (posições
+  1-5 + 12, como no mock), "Árbitros que mais punem" (top 5 por
+  cartões/jogo) e "Viés de mandante" (top 4 por diferença de cartão
+  casa-visitante, mais negativo primeiro).
+- **Classificação** = Aba 4 antiga, com legenda de zonas continentais
+  (Libertadores grupos/playoff, Sul-Americana, Rebaixamento — faixas de
+  posição aproximadas, `frontend/src/zones.js`) e crachá-monograma por
+  clube (`nameFormat.js::crestFor`, iniciais + cor de paleta fixa ciclada
+  por índice — **não** é a cor do clube, e não carrega imagem de escudo
+  externa: decisão de escopo pra não precisar de `Team.crest_url` nem
+  tratar falha de carregamento de imagem).
+- **Confrontos** = Aba 2 antiga (Índice de Favorecimento), casca nova.
+- **Clubes** = Aba 3 antiga (Tabela Geral), casca nova, renomeada.
+- **Árbitros** (novo): lista completa de árbitros elegíveis (piso de
+  amostra ≥ 8 jogos, `REFEREE_SAMPLE_FLOOR` em `queries.py`) com
+  jogos/cartões-por-jogo/viés — não é só o top 5/4 do Dashboard,
+  `season-overview` devolve `allReferees` com a lista inteira.
+- **Visão Geral** (Aba 1 antiga) não é mais item de sidebar — vira uma
+  "tela de detalhe" (`activeTab==="detail"`) alcançada só clicando numa
+  célula de Confrontos/Clubes, com link "← Voltar". Mantém 100% da lógica
+  (slicer dependente time↔árbitro, zerado explícito).
+
+Regra de nome longo do handoff implementada em
+`nameFormat.js::displayRefereeName`: primeiro nome + último sobrenome; se
+o último token for um sufixo composto (Filho/Junior/Neto/Sobrinho), inclui
+o penúltimo token também (ex.: "Fernando Antonio Mendes de Salles
+Nascimento Filho" → "Fernando Nascimento Filho", não "Fernando Filho").
+Nome completo sempre no `title` (tooltip nativo).
+
+Validado com o dado real: números do ranking de árbitro (`Davi De Oliveira
+Lacerda 6,95 cartões/jogo, 19 jogos`, viés `Savio Pereira Sampaio -1,27`) e
+da prévia de classificação bateram com os que o `design-brief.md` já
+documentava como "dado real" — confirma que a implementação usa a mesma
+fonte, não valores inventados pro mockup.
+
+Escopo não implementado (fora do handoff atual, que só cobre 2 das 6 telas
+do brief original): perfil individual de árbitro/clube, coluna "Forma"
+(histórico V/E/D recente — placeholder cinza, sem dado ainda), estado
+vazio dedicado além do "—"/opacidade reduzida já usado nas linhas sem
+dado.
+
 ## 6. Regra de negócio — Índice de Favorecimento
 
 Objetivo do dashboard: sinalizar possíveis favorecimentos de árbitro a time.

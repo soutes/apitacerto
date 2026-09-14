@@ -88,6 +88,90 @@ def _card_counts(db: Session, fixture_ids: list[int]) -> dict[tuple[int, int], t
     return {k: (v[0], v[1]) for k, v in counts.items()}
 
 
+REFEREE_SAMPLE_FLOOR = 8  # jogos minimos pra entrar nos rankings por arbitro (season_overview)
+
+
+def season_overview(db: Session, season: int) -> dict:
+    """KPIs de temporada + rankings por arbitro pro Dashboard novo (design
+    handoff 2026-09-14): rodada atual, cartoes/jogo, aproveitamento do
+    mandante, gols/jogo, e os dois rankings de arbitro (mais cartao,
+    vies de mandante). Nao existia antes -- so tinha o indice por par
+    time x arbitro (stats.py)."""
+    fixtures = _scored_fixtures(db, season)
+    if not fixtures:
+        return {
+            "currentRound": 0, "gamesPlayed": 0, "cardsPerGame": 0.0,
+            "homeWinPct": 0.0, "goalsPerGame": 0.0,
+            "mostCardsReferees": [], "homeBiasReferees": [], "allReferees": [],
+        }
+
+    cards = _card_counts(db, [f.id for f in fixtures])
+
+    current_round = max((_round_number(f.round) for f in fixtures), default=0)
+    games_played = len(fixtures)
+    home_wins = sum(1 for f in fixtures if f.home_score > f.away_score)
+    total_goals = sum(f.home_score + f.away_score for f in fixtures)
+    total_cards = 0
+
+    # acumulador por arbitro: jogos, cartoes totais, cartoes do mandante,
+    # cartoes do visitante (pra tirar cardsPerGame e o vies de mandante)
+    by_ref: dict[str, dict] = {}
+
+    for f in fixtures:
+        hy, hr = cards.get((f.id, f.home_team_id), (0, 0))
+        ay, ar = cards.get((f.id, f.away_team_id), (0, 0))
+        home_cards, away_cards = hy + hr, ay + ar
+        total_cards += home_cards + away_cards
+
+        if f.referee is None:
+            continue
+        acc = by_ref.setdefault(f.referee.name, {"games": 0, "cards": 0, "homeCards": 0, "awayCards": 0})
+        acc["games"] += 1
+        acc["cards"] += home_cards + away_cards
+        acc["homeCards"] += home_cards
+        acc["awayCards"] += away_cards
+
+    eligible = {name: a for name, a in by_ref.items() if a["games"] >= REFEREE_SAMPLE_FLOOR}
+
+    most_cards = sorted(
+        ({"name": name, "games": a["games"], "cardsPerGame": round(a["cards"] / a["games"], 2)}
+         for name, a in eligible.items()),
+        key=lambda r: -r["cardsPerGame"],
+    )[:5]
+    if most_cards:
+        max_val = most_cards[0]["cardsPerGame"] or 1
+        for r in most_cards:
+            r["barPct"] = round(r["cardsPerGame"] / max_val * 100, 1)
+
+    home_bias = sorted(
+        ({"name": name, "games": a["games"],
+          "bias": round(a["homeCards"] / a["games"] - a["awayCards"] / a["games"], 2)}
+         for name, a in eligible.items()),
+        key=lambda r: r["bias"],
+    )[:4]
+
+    # lista completa (nao so o top 5/4 dos destaques do Dashboard) -- pra
+    # tela Arbitros, que lista TODO arbitro elegivel, nao so os extremos.
+    all_referees = sorted(
+        ({"name": name, "games": a["games"],
+          "cardsPerGame": round(a["cards"] / a["games"], 2),
+          "bias": round(a["homeCards"] / a["games"] - a["awayCards"] / a["games"], 2)}
+         for name, a in eligible.items()),
+        key=lambda r: -r["cardsPerGame"],
+    )
+
+    return {
+        "currentRound": current_round,
+        "gamesPlayed": games_played,
+        "allReferees": all_referees,
+        "cardsPerGame": round(total_cards / games_played, 2) if games_played else 0.0,
+        "homeWinPct": round(home_wins / games_played * 100, 1) if games_played else 0.0,
+        "goalsPerGame": round(total_goals / games_played, 2) if games_played else 0.0,
+        "mostCardsReferees": most_cards,
+        "homeBiasReferees": home_bias,
+    }
+
+
 def last_updated(db: Session, season: int) -> str | None:
     """Data/hora (ISO UTC) da ultima rodada de scraping processada pra essa
     temporada -- vem de IngestionLog, gravado pelo scripts/scrape_cbf.py.

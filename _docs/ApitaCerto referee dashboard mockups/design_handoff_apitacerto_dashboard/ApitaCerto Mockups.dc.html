@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:oklch(96% 0.006 80);font-family:Plus Jakarta Sans,Inter,system-ui,sans-serif}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+
+<div style="padding:40px 48px 120px;max-width:none">
+  <div style="max-width:760px;margin:0 0 36px;display:flex;flex-direction:column;gap:10px">
+    <div style="font:700 12px/1 JetBrains Mono,monospace;letter-spacing:.06em;color:oklch(45% 0.13 145);text-transform:uppercase">ApitaCerto — rodada 2 de direção</div>
+    <h1 style="margin:0;font:800 26px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260)">Duas opções de layout, mesmos dados reais</h1>
+    <p style="margin:0;font:500 14px/1.6 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(38% 0.01 260);max-width:680px">
+      <a href="#opt-2a" style="font:700 12px/1 JetBrains Mono,monospace;color:#fff;background:oklch(50% 0.12 195);padding:2px 7px;border-radius:5px;text-decoration:none">2a</a>
+      Opção nova — sidebar trocada por nav em pills, sombras coloridas (glow), divisores tracejados: técnicas da referência que você enviou, adaptadas a um tom editorial (sem medalha/celebração nos rankings de punição).
+      <a href="#opt-1a" style="font:700 12px/1 JetBrains Mono,monospace;color:#fff;background:oklch(40% 0.01 260);padding:2px 7px;border-radius:5px;text-decoration:none;margin-left:4px">1a</a>
+      Opção anterior — sidebar escura, cards neutros.
+    </p>
+  </div>
+
+  <!-- ============ OPÇÃO 2a — REFERÊNCIA FLIP7 (adaptada) ============ -->
+  <div id="opt-2a" style="display:flex;flex-direction:column;gap:14px;margin-bottom:56px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font:700 11px/1 JetBrains Mono,monospace;color:#fff;background:oklch(50% 0.12 195);padding:3px 8px;border-radius:6px">2a</span>
+      <span style="font:700 13px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260)">Nav em pills, glow tátil, divisores tracejados</span>
+    </div>
+
+    <!-- Dashboard v2 -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="font:700 12px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260);letter-spacing:.04em">DASHBOARD</div>
+      <div style="width:1440px;background:oklch(97% 0.01 80);border-radius:20px;box-shadow:0 10px 32px oklch(52% 0.12 195 / 0.12);overflow:hidden;border:1px solid oklch(90% 0.01 195);display:flex">
+
+        <div style="width:232px;flex:none;background:oklch(20% 0.014 235);border-right:1px solid oklch(15% 0.01 235);display:flex;flex-direction:column;padding:22px 16px;gap:26px">
+          <div style="display:flex;align-items:center;gap:9px;padding:0 6px">
+            <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,oklch(58% 0.13 195),oklch(45% 0.1 195));display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="1.4" y="7.1" width="8" height="4.2" rx="2.1" fill="#fff" transform="rotate(-30 5.4 9.2)"/><circle cx="10.4" cy="5.5" r="1.6" fill="none" stroke="#fff" stroke-width="1.2"/><polygon points="12.6,10.6 13.9,11.6 13.4,13.1 11.7,13.1 11.2,11.6" fill="#fff"/></svg></div>
+            <div style="font:800 16px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff">ApitaCerto</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="padding:10px 14px;border-radius:999px;background:oklch(55% 0.12 195);font:700 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff;box-shadow:0 4px 14px oklch(52% 0.12 195 / 0.4)">Dashboard</div>
+            <div style="padding:10px 14px;border-radius:999px;font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(78% 0.008 235)" style-hover="background:oklch(28% 0.02 235)">Classificação</div>
+            <div style="padding:10px 14px;border-radius:999px;font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(78% 0.008 235)" style-hover="background:oklch(28% 0.02 235)">Árbitros</div>
+            <div style="padding:10px 14px;border-radius:999px;font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(78% 0.008 235)" style-hover="background:oklch(28% 0.02 235)">Clubes</div>
+            <div style="padding:10px 14px;border-radius:999px;font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(78% 0.008 235)" style-hover="background:oklch(28% 0.02 235)">Confrontos</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:0;padding:26px 28px 32px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <h2 style="margin:0;font:800 22px/1.2 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(18% 0.01 260)">Visão da temporada</h2>
+              <div style="font:500 13px/1.4 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(48% 0.01 260)">Painel geral · Série A 2026</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:oklch(90% 0.1 85);box-shadow:0 3px 10px oklch(80% 0.15 85 / 0.4)">
+                <div style="width:6px;height:6px;border-radius:50%;background:oklch(45% 0.13 60)"></div>
+                <div style="font:700 12px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(35% 0.1 60)">Rodada 27 · em andamento</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:linear-gradient(135deg,oklch(58% 0.13 195),oklch(45% 0.1 195));font:700 13px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff;box-shadow:0 4px 14px oklch(52% 0.12 195 / 0.35);cursor:pointer">
+                Temporada 2026
+                <svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+            <sc-for list="{{ kpisV2 }}" as="k" hint-placeholder-count="4">
+              <div style="background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 20px {{ k.glow }};animation:fadeUp .5s ease both;animation-delay:{{ k.delay }}" style-hover="transform:translateY(-2px)">
+                <div style="padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+                  <div style="font:600 11.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(45% 0.01 260)">{{ k.label }}</div>
+                  <div style="font:700 28px/1 JetBrains Mono,monospace;color:oklch(18% 0.01 260);font-variant-numeric:tabular-nums">{{ k.value }}</div>
+                  <div style="font:500 11.5px/1.4 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(52% 0.01 260)">{{ k.sub }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:stretch">
+            <div style="background:#fff;border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 20px oklch(52% 0.12 195 / 0.08)">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:3px dashed oklch(80% 0.08 195)">
+                <div style="font:700 14.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(40% 0.13 195)">Prévia da classificação</div>
+                <a href="#cls-v2" style="font:700 12px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(50% 0.12 195);text-decoration:none">Ver completa →</a>
+              </div>
+              <sc-for list="{{ previewRows }}" as="r" hint-placeholder-count="6">
+                <div style="display:grid;grid-template-columns:22px 1fr 44px 40px 40px;align-items:center;gap:10px;padding:8px 4px">
+                  <div style="font:700 12px/1 JetBrains Mono,monospace;color:oklch(50% 0.01 260)">{{ r.pos }}</div>
+                  <div style="display:flex;align-items:center;gap:9px;min-width:0">
+                    <div style="width:26px;height:26px;border-radius:50%;background:{{ r.crestBg }};display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 0 0 2px oklch(92% 0.006 80)">
+                      <span style="font:700 9.5px/1 JetBrains Mono,monospace;color:#fff">{{ r.crestInitials }}</span>
+                    </div>
+                    <span title="{{ r.fullName }}" style="font:600 13px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(22% 0.01 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                  </div>
+                  <div style="font:700 13px/1 JetBrains Mono,monospace;color:oklch(18% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.ptsD }}</div>
+                  <div style="font:600 12px/1 JetBrains Mono,monospace;color:oklch(50% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.jD }}j</div>
+                  <div style="font:700 12px/1 JetBrains Mono,monospace;color:{{ r.sgColor }};text-align:right;font-variant-numeric:tabular-nums">{{ r.sgD }}</div>
+                </div>
+              </sc-for>
+              <div style="margin-top:auto;padding-top:14px;border-top:3px dashed oklch(90% 0.008 195);font:500 11.5px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(52% 0.01 260)">Mostrando 6 de 20 posições — tabela completa com os 20 clubes, zonas e histórico de forma abaixo.</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="background:#fff;border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 20px oklch(58% 0.15 30 / 0.1)">
+                <div style="display:flex;flex-direction:column;gap:5px;padding-bottom:10px;border-bottom:3px dashed oklch(82% 0.08 30)">
+                  <div style="font:700 14.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(45% 0.15 30)">Árbitros que mais punem</div>
+                  <div style="font:500 11.5px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(50% 0.01 260);font-style:italic">Padrão estatístico ao longo de várias partidas — não é veredito sobre uma decisão isolada. Sem ranking de medalhas de propósito: não é uma competição a se comemorar.</div>
+                </div>
+                <sc-for list="{{ refereeMost }}" as="ref" hint-placeholder-count="5">
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+                      <span title="{{ ref.fullName }}" style="font:600 12.5px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(24% 0.01 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px">{{ ref.displayName }}</span>
+                      <span style="font:700 13px/1 JetBrains Mono,monospace;color:oklch(18% 0.01 260);flex:none;font-variant-numeric:tabular-nums">{{ ref.value }}</span>
+                    </div>
+                    <div style="height:6px;border-radius:999px;background:oklch(94% 0.006 80);overflow:hidden">
+                      <div style="height:100%;width:{{ ref.barPct }};background:linear-gradient(90deg,oklch(70% 0.15 40),oklch(56% 0.17 25));border-radius:999px"></div>
+                    </div>
+                    <div style="font:500 10.5px/1 JetBrains Mono,monospace;color:oklch(55% 0.01 260)">{{ ref.games }} jogos</div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="background:oklch(95% 0.006 80);border:2px dashed oklch(75% 0.01 260);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+                <div style="font:700 10.5px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260);letter-spacing:.04em">REGRA · NOME LONGO (50 CARACTERES)</div>
+                <div style="font:500 11.5px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(45% 0.01 260);text-decoration:line-through;text-decoration-color:oklch(75% 0.01 260)">Fernando Antonio Mendes de Salles Nascimento Filho</div>
+                <span title="Fernando Antonio Mendes de Salles Nascimento Filho" style="font:700 13px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260)">Fernando ⋯ Nascimento Filho</span>
+                <div style="font:500 11px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(50% 0.01 260)">Primeiro nome + último(s) sobrenome(s); nome completo no tooltip.</div>
+              </div>
+
+              <div style="background:#fff;border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 20px oklch(52% 0.12 195 / 0.08)">
+                <div style="font:700 13px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(40% 0.13 195);padding-bottom:8px;border-bottom:3px dashed oklch(80% 0.08 195)">Viés de mandante</div>
+                <div style="font:500 11px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(50% 0.01 260)">Diferença de cartões, casa vs. visitante — negativo significa que o visitante recebe mais.</div>
+                <sc-for list="{{ biasRefs }}" as="b" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0">
+                    <span title="{{ b.fullName }}" style="font:600 12px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(28% 0.01 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px">{{ b.displayName }}</span>
+                    <span style="font:700 12px/1 JetBrains Mono,monospace;color:#fff;background:oklch(50% 0.12 195);padding:3px 9px;border-radius:999px;font-variant-numeric:tabular-nums">{{ b.value }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Classificação v2 -->
+    <div id="cls-v2" style="display:flex;flex-direction:column;gap:10px">
+      <div style="font:700 12px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260);letter-spacing:.04em">CLASSIFICAÇÃO</div>
+      <div style="width:1440px;background:oklch(97% 0.01 80);border-radius:20px;box-shadow:0 10px 32px oklch(52% 0.12 195 / 0.12);overflow:hidden;border:1px solid oklch(90% 0.01 195);display:flex">
+
+        <div style="width:232px;flex:none;background:oklch(20% 0.014 235);border-right:1px solid oklch(15% 0.01 235);display:flex;flex-direction:column;padding:22px 16px;gap:26px">
+          <div style="display:flex;align-items:center;gap:9px;padding:0 6px">
+            <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,oklch(58% 0.13 195),oklch(45% 0.1 195));display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="1.4" y="7.1" width="8" height="4.2" rx="2.1" fill="#fff" transform="rotate(-30 5.4 9.2)"/><circle cx="10.4" cy="5.5" r="1.6" fill="none" stroke="#fff" stroke-width="1.2"/><polygon points="12.6,10.6 13.9,11.6 13.4,13.1 11.7,13.1 11.2,11.6" fill="#fff"/></svg></div>
+            <div style="font:800 16px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff">ApitaCerto</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="padding:10px 14px;border-radius:999px;font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(78% 0.008 235)" style-hover="background:oklch(28% 0.02 235)">Dashboard</div>
+            <div style="padding:10px 14px;border-radius:999px;background:oklch(55% 0.12 195);font:700 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff;box-shadow:0 4px 14px oklch(52% 0.12 195 / 0.4)">Classificação</div>
+            <div style="padding:10px 14px;border-radius:999px;font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(78% 0.008 235)" style-hover="background:oklch(28% 0.02 235)">Árbitros</div>
+            <div style="padding:10px 14px;border-radius:999px;font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(78% 0.008 235)" style-hover="background:oklch(28% 0.02 235)">Clubes</div>
+            <div style="padding:10px 14px;border-radius:999px;font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(78% 0.008 235)" style-hover="background:oklch(28% 0.02 235)">Confrontos</div>
+          </div>
+        </div>
+
+        <div style="flex:1;min-width:0;padding:22px 28px 32px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <h2 style="margin:0;font:800 22px/1.2 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(18% 0.01 260)">Classificação</h2>
+              <div style="font:500 13px/1.4 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(48% 0.01 260)">Série A 2026 · 20 clubes</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:oklch(90% 0.1 85);box-shadow:0 3px 10px oklch(80% 0.15 85 / 0.4)">
+                <div style="width:6px;height:6px;border-radius:50%;background:oklch(45% 0.13 60)"></div>
+                <div style="font:700 12px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(35% 0.1 60)">Rodada 27 · jogos variam 26–27</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:linear-gradient(135deg,oklch(58% 0.13 195),oklch(45% 0.1 195));font:700 13px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff;box-shadow:0 4px 14px oklch(52% 0.12 195 / 0.35);cursor:pointer">
+                Temporada 2026
+                <svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:3px dashed oklch(85% 0.01 260)">
+            <div style="font:700 12px/1 JetBrains Mono,monospace;color:oklch(50% 0.12 195);letter-spacing:.03em">ZONAS</div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ legendZones }}" as="z" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:{{ z.bg }}">
+                  <div style="width:7px;height:7px;border-radius:50%;background:{{ z.color }};flex:none"></div>
+                  <div style="font:600 10.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:{{ z.text }}">{{ z.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="border-radius:14px;overflow:hidden;border:1px solid oklch(90% 0.006 80)">
+            <div style="display:grid;grid-template-columns:44px 250px 56px 42px 40px 40px 40px 46px 46px 46px 42px 42px 104px;background:oklch(50% 0.12 195);padding:0 16px">
+              <sc-for list="{{ headers }}" as="h" hint-placeholder-count="13">
+                <div style="padding:11px 4px;font:700 10.5px/1 JetBrains Mono,monospace;color:oklch(95% 0.01 195);letter-spacing:.03em;text-align:{{ h.align }}">{{ h.label }}</div>
+              </sc-for>
+            </div>
+            <sc-for list="{{ classRows }}" as="r" hint-placeholder-count="20">
+              <div style="display:grid;grid-template-columns:44px 250px 56px 42px 40px 40px 40px 46px 46px 46px 42px 42px 104px;align-items:center;padding:0 16px;border-left:6px solid {{ r.zoneColor }};border-bottom:1px solid oklch(95% 0.003 260);opacity:{{ r.rowOpacity }};background:#fff" style-hover="background:oklch(97% 0.01 195)">
+                <div style="padding:11px 4px;font:700 12.5px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260)">{{ r.pos }}</div>
+                <div style="padding:11px 4px;display:flex;align-items:center;gap:10px;min-width:0">
+                  <div style="width:28px;height:28px;border-radius:50%;background:{{ r.crestBg }};display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 0 0 2px oklch(96% 0.006 80)">
+                    <span style="font:700 10px/1 JetBrains Mono,monospace;color:#fff">{{ r.crestInitials }}</span>
+                  </div>
+                  <span title="{{ r.fullName }}" style="font:700 13px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                </div>
+                <div style="padding:11px 4px;font:700 13.5px/1 JetBrains Mono,monospace;color:oklch(16% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.ptsD }}</div>
+                <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(50% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.jD }}</div>
+                <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(48% 0.13 145);text-align:right;font-variant-numeric:tabular-nums">{{ r.vD }}</div>
+                <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(55% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.eD }}</div>
+                <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(52% 0.15 25);text-align:right;font-variant-numeric:tabular-nums">{{ r.dD }}</div>
+                <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.gpD }}</div>
+                <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.gcD }}</div>
+                <div style="padding:11px 4px;font:700 12px/1 JetBrains Mono,monospace;color:{{ r.sgColor }};text-align:right;font-variant-numeric:tabular-nums">{{ r.sgD }}</div>
+                <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(70% 0.1 90);text-align:right;font-variant-numeric:tabular-nums">{{ r.caD }}</div>
+                <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(52% 0.15 25);text-align:right;font-variant-numeric:tabular-nums">{{ r.cvD }}</div>
+                <div style="padding:11px 4px;display:flex;gap:4px;justify-content:flex-end">
+                  <sc-for list="{{ r.formDots }}" as="d" hint-placeholder-count="5">
+                    <div style="width:7px;height:7px;border-radius:50%;background:oklch(90% 0.006 195)"></div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="font:500 11px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(55% 0.01 260)">Linhas 7, 9–11, 13–20: dado não incluso nesta prévia (linha 6 traz o nome real de 23 caracteres, sem estatísticas). Coluna Forma pendente de integração.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ OPÇÃO 1a — anterior ============ -->
+  <div id="opt-1a" style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+    <span style="font:700 11px/1 JetBrains Mono,monospace;color:#fff;background:oklch(40% 0.01 260);padding:3px 8px;border-radius:6px">1a</span>
+    <span style="font:700 13px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260)">Sidebar escura, cards neutros</span>
+  </div>
+
+  <!-- ARTBOARD 1 — DASHBOARD -->
+  <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:64px">
+    <div style="font:700 13px/1 JetBrains Mono,monospace;color:oklch(40% 0.01 260);letter-spacing:.04em">1 — DASHBOARD</div>
+    <div style="width:1440px;background:#fff;border-radius:14px;box-shadow:0 1px 2px oklch(20% 0.01 260 / 0.06),0 12px 32px oklch(20% 0.01 260 / 0.08);overflow:hidden;display:flex;border:1px solid oklch(90% 0.005 260)">
+
+      <!-- sidebar -->
+      <div style="width:232px;flex:none;background:oklch(19% 0.014 255);display:flex;flex-direction:column;padding:22px 16px;gap:28px">
+        <div style="display:flex;align-items:center;gap:9px;padding:0 6px">
+          <div style="width:26px;height:26px;border-radius:7px;background:oklch(62% 0.14 142);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="1.4" y="7.1" width="8" height="4.2" rx="2.1" fill="#fff" transform="rotate(-30 5.4 9.2)"/><circle cx="10.4" cy="5.5" r="1.6" fill="none" stroke="#fff" stroke-width="1.2"/><polygon points="12.6,10.6 13.9,11.6 13.4,13.1 11.7,13.1 11.2,11.6" fill="#fff"/></svg></div>
+          <div style="font:800 16px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff">ApitaCerto</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;background:oklch(30% 0.08 145)" style-hover="background:oklch(32% 0.08 145)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none"><rect x="1" y="1" width="7" height="7" rx="1.5" fill="#fff"/><rect x="10" y="1" width="7" height="7" rx="1.5" fill="#fff" opacity="0.5"/><rect x="1" y="10" width="7" height="7" rx="1.5" fill="#fff" opacity="0.5"/><rect x="10" y="10" width="7" height="7" rx="1.5" fill="#fff" opacity="0.5"/></svg>
+          <div style="font:700 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff">Dashboard</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px" style-hover="background:oklch(28% 0.015 255)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none;color:oklch(65% 0.01 255)"><rect x="1" y="2" width="16" height="3" rx="1" fill="currentColor"/><rect x="1" y="7.5" width="16" height="3" rx="1" fill="currentColor" opacity="0.55"/><rect x="1" y="13" width="16" height="3" rx="1" fill="currentColor" opacity="0.55"/></svg>
+          <div style="font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(75% 0.008 255)">Classificação</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px" style-hover="background:oklch(28% 0.015 255)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none;color:oklch(65% 0.01 255)"><circle cx="9" cy="5.5" r="3.2" fill="currentColor"/><path d="M2.5 16c0-3.5 2.9-6 6.5-6s6.5 2.5 6.5 6" fill="currentColor" opacity="0.55"/></svg>
+          <div style="font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(75% 0.008 255)">Árbitros</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px" style-hover="background:oklch(28% 0.015 255)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none;color:oklch(65% 0.01 255)"><polygon points="9,1 16,4 16,10 9,17 2,10 2,4" fill="currentColor" opacity="0.55"/></svg>
+          <div style="font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(75% 0.008 255)">Clubes</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px" style-hover="background:oklch(28% 0.015 255)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none;color:oklch(65% 0.01 255)"><circle cx="4" cy="4" r="1.6" fill="currentColor"/><circle cx="9" cy="4" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="14" cy="4" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="4" cy="9" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="9" cy="9" r="1.6" fill="currentColor"/><circle cx="14" cy="9" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="4" cy="14" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="9" cy="14" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="14" cy="14" r="1.6" fill="currentColor"/></svg>
+          <div style="font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(75% 0.008 255)">Confrontos</div>
+        </div>
+        <div style="margin-top:auto;padding:12px;border-radius:10px;background:oklch(24% 0.015 255);display:flex;flex-direction:column;gap:4px">
+          <div style="font:600 10.5px/1 JetBrains Mono,monospace;color:oklch(65% 0.01 255);letter-spacing:.04em">DADO</div>
+          <div style="font:600 12px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(85% 0.005 255)">1.900 partidas · 59 árbitros · 5 temporadas</div>
+        </div>
+      </div>
+
+      <!-- main -->
+      <div style="flex:1;min-width:0;padding:28px 32px 36px;display:flex;flex-direction:column;gap:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <h2 style="margin:0;font:800 22px/1.2 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(18% 0.01 260)">Visão da temporada</h2>
+            <div style="font:500 13px/1.4 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(48% 0.01 260)">Painel geral · Série A 2026</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;background:oklch(93% 0.05 75);border:1px solid oklch(80% 0.09 75)">
+              <div style="width:6px;height:6px;border-radius:50%;background:oklch(60% 0.15 60)"></div>
+              <div style="font:700 12px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(38% 0.09 60)">Rodada 27 · em andamento</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:9px;background:oklch(97% 0.005 260);border:1px solid oklch(88% 0.005 260);font:700 13px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(22% 0.01 260);cursor:pointer" style-hover="border-color:oklch(70% 0.005 260)">
+              Temporada 2026
+              <svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="oklch(45% 0.01 260)" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:oklch(98% 0.004 80);border:1px solid oklch(91% 0.005 260);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;animation:fadeUp .5s ease both;animation-delay:{{ k.delay }}">
+              <div style="font:600 11.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(45% 0.01 260);letter-spacing:.02em">{{ k.label }}</div>
+              <div style="font:700 28px/1 JetBrains Mono,monospace;color:oklch(18% 0.01 260);font-variant-numeric:tabular-nums">{{ k.value }}</div>
+              <div style="font:500 11.5px/1.4 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(52% 0.01 260)">{{ k.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:stretch">
+
+          <!-- preview standings -->
+          <div style="background:#fff;border:1px solid oklch(91% 0.005 260);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font:700 14.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260)">Prévia da classificação</div>
+              <a href="#artboard-2" style="font:700 12px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(45% 0.13 145);text-decoration:none" style-hover="text-decoration:underline">Ver completa →</a>
+            </div>
+            <sc-for list="{{ previewRows }}" as="r" hint-placeholder-count="6">
+              <div style="display:grid;grid-template-columns:22px 1fr 44px 40px 40px;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid oklch(95% 0.003 260)">
+                <div style="font:700 12px/1 JetBrains Mono,monospace;color:oklch(50% 0.01 260)">{{ r.pos }}</div>
+                <div style="display:flex;align-items:center;gap:9px;min-width:0">
+                  <div style="width:26px;height:26px;border-radius:50%;background:{{ r.crestBg }};display:flex;align-items:center;justify-content:center;flex:none">
+                    <span style="font:700 9.5px/1 JetBrains Mono,monospace;color:#fff">{{ r.crestInitials }}</span>
+                  </div>
+                  <span title="{{ r.fullName }}" style="font:600 13px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(22% 0.01 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                </div>
+                <div style="font:700 13px/1 JetBrains Mono,monospace;color:oklch(18% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.ptsD }}</div>
+                <div style="font:600 12px/1 JetBrains Mono,monospace;color:oklch(50% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.jD }}j</div>
+                <div style="font:700 12px/1 JetBrains Mono,monospace;color:{{ r.sgColor }};text-align:right;font-variant-numeric:tabular-nums">{{ r.sgD }}</div>
+              </div>
+            </sc-for>
+            <div style="margin-top:auto;padding-top:14px;border-top:1px solid oklch(93% 0.004 260);font:500 11.5px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(55% 0.01 260)">Mostrando 6 de 20 posições — tabela completa com os 20 clubes e zonas abaixo.</div>
+          </div>
+
+          <!-- referee highlights -->
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid oklch(91% 0.005 260);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <div style="font:700 14.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260)">Árbitros que mais punem</div>
+                <div style="font:500 11.5px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(50% 0.01 260);font-style:italic">Padrão estatístico ao longo de várias partidas — não é veredito sobre uma decisão isolada.</div>
+              </div>
+              <sc-for list="{{ refereeMost }}" as="ref" hint-placeholder-count="5">
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+                    <span title="{{ ref.fullName }}" style="font:600 12.5px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(24% 0.01 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px">{{ ref.displayName }}</span>
+                    <span style="font:700 13px/1 JetBrains Mono,monospace;color:oklch(18% 0.01 260);flex:none;font-variant-numeric:tabular-nums">{{ ref.value }}</span>
+                  </div>
+                  <div style="height:5px;border-radius:3px;background:oklch(93% 0.006 80);overflow:hidden">
+                    <div style="height:100%;width:{{ ref.barPct }};background:oklch(58% 0.14 25);border-radius:3px"></div>
+                  </div>
+                  <div style="font:500 10.5px/1 JetBrains Mono,monospace;color:oklch(55% 0.01 260)">{{ ref.games }} jogos</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="background:oklch(98% 0.004 80);border:1px dashed oklch(78% 0.005 260);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+              <div style="font:700 10.5px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260);letter-spacing:.04em">REGRA · NOME LONGO (50 CARACTERES)</div>
+              <div style="font:500 11.5px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(45% 0.01 260);text-decoration:line-through;text-decoration-color:oklch(75% 0.01 260)">Fernando Antonio Mendes de Salles Nascimento Filho</div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 5h8M6 1l4 4-4 4" stroke="oklch(50% 0.13 145)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span title="Fernando Antonio Mendes de Salles Nascimento Filho" style="font:700 13px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260)">Fernando ⋯ Nascimento Filho</span>
+              </div>
+              <div style="font:500 11px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(50% 0.01 260)">Primeiro nome + último(s) sobrenome(s); nome completo no tooltip. Em listas mais largas (Árbitros), quebra em 2 linhas antes de truncar.</div>
+            </div>
+
+            <div style="background:#fff;border:1px solid oklch(91% 0.005 260);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+              <div style="font:700 13px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260)">Viés de mandante</div>
+              <div style="font:500 11px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(50% 0.01 260)">Diferença de cartões, casa vs. visitante — negativo significa que o visitante recebe mais.</div>
+              <sc-for list="{{ biasRefs }}" as="b" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid oklch(95% 0.003 260)">
+                  <span title="{{ b.fullName }}" style="font:600 12px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(28% 0.01 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px">{{ b.displayName }}</span>
+                  <span style="font:700 12.5px/1 JetBrains Mono,monospace;color:oklch(48% 0.13 235);font-variant-numeric:tabular-nums">{{ b.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARTBOARD 2 — CLASSIFICAÇÃO -->
+  <div id="artboard-2" style="display:flex;flex-direction:column;gap:14px">
+    <div style="font:700 13px/1 JetBrains Mono,monospace;color:oklch(40% 0.01 260);letter-spacing:.04em">2 — CLASSIFICAÇÃO</div>
+    <div style="width:1440px;background:#fff;border-radius:14px;box-shadow:0 1px 2px oklch(20% 0.01 260 / 0.06),0 12px 32px oklch(20% 0.01 260 / 0.08);overflow:hidden;display:flex;border:1px solid oklch(90% 0.005 260)">
+
+      <div style="width:232px;flex:none;background:oklch(19% 0.014 255);display:flex;flex-direction:column;padding:22px 16px;gap:28px">
+        <div style="display:flex;align-items:center;gap:9px;padding:0 6px">
+          <div style="width:26px;height:26px;border-radius:7px;background:oklch(62% 0.14 142);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="1.4" y="7.1" width="8" height="4.2" rx="2.1" fill="#fff" transform="rotate(-30 5.4 9.2)"/><circle cx="10.4" cy="5.5" r="1.6" fill="none" stroke="#fff" stroke-width="1.2"/><polygon points="12.6,10.6 13.9,11.6 13.4,13.1 11.7,13.1 11.2,11.6" fill="#fff"/></svg></div>
+          <div style="font:800 16px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff">ApitaCerto</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px" style-hover="background:oklch(28% 0.015 255)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none;color:oklch(65% 0.01 255)"><rect x="1" y="1" width="7" height="7" rx="1.5" fill="currentColor"/><rect x="10" y="1" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.5"/><rect x="1" y="10" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.5"/><rect x="10" y="10" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.5"/></svg>
+          <div style="font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(75% 0.008 255)">Dashboard</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;background:oklch(30% 0.08 145)" style-hover="background:oklch(32% 0.08 145)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none"><rect x="1" y="2" width="16" height="3" rx="1" fill="#fff"/><rect x="1" y="7.5" width="16" height="3" rx="1" fill="#fff" opacity="0.55"/><rect x="1" y="13" width="16" height="3" rx="1" fill="#fff" opacity="0.55"/></svg>
+          <div style="font:700 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:#fff">Classificação</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px" style-hover="background:oklch(28% 0.015 255)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none;color:oklch(65% 0.01 255)"><circle cx="9" cy="5.5" r="3.2" fill="currentColor"/><path d="M2.5 16c0-3.5 2.9-6 6.5-6s6.5 2.5 6.5 6" fill="currentColor" opacity="0.55"/></svg>
+          <div style="font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(75% 0.008 255)">Árbitros</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px" style-hover="background:oklch(28% 0.015 255)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none;color:oklch(65% 0.01 255)"><polygon points="9,1 16,4 16,10 9,17 2,10 2,4" fill="currentColor" opacity="0.55"/></svg>
+          <div style="font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(75% 0.008 255)">Clubes</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px" style-hover="background:oklch(28% 0.015 255)">
+          <svg width="18" height="18" viewBox="0 0 18 18" style="flex:none;color:oklch(65% 0.01 255)"><circle cx="4" cy="4" r="1.6" fill="currentColor"/><circle cx="9" cy="4" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="14" cy="4" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="4" cy="9" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="9" cy="9" r="1.6" fill="currentColor"/><circle cx="14" cy="9" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="4" cy="14" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="9" cy="14" r="1.6" fill="currentColor" opacity="0.5"/><circle cx="14" cy="14" r="1.6" fill="currentColor"/></svg>
+          <div style="font:600 13.5px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(75% 0.008 255)">Confrontos</div>
+        </div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+          <div style="font:600 10.5px/1 JetBrains Mono,monospace;color:oklch(60% 0.01 255);letter-spacing:.04em">ZONAS</div>
+          <sc-for list="{{ legendZones }}" as="z" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:7px">
+              <div style="width:8px;height:8px;border-radius:2px;background:{{ z.color }};flex:none"></div>
+              <div style="font:500 11px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(78% 0.005 255)">{{ z.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:0;padding:28px 32px 36px;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <h2 style="margin:0;font:800 22px/1.2 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(18% 0.01 260)">Classificação</h2>
+            <div style="font:500 13px/1.4 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(48% 0.01 260)">Série A 2026 · 20 clubes</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;background:oklch(93% 0.05 75);border:1px solid oklch(80% 0.09 75)">
+              <div style="width:6px;height:6px;border-radius:50%;background:oklch(60% 0.15 60)"></div>
+              <div style="font:700 12px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(38% 0.09 60)">Rodada 27 · jogos variam 26–27</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:9px;background:oklch(97% 0.005 260);border:1px solid oklch(88% 0.005 260);font:700 13px/1 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(22% 0.01 260);cursor:pointer" style-hover="border-color:oklch(70% 0.005 260)">
+              Temporada 2026
+              <svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="oklch(45% 0.01 260)" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div style="border:1px solid oklch(91% 0.005 260);border-radius:12px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:44px 250px 56px 42px 40px 40px 40px 46px 46px 46px 42px 42px 104px;background:oklch(97% 0.004 80);border-bottom:1px solid oklch(90% 0.005 260);padding:0 16px">
+            <sc-for list="{{ headers }}" as="h" hint-placeholder-count="13">
+              <div style="padding:11px 4px;font:700 10.5px/1 JetBrains Mono,monospace;color:oklch(48% 0.01 260);letter-spacing:.03em;text-align:{{ h.align }}">{{ h.label }}</div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ classRows }}" as="r" hint-placeholder-count="20">
+            <div style="display:grid;grid-template-columns:44px 250px 56px 42px 40px 40px 40px 46px 46px 46px 42px 42px 104px;align-items:center;padding:0 16px;border-left:3px solid {{ r.zoneColor }};border-bottom:1px solid oklch(95% 0.003 260);opacity:{{ r.rowOpacity }}" style-hover="background:oklch(98% 0.004 80)">
+              <div style="padding:11px 4px;font:700 12.5px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260)">{{ r.pos }}</div>
+              <div style="padding:11px 4px;display:flex;align-items:center;gap:10px;min-width:0">
+                <div style="width:28px;height:28px;border-radius:50%;background:{{ r.crestBg }};display:flex;align-items:center;justify-content:center;flex:none">
+                  <span style="font:700 10px/1 JetBrains Mono,monospace;color:#fff">{{ r.crestInitials }}</span>
+                </div>
+                <span title="{{ r.fullName }}" style="font:700 13px/1.3 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(20% 0.01 260);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+              </div>
+              <div style="padding:11px 4px;font:700 13.5px/1 JetBrains Mono,monospace;color:oklch(16% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.ptsD }}</div>
+              <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(50% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.jD }}</div>
+              <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(48% 0.13 145);text-align:right;font-variant-numeric:tabular-nums">{{ r.vD }}</div>
+              <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(55% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.eD }}</div>
+              <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(52% 0.15 25);text-align:right;font-variant-numeric:tabular-nums">{{ r.dD }}</div>
+              <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.gpD }}</div>
+              <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(45% 0.01 260);text-align:right;font-variant-numeric:tabular-nums">{{ r.gcD }}</div>
+              <div style="padding:11px 4px;font:700 12px/1 JetBrains Mono,monospace;color:{{ r.sgColor }};text-align:right;font-variant-numeric:tabular-nums">{{ r.sgD }}</div>
+              <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(70% 0.1 90);text-align:right;font-variant-numeric:tabular-nums">{{ r.caD }}</div>
+              <div style="padding:11px 4px;font:600 12px/1 JetBrains Mono,monospace;color:oklch(52% 0.15 25);text-align:right;font-variant-numeric:tabular-nums">{{ r.cvD }}</div>
+              <div style="padding:11px 4px;display:flex;gap:4px;justify-content:flex-end">
+                <sc-for list="{{ r.formDots }}" as="d" hint-placeholder-count="5">
+                  <div style="width:7px;height:7px;border-radius:50%;background:oklch(88% 0.004 260)"></div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px">
+          <div style="font:500 11px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(55% 0.01 260)">Linhas 7, 9–11, 13–20: dado não incluso nesta prévia (linha 6 traz o nome real de 23 caracteres, sem estatísticas). Coluna Forma depende de feed de últimos 5 jogos, pendente de integração.</div>
+          <div style="font:500 11px/1.5 Plus Jakarta Sans,Inter,system-ui,sans-serif;color:oklch(55% 0.01 260);font-style:italic">Zonas por posição, não por par clube×árbitro.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+function initials(name, i) {
+  const parts = name.split(' ').filter(w => w.length > 2 || w === parts);
+  return (parts[0][0] + (parts[1] ? parts[1][0] : parts[0][1])).toUpperCase();
+}
+const CREST_PALETTE = ['oklch(52% 0.1 25)','oklch(50% 0.1 145)','oklch(50% 0.1 235)','oklch(55% 0.1 80)','oklch(50% 0.1 300)','oklch(48% 0.1 170)'];
+
+function crestFor(name, idx) {
+  const p = name.split(' ').filter(w => w.length > 2 && !['dos','das','de','do'].includes(w.toLowerCase()));
+  const ini = ((p[0] || name)[0] + ((p[1] || p[0] || name)[0])).toUpperCase();
+  return { crestInitials: ini, crestBg: CREST_PALETTE[idx % CREST_PALETTE.length] };
+}
+
+const REAL_ROWS = [
+  { pos: 1, name: 'Flamengo', pts: 57, j: 27, v: 17, e: 6, d: 4, gp: 53, gc: 22, sg: 31, ca: 53, cv: 6 },
+  { pos: 2, name: 'Palmeiras', pts: 56, j: 27, v: 16, e: 8, d: 3, gp: 47, gc: 21, sg: 26, ca: 56, cv: 6 },
+  { pos: 3, name: 'Athletico-PR', fullName: 'Athletico Paranaense', pts: 46, j: 27, v: 13, e: 7, d: 7, gp: 41, gc: 31, sg: 10, ca: 61, cv: 2 },
+  { pos: 4, name: 'Fluminense', pts: 45, j: 27, v: 12, e: 9, d: 6, gp: 41, gc: 35, sg: 6, ca: 78, cv: 4 },
+  { pos: 5, name: 'Bahia', pts: 43, j: 26, v: 11, e: 10, d: 5, gp: 40, gc: 32, sg: 8, ca: 67, cv: 4 },
+  { pos: 8, name: 'Coritiba', pts: 38, j: 27, v: 10, e: 8, d: 9, gp: 37, gc: 38, sg: -1, ca: 49, cv: 10 },
+  { pos: 12, name: 'Vitória', pts: 33, j: 27, v: 9, e: 6, d: 12, gp: 27, gc: 39, sg: -12, ca: 66, cv: 3 }
+];
+
+function zoneColor(pos) {
+  if (pos <= 4) return 'oklch(58% 0.13 145)';
+  if (pos <= 6) return 'oklch(72% 0.13 80)';
+  if (pos <= 12) return 'oklch(60% 0.11 235)';
+  if (pos <= 16) return 'oklch(85% 0.004 260)';
+  return 'oklch(55% 0.16 25)';
+}
+
+function buildClassRows() {
+  const byPos = {};
+  REAL_ROWS.forEach(r => byPos[r.pos] = r);
+  byPos[6] = { pos: 6, name: 'Fortaleza EC', fullName: 'Fortaleza Esporte Clube', placeholder: true };
+  const rows = [];
+  for (let pos = 1; pos <= 20; pos++) {
+    const base = byPos[pos] || { pos, name: '—', placeholder: true };
+    const isPh = !!base.placeholder;
+    const c = crestFor(base.fullName || base.name, pos);
+    rows.push({
+      pos,
+      name: base.name,
+      fullName: base.fullName || base.name,
+      crestInitials: isPh && base.name === '—' ? '?' : c.crestInitials,
+      crestBg: isPh && base.name === '—' ? 'oklch(88% 0.004 260)' : c.crestBg,
+      ptsD: isPh ? '—' : base.pts,
+      jD: isPh ? '—' : base.j + 'j',
+      vD: isPh ? '—' : base.v,
+      eD: isPh ? '—' : base.e,
+      dD: isPh ? '—' : base.d,
+      gpD: isPh ? '—' : base.gp,
+      gcD: isPh ? '—' : base.gc,
+      sgD: isPh ? '—' : (base.sg > 0 ? '+' + base.sg : base.sg),
+      sgColor: isPh ? 'oklch(60% 0.005 260)' : (base.sg > 0 ? 'oklch(48% 0.13 145)' : base.sg < 0 ? 'oklch(50% 0.15 25)' : 'oklch(50% 0.005 260)'),
+      caD: isPh ? '—' : base.ca,
+      cvD: isPh ? '—' : base.cv,
+      zoneColor: zoneColor(pos),
+      rowOpacity: isPh ? 0.55 : 1,
+      formDots: [0, 1, 2, 3, 4]
+    });
+  }
+  return rows;
+}
+
+class Component extends DCLogic {
+  renderVals() {
+    const kpis = [
+      { label: 'Cartões por jogo', value: '5,74', sub: 'liga · faixa 4,43–7,15 entre árbitros', delay: '0s' },
+      { label: 'Vitória do mandante', value: '47,2%', sub: 'time da casa vence a partida', delay: '.05s' },
+      { label: 'Gols por jogo', value: '2,46', sub: 'média da liga, 5 temporadas', delay: '.1s' },
+      { label: 'Partidas analisadas', value: '1.900', sub: '2022–2026 · 59 árbitros · 20 clubes/ano', delay: '.15s' }
+    ];
+    const previewSrc = [1, 2, 3, 4, 5, 12];
+    const previewRows = buildClassRows().filter(r => previewSrc.includes(r.pos));
+    const refereeMostRaw = [
+      { name: 'Davi De Oliveira Lacerda', value: '6,95', games: 19 },
+      { name: 'Paulo Cesar Zanovelli da Silva', value: '6,58', games: 12 },
+      { name: 'Felipe Fernandes de Lima', value: '6,50', games: 14 },
+      { name: 'Flavio Rodrigues de Souza', value: '6,46', games: 13 },
+      { name: 'Bruno Arleu de Araujo', value: '6,07', games: 15 }
+    ];
+    const shortName = n => { const p = n.split(' '); return p.length <= 3 ? n : p[0] + ' ' + p[p.length - 1]; };
+    const refereeMost = refereeMostRaw.map(r => ({ ...r, fullName: r.name, displayName: shortName(r.name), barPct: (parseFloat(r.value.replace(',', '.')) / 7.15 * 100) + '%' }));
+    const biasRefs = [
+      { name: 'Savio Pereira Sampaio', value: '-1,27' },
+      { name: 'Anderson Daronco', value: '-1,00' },
+      { name: 'Davi De Oliveira Lacerda', value: '-1,05' },
+      { name: 'Ramon Abatti Abel', value: '-1,00' }
+    ].map(r => ({ ...r, fullName: r.name, displayName: shortName(r.name) }));
+
+    const kpisV2 = [
+      { label: 'Cartões por jogo', value: '5,74', sub: 'liga · faixa 4,43–7,15 entre árbitros', delay: '0s', stripe: 'linear-gradient(90deg,oklch(58% 0.13 195),oklch(70% 0.14 85))', glow: 'oklch(52% 0.12 195 / 0.12)' },
+      { label: 'Vitória do mandante', value: '47,2%', sub: 'time da casa vence a partida', delay: '.05s', stripe: 'linear-gradient(90deg,oklch(70% 0.14 85),oklch(58% 0.13 195))', glow: 'oklch(78% 0.15 85 / 0.18)' },
+      { label: 'Gols por jogo', value: '2,46', sub: 'média da liga, 5 temporadas', delay: '.1s', stripe: 'linear-gradient(90deg,oklch(58% 0.13 195),oklch(60% 0.17 30))', glow: 'oklch(52% 0.12 195 / 0.12)' },
+      { label: 'Partidas analisadas', value: '1.900', sub: '2022–2026 · 59 árbitros · 20 clubes/ano', delay: '.15s', stripe: 'linear-gradient(90deg,oklch(60% 0.17 30),oklch(70% 0.14 85))', glow: 'oklch(60% 0.17 30 / 0.14)' }
+    ];
+    return {
+      kpis,
+      kpisV2,
+      previewRows,
+      refereeMost,
+      biasRefs,
+      classRows: buildClassRows(),
+      headers: [
+        { label: '#', align: 'left' }, { label: 'CLUBE', align: 'left' }, { label: 'PTS', align: 'right' },
+        { label: 'J', align: 'right' }, { label: 'V', align: 'right' }, { label: 'E', align: 'right' }, { label: 'D', align: 'right' },
+        { label: 'GP', align: 'right' }, { label: 'GC', align: 'right' }, { label: 'SG', align: 'right' },
+        { label: 'CA', align: 'right' }, { label: 'CV', align: 'right' }, { label: 'FORMA', align: 'right' }
+      ],
+      legendZones: [
+        { color: 'oklch(58% 0.13 145)', bg: 'oklch(94% 0.03 145)', text: 'oklch(40% 0.1 145)', label: 'Libertadores (grupos)' },
+        { color: 'oklch(72% 0.13 80)', bg: 'oklch(94% 0.05 80)', text: 'oklch(45% 0.1 80)', label: 'Libertadores (playoff)' },
+        { color: 'oklch(60% 0.11 235)', bg: 'oklch(94% 0.03 235)', text: 'oklch(42% 0.1 235)', label: 'Sul-Americana' },
+        { color: 'oklch(55% 0.16 25)', bg: 'oklch(94% 0.04 25)', text: 'oklch(45% 0.14 25)', label: 'Rebaixamento' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -49,7 +49,6 @@ export default function MatrixTab({ rows, onSelect }) {
 
   return (
     <div className="chart-box">
-      <h2>Tabela Geral</h2>
       <div className="metric-picker">
         <label>
           Indicador

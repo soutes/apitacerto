@@ -60,6 +60,28 @@ paths:
                     items:
                       $ref: "#/components/schemas/HeatmapCell"
 
+  /season-overview:
+    get:
+      summary: >-
+        KPIs de temporada (rodada atual, cartoes/jogo, aproveitamento do
+        mandante, gols/jogo) e rankings de arbitro (mais cartao, vies de
+        mandante) pra tela Dashboard.
+      operationId: getSeasonOverview
+      parameters:
+        - name: season
+          in: query
+          required: true
+          schema:
+            type: integer
+            enum: [2022, 2023, 2024, 2025, 2026]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeasonOverview"
+
   /dashboard:
     get:
       summary: Dados agregados do dashboard para o recorte de filtros dado
@@ -148,6 +170,38 @@ components:
           type: number
           nullable: true
           description: "Indice de Favorecimento; null quando insufficientSample"
+
+    RefereeRanking:
+      type: object
+      required: [name, games]
+      properties:
+        name: { type: string }
+        games: { type: integer }
+        cardsPerGame: { type: number, description: "so em mostCardsReferees" }
+        barPct: { type: number, description: "cardsPerGame normalizado no maximo da lista, 0-100; so em mostCardsReferees" }
+        bias: { type: number, description: "cartoes/jogo mandante menos visitante; negativo = visitante leva mais; so em homeBiasReferees" }
+
+    SeasonOverview:
+      type: object
+      required: [currentRound, gamesPlayed, cardsPerGame, homeWinPct, goalsPerGame, mostCardsReferees, homeBiasReferees, allReferees]
+      properties:
+        currentRound: { type: integer }
+        gamesPlayed: { type: integer }
+        cardsPerGame: { type: number }
+        homeWinPct: { type: number }
+        goalsPerGame: { type: number }
+        mostCardsReferees:
+          type: array
+          items: { $ref: "#/components/schemas/RefereeRanking" }
+          description: "top 5 por cardsPerGame, pra tela Dashboard"
+        homeBiasReferees:
+          type: array
+          items: { $ref: "#/components/schemas/RefereeRanking" }
+          description: "top 4 por vies (mais negativo primeiro), pra tela Dashboard"
+        allReferees:
+          type: array
+          items: { $ref: "#/components/schemas/RefereeRanking" }
+          description: "todo arbitro elegivel (>= piso de amostra) com cardsPerGame e bias, pra tela Arbitros"
 
     DataCompleteness:
       type: object

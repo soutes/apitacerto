@@ -33,6 +33,19 @@ export async function getFavoritism({ season } = {}) {
   return res.json();
 }
 
+export async function getSeasonOverview({ season }) {
+  if (USE_MOCK) {
+    await delay(120);
+    return {
+      currentRound: 0, gamesPlayed: 0, cardsPerGame: 0, homeWinPct: 0, goalsPerGame: 0,
+      mostCardsReferees: [], homeBiasReferees: [],
+    };
+  }
+  const res = await fetch(`${BACKEND_URL}/season-overview?season=${season}`);
+  if (!res.ok) throw new Error(`season-overview fetch failed: ${res.status}`);
+  return res.json();
+}
+
 export async function getDashboard({ season, team, referee }) {
   if (USE_MOCK) {
     await delay(150);

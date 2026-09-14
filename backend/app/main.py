@@ -53,6 +53,20 @@ def get_favoritism(season: Optional[int] = None, db: Session = Depends(get_db)):
     return {"heatmap": heatmap}
 
 
+@app.get("/season-overview")
+def get_season_overview(season: int = Query(..., ge=2022, le=2026), db: Session = Depends(get_db)):
+    # KPIs de temporada + rankings de arbitro (mais cartao, vies de mandante)
+    # pra tela Dashboard do redesign (design_handoff 2026-09-14). Sem dado
+    # real ainda pra essa temporada -> tudo zerado, nao inventa ranking.
+    if queries.has_ingested_data(db, season):
+        return queries.season_overview(db, season)
+    return {
+        "currentRound": 0, "gamesPlayed": 0, "cardsPerGame": 0.0,
+        "homeWinPct": 0.0, "goalsPerGame": 0.0,
+        "mostCardsReferees": [], "homeBiasReferees": [], "allReferees": [],
+    }
+
+
 @app.get("/dashboard")
 def get_dashboard(
     season: int = Query(..., ge=2022, le=2026),

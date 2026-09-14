@@ -48,7 +48,6 @@ export default function FavoritismTab({ seasons, onSelect }) {
 
   return (
     <div className="chart-box">
-      <h2>Indice de Favorecimento</h2>
       <label className="season-picker">
         Temporada (amostra)
         <select

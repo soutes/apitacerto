@@ -1,44 +1,10 @@
 import { useMemo, useState } from "react";
+import ScreenHeader from "./ScreenHeader";
+import { aggregateStandings } from "../standings";
+import { crestFor, displayClubName } from "../nameFormat";
+import { ZONES, zoneColorForPosition } from "../zones";
 
-// Pontos = vitoria x3 + empate x1 (formula oficial da CBF). V/E/D/gols
-// batem exatos com a tabela real (conferido -- o pipeline de dado esta
-// correto); so os pontos usavam vitorias+empates antes, o que mudava a
-// ordem em relacao a classificacao de verdade.
-function aggregateStandings(rows, teams, referee) {
-  const filtered = referee ? rows.filter((r) => r.referee === referee) : rows;
-
-  const byTeam = new Map(teams.map((t) => [t, {
-    team: t, n: 0, wins: 0, draws: 0, losses: 0,
-    goalsFor: 0, goalsAgainst: 0, yellow: 0, red: 0,
-  }]));
-
-  for (const row of filtered) {
-    const acc = byTeam.get(row.team);
-    if (!acc) continue; // time fora da lista global (nao deveria acontecer)
-    acc.n += row.n;
-    acc.wins += row.wins;
-    acc.draws += row.draws;
-    acc.losses += row.losses;
-    acc.goalsFor += row.goalsFor;
-    acc.goalsAgainst += row.goalsAgainst;
-    acc.yellow += row.yellow;
-    acc.red += row.red;
-  }
-
-  const table = [...byTeam.values()].map((t) => ({
-    ...t,
-    points: t.wins * 3 + t.draws,
-    goalDiff: t.goalsFor - t.goalsAgainst,
-    winRatePct: t.n ? Math.round((t.wins / t.n) * 1000) / 10 : 0,
-  }));
-
-  table.sort((a, b) =>
-    b.points - a.points || b.goalDiff - a.goalDiff || b.goalsFor - a.goalsFor || a.team.localeCompare(b.team)
-  );
-  return table;
-}
-
-export default function StandingsTab({ rows }) {
+export default function StandingsTab({ season, seasons, onChangeSeason, rows }) {
   const [referee, setReferee] = useState();
 
   // times e arbitros vem do heatmap DESSA temporada, nao da lista global de
@@ -49,18 +15,25 @@ export default function StandingsTab({ rows }) {
 
   const table = useMemo(() => aggregateStandings(rows, teams, referee), [rows, teams, referee]);
 
-  return (
-    <div className="chart-box">
-      <h2>Tabela de Classificacao</h2>
-      <p className="hint">
-        Pontos = vitoria x3 + empate x1 (regra oficial), no recorte de
-        arbitro escolhido (ou de todos, se nenhum arbitro for selecionado).
-        Time sem jogo nesse recorte aparece zerado, no fim da tabela.
-      </p>
+  const games = table.map((t) => t.n).filter((n) => n > 0);
+  const roundRange = games.length
+    ? (Math.min(...games) === Math.max(...games) ? `${Math.max(...games)}` : `${Math.min(...games)}–${Math.max(...games)}`)
+    : "0";
 
-      <div className="metric-picker">
+  return (
+    <div className="screen">
+      <ScreenHeader
+        title="Classificação"
+        subtitle={`Série A ${season} · ${table.length} clubes`}
+        statusLabel={games.length ? `Jogos por clube variam ${roundRange}` : undefined}
+        season={season}
+        seasons={seasons}
+        onChangeSeason={onChangeSeason}
+      />
+
+      <div className="referee-filter-row">
         <label>
-          Arbitro
+          Árbitro
           <select value={referee || ""} onChange={(e) => setReferee(e.target.value || undefined)}>
             <option value="">Todos</option>
             {referees.map((r) => (
@@ -70,42 +43,80 @@ export default function StandingsTab({ rows }) {
         </label>
       </div>
 
-      <div className="heatmap-wrap">
-        <table className="standings">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th className="col-team">Time</th>
-              <th>Pontos</th>
-              <th>Jogos</th>
-              <th>Cartoes amarelos</th>
-              <th>Cartoes vermelhos</th>
-              <th>Vitorias</th>
-              <th>Empates</th>
-              <th>Derrotas</th>
-              <th>Aproveitamento</th>
-              <th>Saldo de gols</th>
-            </tr>
-          </thead>
-          <tbody>
-            {table.map((t, i) => (
-              <tr key={t.team} className={t.n === 0 ? "no-data-row" : undefined}>
-                <td>{i + 1}</td>
-                <td className="col-team">{t.team}</td>
-                <td className="col-strong">{t.points}</td>
-                <td>{t.n}</td>
-                <td>{t.yellow}</td>
-                <td>{t.red}</td>
-                <td>{t.wins}</td>
-                <td>{t.draws}</td>
-                <td>{t.losses}</td>
-                <td>{t.winRatePct}%</td>
-                <td>{t.goalDiff > 0 ? `+${t.goalDiff}` : t.goalDiff}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="zones-row">
+        <div className="zones-label">ZONAS</div>
+        <div className="zones-legend">
+          {ZONES.map((z) => (
+            <div key={z.key} className="zone-chip" style={{ background: z.bg }}>
+              <span className="zone-dot" style={{ background: z.color }} />
+              <span style={{ color: z.text }}>{z.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
+
+      <div className="standings-table-wrap">
+        <div className="standings-header-row">
+          <div>#</div>
+          <div>Clube</div>
+          <div className="num">Pts</div>
+          <div className="num">J</div>
+          <div className="num">V</div>
+          <div className="num">E</div>
+          <div className="num">D</div>
+          <div className="num">GP</div>
+          <div className="num">GC</div>
+          <div className="num">SG</div>
+          <div className="num">CA</div>
+          <div className="num">CV</div>
+          <div className="num">Forma</div>
+        </div>
+        {table.map((t, i) => {
+          const pos = i + 1;
+          const crest = crestFor(t.team, i);
+          const noData = t.n === 0;
+          return (
+            <div
+              key={t.team}
+              className="standings-row"
+              style={{ borderLeftColor: zoneColorForPosition(pos), opacity: noData ? 0.55 : 1 }}
+            >
+              <div className="mono-strong">{pos}</div>
+              <div className="standings-club">
+                <span className="crest" style={{ background: crest.background }}>{crest.initials}</span>
+                <span title={t.team} className="truncate">{displayClubName(t.team)}</span>
+              </div>
+              {noData ? (
+                <>
+                  <div className="num">—</div><div className="num">—</div><div className="num">—</div>
+                  <div className="num">—</div><div className="num">—</div><div className="num">—</div>
+                  <div className="num">—</div><div className="num">—</div><div className="num">—</div>
+                  <div className="num">—</div>
+                </>
+              ) : (
+                <>
+                  <div className="num mono-strong">{t.points}</div>
+                  <div className="num mono">{t.n}</div>
+                  <div className="num mono positive">{t.wins}</div>
+                  <div className="num mono">{t.draws}</div>
+                  <div className="num mono negative">{t.losses}</div>
+                  <div className="num mono">{t.goalsFor}</div>
+                  <div className="num mono">{t.goalsAgainst}</div>
+                  <div className="num mono" style={{ color: t.goalDiff >= 0 ? "var(--positive)" : "var(--negative)" }}>
+                    {t.goalDiff > 0 ? `+${t.goalDiff}` : t.goalDiff}
+                  </div>
+                  <div className="num mono amber">{t.yellow}</div>
+                  <div className="num mono negative">{t.red}</div>
+                </>
+              )}
+              <div className="forma-dots">
+                {Array.from({ length: 5 }).map((_, d) => <span key={d} className="forma-dot" />)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <p className="hint">Coluna Forma pendente de integração (histórico jogo a jogo). Clube sem jogo no recorte aparece com "—" e opacidade reduzida.</p>
     </div>
   );
 }

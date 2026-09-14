@@ -96,6 +96,80 @@ def test_dashboard_falls_back_to_mock_when_season_has_no_real_data(db_session):
     assert res.json()["kpis"]["games"] > 0
 
 
+def test_season_overview_kpis_and_referee_rankings(db_session):
+    """Design handoff 2026-09-14 (Dashboard novo): KPIs de temporada +
+    ranking de arbitro por cartao/jogo e vies de mandante. Cenario: 8 jogos
+    (piso REFEREE_SAMPLE_FLOOR), mandante sempre leva 1 amarelo, visitante
+    sempre leva 3 -- vies de mandante tem que sair negativo (visitante leva
+    mais), cardsPerGame = 4.0 exato."""
+    home = Team(api_id=101, name="Time Mandante")
+    away = Team(api_id=102, name="Time Visitante")
+    ref = Referee(name="Arbitro Oito Jogos")
+    db_session.add_all([home, away, ref])
+    db_session.flush()
+
+    for i in range(8):
+        fx = Fixture(
+            source="cbf", api_id=9000 + i, season=SEASON, round=f"Regular Season - {i + 1}",
+            date="2023-01-01", home_team_id=home.id, away_team_id=away.id,
+            referee_id=ref.id, home_score=2, away_score=1, events_ingested=True,
+        )
+        db_session.add(fx)
+        db_session.flush()
+        db_session.add(MatchEvent(fixture_id=fx.id, team_id=home.id, type="YELLOW_CARD"))
+        for _ in range(3):
+            db_session.add(MatchEvent(fixture_id=fx.id, team_id=away.id, type="YELLOW_CARD"))
+    db_session.commit()
+
+    res = client.get("/season-overview", params={"season": SEASON})
+    assert res.status_code == 200
+    body = res.json()
+
+    assert body["gamesPlayed"] == 8
+    assert body["homeWinPct"] == 100.0  # mandante venceu os 8 (2x1)
+    assert body["goalsPerGame"] == 3.0  # (2+1) por jogo
+    assert body["cardsPerGame"] == 4.0  # (1+3) por jogo
+
+    assert len(body["mostCardsReferees"]) == 1
+    top = body["mostCardsReferees"][0]
+    assert top["name"] == "Arbitro Oito Jogos"
+    assert top["games"] == 8
+    assert top["cardsPerGame"] == 4.0
+    assert top["barPct"] == 100.0  # unico da lista, normalizado no proprio maximo
+
+    assert len(body["homeBiasReferees"]) == 1
+    bias = body["homeBiasReferees"][0]
+    assert bias["name"] == "Arbitro Oito Jogos"
+    assert bias["bias"] == -2.0  # mandante 1 cartao, visitante 3 -> 1-3
+
+    # allReferees: lista completa (tela Arbitros), nao so o top 5/4
+    assert len(body["allReferees"]) == 1
+    assert body["allReferees"][0]["cardsPerGame"] == 4.0
+    assert body["allReferees"][0]["bias"] == -2.0
+
+
+def test_season_overview_excludes_referee_below_sample_floor(db_session):
+    home = Team(api_id=103, name="Time C")
+    away = Team(api_id=104, name="Time D")
+    ref = Referee(name="Arbitro Poucos Jogos")
+    db_session.add_all([home, away, ref])
+    db_session.flush()
+
+    for i in range(3):  # abaixo do piso de 8
+        db_session.add(Fixture(
+            source="cbf", api_id=9100 + i, season=SEASON, round=f"Regular Season - {i + 1}",
+            date="2023-02-01", home_team_id=home.id, away_team_id=away.id,
+            referee_id=ref.id, home_score=1, away_score=0, events_ingested=True,
+        ))
+    db_session.commit()
+
+    body = client.get("/season-overview", params={"season": SEASON}).json()
+    names = [r["name"] for r in body["mostCardsReferees"]] + [r["name"] for r in body["homeBiasReferees"]]
+    names += [r["name"] for r in body["allReferees"]]
+    assert "Arbitro Poucos Jogos" not in names
+    assert body["gamesPlayed"] == 3  # conta pro KPI de temporada mesmo assim
+
+
 def test_filters_include_real_teams_once_ingested(db_session):
     _seed_favoritism_scenario(db_session)
     res = client.get("/filters")

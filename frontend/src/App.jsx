@@ -105,9 +105,7 @@ export default function App() {
           {activeTab === "matrix" && (
             <MatrixTab rows={dashboard.heatmap} onSelect={selectFromMatrix} />
           )}
-          {activeTab === "standings" && (
-            <StandingsTab rows={dashboard.heatmap} teams={options.teams} referees={options.referees} />
-          )}
+          {activeTab === "standings" && <StandingsTab rows={dashboard.heatmap} />}
         </div>
       )}
     </div>

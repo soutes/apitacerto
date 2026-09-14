@@ -37,8 +37,14 @@ function aggregateStandings(rows, teams, referee) {
   return table;
 }
 
-export default function StandingsTab({ rows, teams, referees }) {
+export default function StandingsTab({ rows }) {
   const [referee, setReferee] = useState();
+
+  // times e arbitros vem do heatmap DESSA temporada, nao da lista global de
+  // filtros -- os 20 clubes da Serie A mudam a cada ano (acesso/queda), lista
+  // global misturava clube que so jogou em outra temporada (bug reportado).
+  const teams = useMemo(() => [...new Set(rows.map((r) => r.team))].sort(), [rows]);
+  const referees = useMemo(() => [...new Set(rows.map((r) => r.referee))].sort(), [rows]);
 
   const table = useMemo(() => aggregateStandings(rows, teams, referee), [rows, teams, referee]);
 

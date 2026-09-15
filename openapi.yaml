@@ -4,8 +4,9 @@ info:
   version: "1.0"
   description: >
     Backend do dashboard ApitaCerto. Serve dados agregados do Brasileirao
-    Serie A (2022-2024) segmentados por time e arbitro, incluindo o Indice
-    de Favorecimento (ver _docs/specs.md secao 6).
+    Serie A (2018 em diante) segmentados por time e arbitro, incluindo o
+    Indice de Favorecimento (ver _docs/specs.md secao 6) e a aba Dados
+    estatisticos (secao 9).
 
 servers:
   - url: http://localhost:8000
@@ -73,7 +74,7 @@ paths:
           required: true
           schema:
             type: integer
-            enum: [2022, 2023, 2024, 2025, 2026]
+            minimum: 2018
       responses:
         "200":
           description: OK
@@ -81,6 +82,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SeasonOverview"
+
+  /statistics:
+    get:
+      summary: >-
+        Aba Dados estatisticos (spec secao 9): relatorio pre-calculado offline
+        por scripts/compute_stats.py e so lido aqui. Season omitido = todas
+        as temporadas juntas.
+      operationId: getStatistics
+      parameters:
+        - name: season
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 2018
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatisticsReport"
+        "404":
+          description: Relatorio ainda nao calculado para esse recorte
 
   /dashboard:
     get:
@@ -92,7 +117,7 @@ paths:
           required: true
           schema:
             type: integer
-            enum: [2022, 2023, 2024, 2025, 2026]
+            minimum: 2018
         - name: team
           in: query
           required: false
@@ -221,6 +246,71 @@ components:
           format: date-time
           nullable: true
           description: "ISO 8601 UTC da ultima rodada de scraping processada pra essa temporada; null se isReal=false"
+
+    EvidenceLevel:
+      type: string
+      enum: [forte, fraco, acaso, "sem comparação"]
+      description: >-
+        forte = q <= 0,10 (Benjamini-Hochberg); fraco = p < 0,01 sem
+        sobreviver a correcao; acaso = resto (spec 9.2)
+
+    PairTest:
+      type: object
+      required: [team, referee, n, z, p, q, level]
+      properties:
+        team: { type: string }
+        referee: { type: string }
+        n: { type: integer, description: "jogos do par no recorte" }
+        observed: { type: number }
+        expected: { type: number }
+        ratio: { type: number, nullable: true, description: "observado / esperado (so contagens)" }
+        perGame: { type: number, description: "(observado - esperado) por jogo" }
+        easeWithReferee: { type: number, description: "so em ease: xPts medio dos jogos com o arbitro" }
+        easeTeam: { type: number, description: "so em ease: xPts medio esperado sob sorteio" }
+        sameCategory: { type: object, description: "so em ease: mesmo teste contra arbitros da mesma categoria" }
+        z: { type: number }
+        p: { type: number }
+        q: { type: number }
+        level: { $ref: "#/components/schemas/EvidenceLevel" }
+
+    PairAnalysis:
+      type: object
+      required: [floor, points, funnel, summary]
+      properties:
+        floor: { type: integer, description: "piso de jogos pra entrar no teste" }
+        points:
+          type: array
+          items: { $ref: "#/components/schemas/PairTest" }
+        funnel:
+          type: array
+          description: "linhas do grafico de funil (x, lo95, hi95, lo998, hi998)"
+          items: { type: object }
+        summary: { type: object, description: "testados, fortes, fracos, esperado por acaso" }
+
+    StatisticsReport:
+      type: object
+      required: [key, seasons, methodVersion, overview, pairs, escala, league, crossSeason, hypotheses, computedAt]
+      properties:
+        key: { type: string, description: "temporada ou 'all'" }
+        season: { type: integer, nullable: true }
+        seasons: { type: array, items: { type: integer } }
+        partialSeasons: { type: array, items: { type: integer }, description: "temporadas em andamento no recorte" }
+        methodVersion: { type: integer }
+        computedAt: { type: string, format: date-time }
+        dataVersion: { type: string }
+        overview: { type: object }
+        refereeStrictness: { type: object, description: "L2 -- rigor ajustado com encolhimento e vies de mandante vs liga" }
+        pairs:
+          type: object
+          properties:
+            cards: { $ref: "#/components/schemas/PairAnalysis" }
+            rivalCards: { $ref: "#/components/schemas/PairAnalysis" }
+            points: { $ref: "#/components/schemas/PairAnalysis" }
+            ease: { $ref: "#/components/schemas/PairAnalysis" }
+        escala: { type: object, description: "E1 federacao, E2 categoria x importancia, E3 concentracao" }
+        league: { type: object, description: "L1 -- mandante vs visitante por temporada" }
+        crossSeason: { type: object, description: "A5 -- mesmo par em temporadas diferentes" }
+        hypotheses: { type: array, items: { type: object }, description: "H1-H4 pre-registradas" }
 
     DashboardResponse:
       type: object

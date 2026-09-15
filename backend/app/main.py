@@ -1,17 +1,20 @@
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app import mock_store, queries
-from app.db import Base, engine, get_db
+from app.db import ensure_schema, get_db
+from app.models import StatReport
+
+MIN_SEASON = 2018  # primeira temporada com competitionId conhecido (cbf_scraper.COMPETITION_IDS)
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    ensure_schema()
     yield
 
 
@@ -54,7 +57,7 @@ def get_favoritism(season: Optional[int] = None, db: Session = Depends(get_db)):
 
 
 @app.get("/season-overview")
-def get_season_overview(season: int = Query(..., ge=2022, le=2026), db: Session = Depends(get_db)):
+def get_season_overview(season: int = Query(..., ge=MIN_SEASON, le=2100), db: Session = Depends(get_db)):
     # KPIs de temporada + rankings de arbitro (mais cartao, vies de mandante)
     # pra tela Dashboard do redesign (design_handoff 2026-09-14). Sem dado
     # real ainda pra essa temporada -> tudo zerado, nao inventa ranking.
@@ -67,9 +70,22 @@ def get_season_overview(season: int = Query(..., ge=2022, le=2026), db: Session 
     }
 
 
+@app.get("/statistics")
+def get_statistics(season: Optional[int] = None, db: Session = Depends(get_db)):
+    # aba Dados estatisticos (spec secao 9): so LE o JSON que
+    # scripts/compute_stats.py calculou offline. Importar app.analysis aqui
+    # levaria numpy/statsmodels pro pacote da funcao serverless (spec 9.6).
+    key = str(season) if season is not None else "all"
+    report = db.get(StatReport, key)
+    if report is None:
+        raise HTTPException(status_code=404,
+                            detail="Estatísticas ainda não calculadas para esse recorte (rode scripts/compute_stats.py)")
+    return {**report.payload, "computedAt": report.computed_at, "dataVersion": report.data_version}
+
+
 @app.get("/dashboard")
 def get_dashboard(
-    season: int = Query(..., ge=2022, le=2026),
+    season: int = Query(..., ge=MIN_SEASON, le=2100),
     team: Optional[str] = None,
     referee: Optional[str] = None,
     db: Session = Depends(get_db),

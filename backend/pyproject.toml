@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.141.1",
     "httpx>=0.28.1",
+    "psycopg[binary]>=3.3.5",
     "python-dotenv>=1.2.3",
     "sqlalchemy>=2.0.52",
     "truststore>=0.10.4",
@@ -14,7 +15,17 @@ dependencies = [
 ]
 
 [dependency-groups]
+analysis = [
+    "numpy>=2.5.3",
+    "pandas>=3.0.5",
+    "scipy>=1.18.1",
+    "statsmodels>=0.15.0",
+]
+# analysis fica dentro do dev: `uv run` local traz tudo; deploy na Vercel
+# instala sem o dev, entao numpy/scipy/pandas/statsmodels nao entram no
+# pacote da funcao (a API so le JSON pronto -- spec 9.6).
 dev = [
+    {include-group = "analysis"},
     "httpx>=0.28.1",
     "pytest>=9.1.1",
 ]

@@ -21,43 +21,48 @@ from sqlalchemy.orm import Session
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # backend/ no path
 
 from app.cbf_scraper import COMPETITION_IDS, scrape_season  # noqa: E402
-from app.db import Base, SessionLocal, engine  # noqa: E402
+from app.db import SessionLocal, ensure_schema  # noqa: E402
 from app.models import Fixture, IngestionLog, MatchEvent, Referee, Team  # noqa: E402
 
 SOURCE = "cbf"
 
 
-def _get_or_create_team(db: Session, cbf_id: int, name: str) -> Team:
+def _get_or_create_team(db: Session, cbf_id: int, name: str, state: str | None = None) -> Team:
     # o mesmo clube pode ter cod_time diferente entre temporadas na CBF
     # (ex.: Atletico Mineiro em 2022 vs 2024) -- nome e a identidade estavel,
     # api_id so serve pra resolver o time de um evento dentro da MESMA
     # partida (sempre e o mandante ou o visitante daquele jogo).
     team = db.scalar(select(Team).where(Team.name == name))
-    if team:
-        return team
-    team = db.scalar(select(Team).where(Team.api_id == cbf_id))
-    if team:
-        return team
-    team = Team(api_id=cbf_id, name=name)
-    db.add(team)
+    if not team:
+        team = db.scalar(select(Team).where(Team.api_id == cbf_id))
+        if team:
+            # alias novo em TEAM_NAME_ALIASES ("Csa" -> "CSA"): nenhum clube tem
+            # o nome canonico ainda, entao renomeia o registro antigo
+            team.name = name
+    if not team:
+        team = Team(api_id=cbf_id, name=name)
+        db.add(team)
+    if state:  # jogo sem evento do clube nao traz UF -- mantem a que ja tinha
+        team.state = state
     db.flush()
     return team
 
 
-def _get_or_create_referee(db: Session, cbf_id: int, name: str) -> Referee:
-    referee = db.scalar(select(Referee).where(Referee.name == name))
-    if referee:
-        return referee
-    referee = db.scalar(select(Referee).where(Referee.cbf_id == cbf_id))
-    if referee:
-        return referee
-    referee = Referee(cbf_id=cbf_id, name=name)
-    db.add(referee)
+def _get_or_create_referee(db: Session, staff: dict) -> Referee:
+    referee = db.scalar(select(Referee).where(Referee.name == staff["name"]))
+    if not referee:
+        referee = db.scalar(select(Referee).where(Referee.cbf_id == staff["cbf_id"]))
+    if not referee:
+        referee = Referee(cbf_id=staff["cbf_id"], name=staff["name"])
+        db.add(referee)
+    if staff.get("uf"):
+        referee.uf = staff["uf"]
     db.flush()
     return referee
 
 
-def _upsert_fixture(db: Session, match: dict, home: Team, away: Team, referee: Referee | None) -> Fixture:
+def _upsert_fixture(db: Session, match: dict, home: Team, away: Team,
+                    referee: Referee | None, var_referee: Referee | None) -> Fixture:
     fixture = db.scalar(
         select(Fixture).where(Fixture.source == SOURCE, Fixture.api_id == match["cbf_id"])
     )
@@ -71,6 +76,9 @@ def _upsert_fixture(db: Session, match: dict, home: Team, away: Team, referee: R
     fixture.home_team_id = home.id
     fixture.away_team_id = away.id
     fixture.referee_id = referee.id if referee else None
+    fixture.referee_category = (match["referee"] or {}).get("category")
+    fixture.var_referee_id = var_referee.id if var_referee else None
+    fixture.var_category = (match.get("var_referee") or {}).get("category")
     fixture.home_score = match["home_score"]
     fixture.away_score = match["away_score"]
     fixture.venue_stadium = match["venue_stadium"]
@@ -96,20 +104,21 @@ def _replace_events(db: Session, fixture: Fixture, match: dict, home: Team, away
             continue  # nao deveria acontecer -- time do evento sempre e mandante ou visitante
         db.add(MatchEvent(
             fixture_id=fixture.id, team_id=team_id,
-            player_name=ev["player_name"], minute=ev["minute"],
+            player_name=ev["player_name"], minute=ev["minute"], period=ev.get("period"),
             type=ev["type"], detail=ev["detail"],
         ))
 
 
 def ingest_matches(db: Session, matches: list[dict]) -> None:
     for match in matches:
-        home = _get_or_create_team(db, match["home_team"]["cbf_id"], match["home_team"]["name"])
-        away = _get_or_create_team(db, match["away_team"]["cbf_id"], match["away_team"]["name"])
-        referee = None
-        if match["referee"]:
-            referee = _get_or_create_referee(db, match["referee"]["cbf_id"], match["referee"]["name"])
+        home = _get_or_create_team(db, match["home_team"]["cbf_id"], match["home_team"]["name"],
+                                   match["home_team"].get("state"))
+        away = _get_or_create_team(db, match["away_team"]["cbf_id"], match["away_team"]["name"],
+                                   match["away_team"].get("state"))
+        referee = _get_or_create_referee(db, match["referee"]) if match["referee"] else None
+        var_referee = _get_or_create_referee(db, match["var_referee"]) if match.get("var_referee") else None
 
-        fixture = _upsert_fixture(db, match, home, away, referee)
+        fixture = _upsert_fixture(db, match, home, away, referee, var_referee)
         _replace_events(db, fixture, match, home, away)
     db.commit()
 
@@ -121,9 +130,11 @@ def main():
     parser.add_argument("--start-round", type=int, default=1)
     parser.add_argument("--end-round", type=int, default=38)
     parser.add_argument("--delay", type=float, default=1.0, help="segundos entre requests")
+    parser.add_argument("--no-stats", dest="stats", action="store_false",
+                        help="nao recalcular a aba Dados estatisticos ao final")
     args = parser.parse_args()
 
-    Base.metadata.create_all(engine)
+    ensure_schema()
 
     with SessionLocal() as db:
         for season in args.season:
@@ -149,6 +160,23 @@ def main():
                 db.commit()
                 print(f"  rodada {round_num}: {len(matches)} partidas gravadas")
             print(f"season {season}: {total_matches} partidas, {total_events} eventos (gol+cartao)")
+
+    if args.stats:
+        _recompute_stats()
+
+
+def _recompute_stats() -> None:
+    # calculo pesado fica fora da API (spec 9.6); aqui e o lugar natural de
+    # rodar, logo depois de dado novo entrar -- inclusive no cron semanal
+    try:
+        from app.analysis.report import compute_and_store
+    except ImportError:
+        print("[aviso] grupo 'analysis' nao instalado -- aba Dados estatisticos nao recalculada "
+              "(rode scripts/compute_stats.py onde ele estiver)")
+        return
+    with SessionLocal() as db:
+        keys = compute_and_store(db)
+    print(f"estatisticas recalculadas: {', '.join(keys)}")
 
 
 if __name__ == "__main__":

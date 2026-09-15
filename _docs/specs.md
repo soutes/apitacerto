@@ -520,3 +520,53 @@ campo, estilo/força do clube na temporada, adversário e rigor do árbitro.
   da torcida fica para depois.
 - Troca das abas antigas (Favorecimento/Dashboard) pelo método novo —
   depende da validação do usuário.
+
+### 9.8 Emendas (datadas)
+
+- **2026-09-14, antes de rodar o código de produção**: H1 tem 4 medidas
+  (cartões e pontos × árbitro da região do clube / do adversário) — o
+  veredito usa Bonferroni dentro da hipótese (α = 0,0125 por medida). H3 fica
+  sem o termo principal `fifa` (colinear com o efeito de cada árbitro); só
+  a interação mandante × FIFA entra.
+- **2026-09-14, dado de 2018**: a CBF não publica a escala de árbitro das
+  rodadas 1–32 de 2018 (o JSON vem com `arbitros: []`; só a súmula em PDF
+  tem). 2018 entra inteiro no que não depende do árbitro (linha de base, H2,
+  H4) e com só 60 jogos no que depende. VAR aparece em 0 jogos de 2018 e em
+  todos de 2019 — bate com a adoção do VAR na Série A em 2019.
+- **2026-09-14, esperado dos pares (A1–A3)**: o teste com cenário
+  sintético mostrou que ajustar o esperado com os jogos do próprio par
+  apaga o sinal (par plantado com 2,8× os cartões saiu com z = 2,7) e cria
+  resíduo espelhado em pares inocentes — o excesso vira "rigor geral" do
+  árbitro e "estilo" do clube. Correção, antes de rodar em dado real: o
+  esperado de cada par vem de um ajuste **sem os jogos do par** (jackknife),
+  a variância inclui a incerteza desse esperado (método delta nos pontos) e
+  pares com sinal forte saem da régua dos demais até o conjunto estabilizar
+  (busca progressiva, Atkinson & Riani, 2000). A primeira versão disso ainda
+  gerava falso sinal em cascata no cenário sintético: tirar pares da régua
+  deixava árbitro com 2–3 jogos restantes e rigor extremo. Correção: o
+  efeito de cada árbitro entra encolhido para a média (efeito aleatório via
+  Bayes empírico; a força do encolhimento é a variação real entre árbitros
+  na temporada) — árbitro sem nenhum outro jogo vira o "árbitro médio", com
+  a variância entre árbitros como incerteza.
+- **2026-09-15, calibração — antes de rodar em dado real**: ligas simuladas
+  **sem nenhum efeito** (nulo global; 8 e 20 clubes; começo, meio e fim de
+  temporada — `backend/scripts/calibrate_stats.py`). Problemas achados e
+  corrigidos, em ordem: (1) liga pequena / começo de temporada explodia
+  numericamente (clube sem cartão nos jogos restantes → coeficiente −∞) →
+  prior fraca (DP 1 na escala log) nos efeitos de clube e adversário, todos
+  centrados na média; (2) a interação de um par sinalizado entrava na
+  previsão do próprio par (variância 511 em vez de 33) → removida; (3) a
+  aproximação normal de contagem pequena gerava "sinal forte" falso em até
+  33% das ligas → teste exato de Poisson / binomial negativa para cartões e
+  distribuição exata da soma de pontos (convolução jogo a jogo), com p exato
+  convencional (não mid-p — conservador de propósito). Resultado final, ligas
+  com algum "sinal forte" falso (cartões / adversário / pontos / escala):
+  tamanho real 0/16, 1/16, 0/16, 0/16; meio de temporada 3/30, 3/30, 1/30,
+  2/30; começo 1/20, 0/20, 3/20, 3/20 — dentro dos ~10% prometidos pela
+  régua (BH q ≤ 0,10 sob nulo global); cauda |z| > 3 ≤ 0,31% (normal: 0,27%).
+  Os efeitos plantados (árbitro 2,6× mais duro com um clube; árbitro sempre
+  nos jogos fáceis de outro) continuam sendo achados (`tests/test_analysis.py`).
+- **2026-09-14, nomes de clube**: 2018–2021 vinham com razão social ou sem
+  acento ("America", "Botafogo de Futebol E Regatas", "Cruzeiro Esporte
+  Clube", "Esporte Clube Bahia", "Csa", "Parana") e viravam clubes
+  duplicados — mapeados em `TEAM_NAME_ALIASES`.

@@ -10,7 +10,7 @@ repo root) — separate stack, separate deps, separate AGENTS.md.
 - Frontend: `cd frontend && npm run dev` — http://localhost:5173
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
 - Tests: `cd backend && uv run pytest`
-- Ingest (primary, CBF scraper, no daily limit): `cd backend && uv run python scripts/scrape_cbf.py --season 2022 --season 2023 --season 2024 --season 2025 --season 2026`
+- Ingest (primary, CBF scraper, no daily limit): `cd backend && uv run python scripts/scrape_cbf.py --season 2018 --season 2019 --season 2020 --season 2021 --season 2022 --season 2023 --season 2024 --season 2025 --season 2026`
 - Ingest (fallback, API-Football, rate-limited): `cd backend && uv run python scripts/ingest.py --max-requests 90`
 
 ## Rules
@@ -25,4 +25,10 @@ repo root) — separate stack, separate deps, separate AGENTS.md.
 - `API_FOOTBALL_KEY` comes from the environment only. Never commit it, never
   hardcode it.
 - Keep the backend database-agnostic (SQLAlchemy), per HW2 Question 7.
-- Do not add dependencies without asking.
+  Deploy target is Vercel (Python functions) + Neon (Postgres).
+- Dependencies are fine as long as they run on that target. Heavy analysis
+  libraries (numpy/scipy/pandas/statsmodels) live in the `analysis`
+  dependency group and are imported only by offline scripts
+  (`scripts/compute_stats.py`), never by the request path — the API only
+  reads precomputed JSON from `stat_reports`, keeping the serverless bundle
+  small.

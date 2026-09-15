@@ -55,6 +55,12 @@ GOAL_DETAIL_MAP = {
     "FT": "falta",
 }
 
+# "tempo_jogo" da CBF: gol usa "1"/"2"; cartao usa TN1/TN2 (tempo normal),
+# AC1/AC2 (acrescimo), INT (intervalo) e PJ (pos-jogo).
+PERIOD_MAP = {"1": "1T", "TN1": "1T", "2": "2T", "TN2": "2T",
+              "AC1": "AC1", "AC2": "AC2", "INT": "INT", "PJ": "PJ"}
+PERIOD_OFFSET = {"1T": 0, "2T": 45, "AC1": 45, "AC2": 90, "INT": 45, "PJ": 90}
+
 # A CBF nao usa o mesmo nome pro mesmo clube em todas as temporadas (virou
 # SAF, ou o campo "nome" veio truncado num ano especifico) -- sem isso o
 # mesmo clube vira dois Team distintos entre temporadas. Achado inspecionando
@@ -65,6 +71,13 @@ TEAM_NAME_ALIASES = {
     "Vasco da Gama Saf": "Vasco da Gama",
     "Atlético Goianiense Saf": "Atlético Goianiense",
     "Fortaleza SAF": "Fortaleza Esporte Clube",  # 2025: virou SAF
+    # 2018-2021: a CBF mandava razao social completa ou nome sem acento
+    "America": "América",
+    "Botafogo de Futebol E Regatas": "Botafogo",
+    "Cruzeiro Esporte Clube": "Cruzeiro",
+    "Esporte Clube Bahia": "Bahia",
+    "Csa": "CSA",
+    "Parana": "Paraná",
 }
 
 
@@ -135,11 +148,45 @@ def _parse_date(data: str | None) -> str | None:
     return f"{y}-{mo}-{d}"
 
 
-def _main_referee(arbitros: list[dict]) -> dict | None:
+def _staff_member(arbitros: list[dict], funcao: str) -> dict | None:
     for a in arbitros or []:
-        if a.get("funcao") == "Arbitro":
+        if a.get("funcao") == funcao:
             return a
     return None
+
+
+def _main_referee(arbitros: list[dict]) -> dict | None:
+    return _staff_member(arbitros, "Arbitro")
+
+
+def _staff_dict(a: dict | None) -> dict | None:
+    if not a:
+        return None
+    return {"cbf_id": int(a["id"]), "name": a["nome"], "uf": a.get("uf"), "category": a.get("categoria")}
+
+
+def _club_state(clube: str | None) -> str | None:
+    """'Athletico Paranaense - PR' -> 'PR' (UF do clube, nao do estadio)."""
+    m = re.search(r"\s-\s([A-Z]{2})$", clube or "")
+    return m.group(1) if m else None
+
+
+def _parse_event_time(tempo_jogo: str | None, minutos: str | None) -> tuple[str | None, int | None]:
+    """(periodo, minuto absoluto). A CBF manda o minuto relativo a cada tempo
+    ("13:00" no 2o tempo = 58') e o acrescimo colado no 45 ("45:003:00" =
+    45+3); intervalo e pos-jogo vem "45:0000:00". Pegar so o primeiro numero
+    (como antes) fazia todo cartao de acrescimo/intervalo/pos-jogo virar 45."""
+    period = PERIOD_MAP.get(str(tempo_jogo)) if tempo_jogo is not None else None
+    if tempo_jogo is not None and period is None:
+        _warn_unknown("tempo_jogo", str(tempo_jogo))
+    nums = re.findall(r"\d+", minutos or "")
+    if not nums:
+        return period, None
+    if period in ("AC1", "AC2"):
+        return period, PERIOD_OFFSET[period] + (int(nums[1]) if len(nums) > 1 else 0)
+    if period in ("INT", "PJ"):
+        return period, PERIOD_OFFSET[period]
+    return period, PERIOD_OFFSET.get(period, 0) + int(nums[0])
 
 
 def parse_round(payload: dict, season: int) -> list[dict]:
@@ -155,15 +202,16 @@ def parse_round(payload: dict, season: int) -> list[dict]:
             mandante, visitante = jogo["mandante"], jogo["visitante"]
             stadium, city, state = _split_local(jogo.get("local"))
             referee = _main_referee(jogo.get("arbitros"))
+            var = _staff_member(jogo.get("arbitros"), "VAR")
 
             events = []
+            club_states: dict[int, str] = {}
             for p in jogo.get("penalidades") or []:
                 team_id = int(p["clube_id"]) if p.get("clube_id") is not None else None
-                minute = None
-                if p.get("minutos"):
-                    m = re.match(r"(\d+)", p["minutos"])
-                    if m:
-                        minute = int(m.group(1))
+                period, minute = _parse_event_time(p.get("tempo_jogo"), p.get("minutos"))
+                uf = _club_state(p.get("clube"))
+                if team_id is not None and uf:
+                    club_states[team_id] = uf
 
                 resultado = p.get("resultado")
                 if p["tipo"] == "GOL":
@@ -171,7 +219,7 @@ def parse_round(payload: dict, season: int) -> list[dict]:
                         _warn_unknown("GOL", resultado)
                     events.append({
                         "type": "GOAL", "team_cbf_id": team_id,
-                        "player_name": p.get("atleta_nome"), "minute": minute,
+                        "player_name": p.get("atleta_nome"), "minute": minute, "period": period,
                         "detail": GOAL_DETAIL_MAP.get(resultado, resultado),
                     })
                 elif p["tipo"] == "PENALIDADE":
@@ -179,7 +227,7 @@ def parse_round(payload: dict, season: int) -> list[dict]:
                     if card_type:
                         events.append({
                             "type": card_type, "team_cbf_id": team_id,
-                            "player_name": p.get("atleta_nome"), "minute": minute,
+                            "player_name": p.get("atleta_nome"), "minute": minute, "period": period,
                             "detail": resultado,
                         })
                     else:
@@ -194,13 +242,14 @@ def parse_round(payload: dict, season: int) -> list[dict]:
                 "season": season,
                 "round": jogo.get("rodada"),
                 "date": _parse_date(jogo.get("data")),
-                "home_team": {"cbf_id": int(mandante["id"]), "name": _canonical_team_name(mandante["nome"])},
-                "away_team": {"cbf_id": int(visitante["id"]), "name": _canonical_team_name(visitante["nome"])},
+                "home_team": {"cbf_id": int(mandante["id"]), "name": _canonical_team_name(mandante["nome"]),
+                              "state": club_states.get(int(mandante["id"]))},
+                "away_team": {"cbf_id": int(visitante["id"]), "name": _canonical_team_name(visitante["nome"]),
+                              "state": club_states.get(int(visitante["id"]))},
                 "home_score": int(mandante["gols"]) if mandante.get("gols") not in (None, "") else None,
                 "away_score": int(visitante["gols"]) if visitante.get("gols") not in (None, "") else None,
-                "referee": (
-                    {"cbf_id": int(referee["id"]), "name": referee["nome"]} if referee else None
-                ),
+                "referee": _staff_dict(referee),
+                "var_referee": _staff_dict(var),
                 "venue_stadium": stadium, "venue_city": city, "venue_state": state,
                 "events": events,
             })

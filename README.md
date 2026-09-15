@@ -2,67 +2,101 @@
 
 *English below.*
 
-Dashboard interativo do desempenho de times do Brasileirão Série A,
-segmentado por árbitro — gols, cartões, V/E/D, aproveitamento %, saldo de
-gols, classificação, e um **Índice de Favorecimento** pra sinalizar
-possível viés de arbitragem. Sem Power BI, sem Looker: frontend próprio
+Dashboard interativo do Brasileirão Série A segmentado por árbitro — gols,
+cartões, V/E/D, classificação — com uma aba de **dados estatísticos** que
+testa, com o método explicado embaixo de cada gráfico, se algum árbitro
+favorece ou persegue algum clube. Sem Power BI, sem Looker: frontend próprio
 (React) consumindo um backend próprio (FastAPI), dados persistidos em banco
-(SQLite via SQLAlchemy).
+(SQLAlchemy — SQLite local, Postgres/Neon em produção).
 
 Feito para o [HW2 do AI Dev Tools Zoomcamp](https://courses.datatalks.club/ai-dev-tools-2026/homework/hw2)
 — opção "Sports-league scoreboard".
 
 Ver spec completa em [`_docs/specs.md`](_docs/specs.md).
 
-## As 4 abas
+## Telas
 
-1. **Visão Geral** — escolha um time e/ou árbitro e veja KPIs (jogos, V/E/D,
-   aproveitamento, gols, cartões) e séries temporais desse recorte. Sem
-   filtro, não mostra nada (evita somar a liga toda em dobro).
-2. **Índice de Favorecimento** — heatmap time × árbitro. Slicer de
-   temporada próprio, com opção "Todos" (junta as temporadas pra ganhar
-   amostra nos pares com poucos jogos numa temporada só). Vermelho =
-   possível favorecimento, azul = possível prejuízo, cinza = amostra
-   insuficiente (menos de 5 jogos do par). Clique numa célula pra ver o
-   detalhe na Visão Geral.
-3. **Tabela Geral** — mesmo heatmap, com seletor de indicador (jogos,
-   cartões, V/E/D, aproveitamento, saldo de gols) e gradiente de cor.
-4. **Classificação** — tabela de pontos oficial (vitória×3 + empate×1),
-   com filtro de árbitro pra ver como cada clube se saiu especificamente
-   sob aquele árbitro.
+- **Dashboard** — visão da temporada: KPIs, prévia da classificação,
+  árbitros que mais punem.
+- **Classificação** — tabela oficial (vitória×3 + empate×1).
+- **Árbitros** — ranking por rigor (cartões/jogo) e viés de mandante.
+- **Clubes** — matriz clube × árbitro com seletor de indicador.
+- **Favorecimento** — matriz com o Índice de Favorecimento original
+  (spec seção 6). O diagnóstico de 14/09/2026 mostrou que esse índice não se
+  distingue do acaso; ele fica até a aba nova ser validada.
+- **Dados estatísticos** (nova) — ver abaixo.
 
-Metodologia do Índice de Favorecimento (fórmula, piso de amostra, limitações
-— não é prova de manipulação, é sinalização exploratória) está em
-[`_docs/specs.md`](_docs/specs.md) seção 6.
+Clicar numa célula das matrizes abre o detalhe do par (KPIs e séries).
+
+## Dados estatísticos — como funciona
+
+Tudo compara **observado com esperado**. O esperado de cada jogo considera
+mando, força e estilo de cada clube na temporada, adversário e rigor do
+árbitro (regressão de Poisson). Embaixo de cada gráfico, a tela explica como
+o dado foi construído, o método, quem criou e como ler.
+
+- **Árbitro × clube** — cartões ao clube ("implicância"), cartões ao
+  adversário, pontos acima do esperado e escala favorável ("o mesmo árbitro
+  nos jogos mais fáceis"). O esperado de cada par é calculado *sem os jogos
+  do próprio par* (jackknife), com teste exato (Poisson / binomial negativa;
+  distribuição exata da soma de pontos), correção de múltiplas comparações
+  (Benjamini-Hochberg) e gráfico de funil (Spiegelhalter).
+- **Repetição entre temporadas** — o mesmo árbitro favorece o mesmo clube em
+  anos diferentes?
+- **Escala da CBF** — regra de federação, árbitro FIFA × tamanho do jogo e
+  concentração árbitro × clube contra sorteios que respeitam as regras.
+- **Hipóteses pré-registradas** (H1–H4), fixadas em commit público antes do
+  código de análise existir ([`85e9b06`](https://github.com/soutes/apitacerto/commit/85e9b06)).
+
+**Calibração**: em ligas simuladas *sem* nenhum favorecimento, o "sinal
+forte" falso fica no nível que a régua promete (≤ ~10% das ligas), inclusive
+em começo de temporada — `backend/scripts/calibrate_stats.py`. Efeitos
+plantados de propósito são achados — `backend/tests/test_analysis.py`.
+
+**Achados em 15/09/2026** (2018–2026, 3.305 jogos): nenhum par árbitro ×
+clube com sinal forte; nenhum árbitro mais duro com o mesmo clube em mais de
+uma temporada; a vantagem do mandante em cartões quase some em 2020, jogado
+sem público (H2 apoiada, p = 0,018); a escala da CBF concentra alguns pares
+além do que as regras explicam — pergunta sobre a escala, não prova sobre o
+árbitro.
 
 ## Estrutura
 
 - `frontend/` — React + Vite + Recharts
-- `backend/` — FastAPI + uv + SQLAlchemy + SQLite
+- `backend/` — FastAPI + uv + SQLAlchemy (SQLite local; Postgres/Neon via
+  `DATABASE_URL=postgresql+psycopg://...`)
+  - `app/analysis/` — cálculo estatístico **offline** (numpy, scipy, pandas,
+    statsmodels). A API só lê o resultado pronto (tabela `stat_reports`), pra
+    função serverless da Vercel ficar leve.
 - `openapi.yaml` — contrato entre frontend e backend
 
 ## Rodando
 
 - Frontend: `cd frontend && npm run dev` — http://localhost:5173
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
-- Testes: `cd backend && uv run pytest` (21 passando)
+- Testes: `cd backend && uv run pytest` (46 passando)
+- Estatísticas: `cd backend && uv run python scripts/compute_stats.py`
+  (também roda sozinho ao fim do scraping)
+- Calibração: `cd backend && uv run python scripts/calibrate_stats.py`
 
 Frontend fala com o backend em `http://localhost:8000` (configurável via
 `VITE_BACKEND_URL`, ver `frontend/src/api.js`).
 
 ## Dados
 
-Cobertura: 2022-2026 (2026 é a temporada em andamento, atualizada rodada a
-rodada). Fonte primária: scraping da API JSON pública da CBF (sem limite
-diário — ver `_docs/specs.md` seção 3):
+Cobertura: 2018–2026 (2026 é a temporada em andamento). Fonte primária:
+scraping da API JSON pública da CBF (sem limite diário — ver
+`_docs/specs.md` seção 3):
 
 ```bash
 cd backend
-uv run python scripts/scrape_cbf.py --season 2022 --season 2023 --season 2024 --season 2025 --season 2026
+uv run python scripts/scrape_cbf.py --season 2018 --season 2019 --season 2020 --season 2021 --season 2022 --season 2023 --season 2024 --season 2025 --season 2026
 ```
 
-Leva poucos minutos pras 5 temporadas. Idempotente — roda de novo sem medo,
-só atualiza o que mudou.
+Grava placar, árbitro (com federação e categoria), VAR, gols e cartões com o
+tempo de jogo (1º/2º tempo, acréscimos, intervalo, pós-jogo). Idempotente —
+roda de novo sem medo. Limitação da fonte: em 2018 a CBF só publicou a escala
+de árbitro das rodadas 33–38.
 
 **Cron semanal**: scheduled task do Claude Code (`apitacerto-cbf-refresh`,
 toda terça 23:59 horário do Brasil) reprocessa só o ano atual
@@ -71,7 +105,7 @@ Só dispara com o app aberto — ver seção 3.1 do spec pra alternativa real
 (GitHub Actions / Task Scheduler) quando isso for pra produção.
 
 `GET /dashboard` retorna `dataCompleteness.lastUpdated` (data/hora da
-última rodada processada) — o dashboard mostra isso no banner do topo.
+última rodada processada) — o dashboard mostra isso no rodapé.
 
 Fonte secundária (fallback, caso a API da CBF pare de funcionar):
 API-Football, `uv run python scripts/ingest.py --max-requests 90` — precisa
@@ -84,65 +118,102 @@ mock determinístico (não quebra o dashboard enquanto a ingestão progride).
 
 # ApitaCerto (English)
 
-Interactive dashboard of Brasileirão Série A team performance, broken down
-by referee — goals, cards, W/D/L, win rate, goal difference, standings, and
-a **Favoritism Index** to flag possible referee bias. No Power BI, no
-Looker: a custom React frontend talking to a custom FastAPI backend, data
-persisted in a database (SQLite via SQLAlchemy).
+Interactive dashboard of Brasileirão Série A broken down by referee — goals,
+cards, W/D/L, standings — with a **statistics** tab that tests, with the
+method explained under every chart, whether any referee favors or targets any
+club. No Power BI, no Looker: a custom React frontend talking to a custom
+FastAPI backend, data persisted in a database (SQLAlchemy — SQLite locally,
+Postgres/Neon in production).
 
 Built for [HW2 of the AI Dev Tools Zoomcamp](https://courses.datatalks.club/ai-dev-tools-2026/homework/hw2)
 — "Sports-league scoreboard" option.
 
 Full spec in [`_docs/specs.md`](_docs/specs.md) (Portuguese).
 
-## The 4 tabs
+## Screens
 
-1. **Overview** — pick a team and/or referee to see KPIs (games, W/D/L,
-   win rate, goals, cards) and time series for that slice. With no filter,
-   it shows nothing (avoids double-counting the whole league).
-2. **Favoritism Index** — team × referee heatmap. Has its own season
-   picker, including an "All" option (pools every season to get enough
-   sample size for pairs that only played a handful of games in a single
-   year). Red = possible favoritism, blue = possible disadvantage, gray =
-   insufficient sample (fewer than 5 games for that pair). Click a cell to
-   jump to the Overview tab with that detail.
-3. **Full Table** — same heatmap, with a metric picker (games, cards,
-   W/D/L, win rate, goal difference) and a color gradient.
-4. **Standings** — official points table (win×3 + draw×1), with a referee
-   filter to see how each club fared specifically under that referee.
+- **Dashboard** — season overview: KPIs, standings preview, strictest
+  referees.
+- **Standings** — official table (win×3 + draw×1).
+- **Referees** — ranking by strictness (cards/game) and home bias.
+- **Clubs** — club × referee matrix with a metric picker.
+- **Favoritism** — matrix with the original Favoritism Index (spec section
+  6). The 2026-09-14 diagnosis showed this index is indistinguishable from
+  chance; it stays until the new tab is validated.
+- **Statistics** (new) — see below.
 
-The Favoritism Index methodology (formula, minimum-sample floor,
-limitations — this is an exploratory signal, not proof of manipulation) is
-documented in [`_docs/specs.md`](_docs/specs.md) section 6 (Portuguese).
+Clicking a matrix cell opens the pair detail (KPIs and time series).
+
+## Statistics — how it works
+
+Everything compares **observed with expected**. Each match's expected value
+accounts for home advantage, each club's strength and style that season, the
+opponent and the referee's strictness (Poisson regression). Under every
+chart, the screen explains how the data was built, the method, who created it
+and how to read it.
+
+- **Referee × club** — cards to the club ("targeting"), cards to the
+  opponent, points above expectation and favorable assignment ("the same
+  referee in the easiest games"). Each pair's expectation is computed
+  *without that pair's own games* (jackknife), with exact tests (Poisson /
+  negative binomial; exact distribution of summed points), multiple-testing
+  correction (Benjamini-Hochberg) and a funnel plot (Spiegelhalter).
+- **Repetition across seasons** — does the same referee favor the same club
+  in different years?
+- **CBF assignment** — home-federation rule, FIFA referees × match size, and
+  referee × club concentration against draws that respect the real rules.
+- **Pre-registered hypotheses** (H1–H4), fixed in a public commit before any
+  analysis code existed ([`85e9b06`](https://github.com/soutes/apitacerto/commit/85e9b06)).
+
+**Calibration**: on simulated leagues with *no* favoritism at all, false
+"strong signals" stay at the level the rule promises (≤ ~10% of leagues),
+early season included — `backend/scripts/calibrate_stats.py`. Deliberately
+planted effects are found — `backend/tests/test_analysis.py`.
+
+**Findings as of 2026-09-15** (2018–2026, 3,305 matches): no referee × club
+pair with a strong signal; no referee harsher on the same club in more than
+one season; home teams' card advantage nearly vanished in 2020, played
+behind closed doors (H2 supported, p = 0.018); CBF's assignment concentrates
+some pairs beyond what the rules explain — a question about assignment, not
+proof about the referee.
 
 ## Structure
 
 - `frontend/` — React + Vite + Recharts
-- `backend/` — FastAPI + uv + SQLAlchemy + SQLite
+- `backend/` — FastAPI + uv + SQLAlchemy (SQLite locally; Postgres/Neon via
+  `DATABASE_URL=postgresql+psycopg://...`)
+  - `app/analysis/` — **offline** statistics (numpy, scipy, pandas,
+    statsmodels). The API only reads the precomputed result (`stat_reports`
+    table), keeping the Vercel serverless function small.
 - `openapi.yaml` — contract between frontend and backend
 
 ## Running it
 
 - Frontend: `cd frontend && npm run dev` — http://localhost:5173
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
-- Tests: `cd backend && uv run pytest` (21 passing)
+- Tests: `cd backend && uv run pytest` (46 passing)
+- Statistics: `cd backend && uv run python scripts/compute_stats.py`
+  (also runs automatically at the end of scraping)
+- Calibration: `cd backend && uv run python scripts/calibrate_stats.py`
 
 The frontend talks to the backend at `http://localhost:8000` (configurable
 via `VITE_BACKEND_URL`, see `frontend/src/api.js`).
 
 ## Data
 
-Coverage: 2022-2026 (2026 is the current season, updated round by round).
-Primary source: scraping the CBF's public JSON API (no daily rate limit —
-see `_docs/specs.md` section 3, Portuguese):
+Coverage: 2018–2026 (2026 is the current season). Primary source: scraping
+the CBF's public JSON API (no daily rate limit — see `_docs/specs.md`
+section 3, Portuguese):
 
 ```bash
 cd backend
-uv run python scripts/scrape_cbf.py --season 2022 --season 2023 --season 2024 --season 2025 --season 2026
+uv run python scripts/scrape_cbf.py --season 2018 --season 2019 --season 2020 --season 2021 --season 2022 --season 2023 --season 2024 --season 2025 --season 2026
 ```
 
-Takes a few minutes for all 5 seasons. Idempotent — safe to re-run, it only
-updates what changed.
+Stores score, referee (with federation and category), VAR, goals and cards
+with the match period (1st/2nd half, stoppage time, half-time, post-match).
+Idempotent — safe to re-run. Source limitation: for 2018 the CBF only
+published the referee assignment for rounds 33–38.
 
 **Weekly cron**: a Claude Code scheduled task (`apitacerto-cbf-refresh`,
 every Tuesday 23:59 Brazil time) re-scrapes only the current year
@@ -152,7 +223,7 @@ for the real alternative (GitHub Actions / Task Scheduler) for a deployed
 setup.
 
 `GET /dashboard` returns `dataCompleteness.lastUpdated` (timestamp of the
-last round processed) — the dashboard shows this in the top banner.
+last round processed) — the dashboard shows it in the footer.
 
 Secondary source (fallback, in case the CBF endpoint stops working):
 API-Football, `uv run python scripts/ingest.py --max-requests 90` — needs

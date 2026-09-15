@@ -46,6 +46,17 @@ export async function getSeasonOverview({ season }) {
   return res.json();
 }
 
+// Aba Dados estatisticos: relatorio pre-calculado offline (backend so le).
+// season omitido = todas as temporadas. 404 = ainda nao calculado -> null.
+export async function getStatistics({ season } = {}) {
+  const params = new URLSearchParams();
+  if (season) params.set("season", season);
+  const res = await fetch(`${BACKEND_URL}/statistics?${params.toString()}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`statistics fetch failed: ${res.status}`);
+  return res.json();
+}
+
 export async function getDashboard({ season, team, referee }) {
   if (USE_MOCK) {
     await delay(150);

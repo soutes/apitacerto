@@ -6,6 +6,7 @@ import StandingsTab from "./components/StandingsTab";
 import OverviewTab from "./components/OverviewTab";
 import FavoritismTab from "./components/FavoritismTab";
 import MatrixTab from "./components/MatrixTab";
+import StatisticsTab from "./components/StatisticsTab";
 import ScreenHeader from "./components/ScreenHeader";
 import DataCompletenessBanner from "./components/DataCompletenessBanner";
 import "./App.css";
@@ -121,6 +122,17 @@ export default function App() {
                   showSeasonPicker={false}
                 />
                 <FavoritismTab seasons={options.seasons} onSelect={goToDetail} />
+              </div>
+            )}
+
+            {activeTab === "estatisticas" && (
+              <div className="screen">
+                <ScreenHeader
+                  title="Dados estatísticos"
+                  subtitle="Observado vs. esperado, com o método explicado embaixo de cada gráfico"
+                  showSeasonPicker={false}
+                />
+                <StatisticsTab seasons={options.seasons} defaultSeason={season} />
               </div>
             )}
 

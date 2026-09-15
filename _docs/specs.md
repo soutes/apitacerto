@@ -387,3 +387,136 @@ Ordem de construção (igual ao HW2):
   limitação real dele. Testado manualmente em 2026-09-14 (rodou de
   verdade, 21 testes passaram); o usuário deu feedback direto na sessão do
   cron pra só buscar o ano atual, já aplicado no `SKILL.md` da task.
+
+## 9. Aba "Dados estatísticos" — metodologia e pré-registro (2026-09-14)
+
+Esta seção foi escrita e commitada **antes** do código de análise existir,
+para que as hipóteses e os critérios de decisão fiquem fixados antes de
+qualquer resultado ser visto (pré-registro — Nosek et al., 2018, *PNAS*).
+Se algo mudar depois, a mudança entra como emenda datada, nunca como
+reescrita silenciosa.
+
+### 9.0 Por que existe
+
+Diagnóstico de 2026-09-14 no banco real (1.785 jogos, 2022–2026): o Índice
+de Favorecimento par a par (seção 6) não se distingue do acaso —
+confiabilidade split-half ~0,20; teste de permutação com 10 mil sorteios deu
+3 pares destacados contra 2,5 esperados por acaso (p=0,45); nenhum par
+sobrevive à correção de Benjamini-Hochberg em 6 medidas; os 10 pares mais
+extremos de 2022–24 caem para índice médio +0,02 em 2025–26. O teste
+funciona (detecta rigor do árbitro e força do clube, traços reais) — o que
+falta é amostra por par (mediana de 2 jogos). A aba nova mostra isso com
+honestidade; as abas antigas ficam intactas até o usuário validar a nova.
+
+### 9.1 Princípio: observado vs. esperado
+
+Toda análise compara o que aconteceu com o que se esperaria dado mando de
+campo, estilo/força do clube na temporada, adversário e rigor do árbitro.
+
+- Contagens (cartões, gols de pênalti): regressão de Poisson com efeitos
+  fixos (Poisson, 1837; modelos lineares generalizados, Nelder & Wedderburn,
+  1972), ajustada **por temporada**: `cartões ~ clube + adversário + árbitro
+  + mando`. Erro-padrão robusto agrupado por jogo (os dois lados de um jogo
+  não são independentes).
+- Resultado: pontos esperados (xPts) a partir de um modelo de gols
+  `gols ~ ataque(clube) + defesa(adversário) + mando` (Maher, 1982; Dixon &
+  Coles, 1997), convertido em P(vitória/empate/derrota).
+- "Todas as temporadas" = soma dos observado − esperado de cada temporada
+  (cada jogo comparado com o esperado da **sua** temporada).
+
+### 9.2 Níveis de evidência (fixados antes de rodar)
+
+- `z = (O − E) / √V` por par; `p` bicaudal.
+- `q` = Benjamini & Hochberg (1995), dentro de cada análise × recorte.
+- **Sinal forte**: q ≤ 0,10 (sobrevive à correção de múltiplas comparações).
+- **Sinal fraco — acompanhar**: p < 0,01 e q > 0,10.
+- **Compatível com o acaso**: todo o resto.
+- Piso de exibição: par com n ≥ 3 jogos na temporada; n ≥ 5 em "todas".
+- Cron semanal recalcula tudo toda semana → risco de "parar quando der
+  significativo" (Simmons, Nelson & Simonsohn, 2011). Regra: veredito de
+  hipótese só é oficial com a temporada encerrada; temporada em andamento
+  é marcada como parcial.
+
+### 9.3 Análises (exploratórias, sempre com correção)
+
+- **A1 — Rigor do árbitro com o clube ("implicância")**: cartões recebidos
+  pelo clube nos jogos daquele árbitro vs. esperado (já descontado o rigor
+  geral do árbitro e o estilo do clube).
+- **A2 — Cartões ao adversário**: cartões do adversário do clube nos jogos
+  daquele árbitro vs. esperado.
+- **A3 — Pontos acima do esperado**: pontos do clube com aquele árbitro vs.
+  xPts.
+- **A4 — Escala favorável ("jogos mais fáceis")**: facilidade de um jogo =
+  xPts do clube (adversário + mando). Compara a facilidade média dos jogos
+  do clube apitados por aquele árbitro com a média dos jogos do clube na
+  temporada. Nulo = escala sorteada sem reposição dentro de clube ×
+  temporada (correção de população finita — Cochran, 1977). Versão
+  adicional comparando só com árbitros da mesma categoria (a CBF escala
+  FIFA para jogo grande — seção 9.0).
+- **A5 — Repetição entre temporadas**: mesmo árbitro × mesmo clube em anos
+  diferentes. (a) correlação do z do par entre temporadas consecutivas;
+  (b) nº de pares com sinal na mesma direção (|z| ≥ 1,96) em ≥ 2
+  temporadas vs. o esperado por acaso (binomial). Expectativa declarada
+  pelo usuário: não aconteceu.
+- **L1 — Linha de base da liga**: por temporada, mandante vs. visitante em
+  cartões, gols de pênalti e resultado, com IC 95%.
+- **L2 — Rigor do árbitro**: cartões observados ÷ esperados, com
+  encolhimento empírico-bayesiano (Efron & Morris, 1975) e confiabilidade;
+  viés de mandante por árbitro medido **contra a média da liga**, não
+  contra zero.
+- **E1 — Regra de federação**: % de jogos com árbitro da UF de um dos
+  clubes vs. o esperado num sorteio.
+- **E2 — Categoria × importância do jogo**: participação de árbitro FIFA em
+  jogos entre times de cima, clássicos estaduais e jogos de baixo (Fisher
+  exato).
+- **E3 — Concentração de escala clube × árbitro**: comparada com sorteios
+  que respeitam as regras reais (trocas de Monte Carlo que preservam a
+  carga de cada árbitro, 1 jogo por rodada e o nº de exceções de
+  federação; versão estratificada por categoria) — Besag & Clifford
+  (1989); Diaconis & Sturmfels (1998).
+
+### 9.4 Hipóteses pré-registradas (confirmatórias)
+
+α = 0,05 bicaudal; resultado publicado na aba qualquer que seja.
+
+- **H1 — Afinidade regional**: o clube recebe menos cartões e faz mais
+  pontos que o esperado quando o árbitro é da mesma região (de outro
+  estado), e o contrário quando o árbitro é da região do adversário.
+  *Transparência*: já olhada no diagnóstico de 14/09 (nulo: pontos
+  +0,00/jogo [−0,10; +0,10]; cartões ×1,03 [0,98; 1,09]). Registrada aqui,
+  mas **não** conta como confirmação independente.
+- **H2 — Pressão da torcida (2020 sem público)**: a vantagem do mandante em
+  cartões (mandante recebe menos) é menor em 2020, temporada inteira sem
+  público, do que nas demais (desenho de Pettersson-Lidbom & Priks, 2010;
+  Reade, Schreyer & Singleton, 2022). Registrada antes de ingerir 2018–2021.
+- **H3 — Categoria sob pressão**: o viés de mandante em cartões é menor com
+  árbitro FIFA. *Transparência*: estimativa pontual vista no diagnóstico
+  (×1,06, p≈0,11, especificação com colinearidade, descartada) —
+  registrada com a especificação nova.
+- **H4 — VAR**: a vantagem do mandante em gols de pênalti é menor com VAR
+  (2019+) do que sem (2018). Registrada antes de ingerir 2018.
+
+### 9.5 Dado novo necessário (Fase 2)
+
+- `MatchEvent.period` (1T/2T/AC1/AC2/INT/PJ) e minuto absoluto. Hoje a CBF
+  manda acréscimo como `"45:003:00"` e o parser grava 45 — todo cartão de
+  acréscimo, intervalo e pós-jogo vira "minuto 45" em qualquer tempo.
+- `Referee.uf`; `Fixture.referee_category`; `Fixture.var_referee_id` +
+  `var_category`; `Team.state` (UF do clube, do campo `clube` "Nome - UF").
+- Ingestão de 2018–2021 (IDs já em `COMPETITION_IDS`).
+
+### 9.6 Arquitetura (deploy alvo: Vercel + Neon)
+
+- Cálculo **offline** (`scripts/compute_stats.py`, também chamado ao fim do
+  scraping): numpy/scipy/pandas/statsmodels no grupo de dependências
+  `analysis`, fora do caminho da request. Resultado gravado como JSON na
+  tabela `stat_reports` (uma linha por temporada + "all").
+- API (`GET /statistics`) só lê o JSON pronto — função serverless leve, sem
+  numpy no pacote. Postgres (Neon) via SQLAlchemy, igual ao resto.
+
+### 9.7 Fora de escopo agora
+
+- Público por jogo (Boletim Financeiro em PDF) — dose-resposta de pressão
+  da torcida fica para depois.
+- Troca das abas antigas (Favorecimento/Dashboard) pelo método novo —
+  depende da validação do usuário.

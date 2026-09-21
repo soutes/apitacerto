@@ -1,0 +1,67 @@
+# Banco: senha (Secret), disco que sobrevive ao pod (PVC), o Postgres
+# (Deployment) e o nome "postgres" na rede do cluster (Service).
+apiVersion: v1
+kind: Secret
+metadata:
+  name: apitacerto-db
+type: Opaque
+stringData:
+  # senha so do cluster kind local; em cluster real, criar o Secret fora do git
+  POSTGRES_USER: apitacerto
+  POSTGRES_PASSWORD: apitacerto-local
+  POSTGRES_DB: apitacerto
+  DATABASE_URL: postgresql+psycopg://apitacerto:apitacerto-local@postgres:5432/apitacerto
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # um banco so por disco: nunca dois pods ao mesmo tempo
+  selector:
+    matchLabels: { app: postgres }
+  template:
+    metadata:
+      labels: { app: postgres }
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17
+          envFrom:
+            - secretRef: { name: apitacerto-db }
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+            periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: postgres-data }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector: { app: postgres }
+  ports:
+    - port: 5432

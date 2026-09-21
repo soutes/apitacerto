@@ -147,6 +147,23 @@ docker compose --profile test run --rm --build test
 e porta vêm do `.env` (ver `.env.example`); sem ele, valores de
 desenvolvimento local.
 
+### Com Kubernetes local (kind)
+
+Mesma imagem, agora num cluster Kubernetes na sua máquina. `k8s/` tem:
+`postgres.yaml` (senha, disco persistente, banco e o nome `postgres`),
+`seed-job.yaml` (carga inicial, roda uma vez) e `app.yaml` (2 cópias da API,
+que só recebem acesso quando `/health` responde).
+
+```bash
+kind create cluster --name apitacerto
+kind load docker-image apitacerto:local --name apitacerto
+kubectl apply -f k8s/
+kubectl rollout status deployment/apitacerto
+kubectl port-forward service/apitacerto 8001:8000
+```
+
+Abre em http://localhost:8001. Para apagar tudo: `kind delete cluster --name apitacerto`.
+
 ## Dados
 
 Cobertura: 2018–2026 (2026 é a temporada em andamento). Fonte primária:
@@ -331,6 +348,23 @@ docker compose --profile test run --rm --build test
 `docker compose down` stops everything and keeps the data; `down -v` deletes
 it. Password and port come from `.env` (see `.env.example`); without it,
 local development defaults.
+
+### With local Kubernetes (kind)
+
+Same image, now in a Kubernetes cluster on your machine. `k8s/` holds:
+`postgres.yaml` (password, persistent disk, database and the `postgres`
+name), `seed-job.yaml` (initial load, runs once) and `app.yaml` (2 API
+replicas that only receive traffic once `/health` answers).
+
+```bash
+kind create cluster --name apitacerto
+kind load docker-image apitacerto:local --name apitacerto
+kubectl apply -f k8s/
+kubectl rollout status deployment/apitacerto
+kubectl port-forward service/apitacerto 8001:8000
+```
+
+Open http://localhost:8001. To delete everything: `kind delete cluster --name apitacerto`.
 
 ## Data
 

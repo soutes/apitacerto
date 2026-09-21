@@ -1,0 +1,16 @@
+# Toda terca as 23h50, horario de Brasilia (o servidor fica em UTC; o fuso
+# vai explicito na regra). Persistent: se a VM estava desligada na hora,
+# roda assim que ela voltar.
+#   instalar:  sudo cp apitacerto-refresh.* /etc/systemd/system/
+#              sudo systemctl daemon-reload
+#              sudo systemctl enable --now apitacerto-refresh.timer
+#   proxima:   systemctl list-timers apitacerto-refresh.timer
+[Unit]
+Description=ApitaCerto - toda terca 23h50 (America/Sao_Paulo)
+
+[Timer]
+OnCalendar=Tue *-*-* 23:50:00 America/Sao_Paulo
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -36,6 +36,26 @@ COPY backend/tests ./tests
 COPY backend/tests_integration ./tests_integration
 CMD ["pytest", "-v", "tests_integration"]
 
+# Job semanal (scraping da CBF + estatisticas): precisa do grupo analysis
+# (numpy/scipy/pandas/statsmodels), que fica FORA da imagem do site.
+# docker build --target jobs -t apitacerto-jobs .
+FROM deps AS jobs-deps
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --group analysis --no-install-project
+
+FROM python:3.12-slim AS jobs
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:$PATH"
+WORKDIR /app
+COPY --from=jobs-deps /opt/venv /opt/venv
+COPY backend/app ./app
+COPY backend/scripts ./scripts
+RUN useradd --create-home --uid 10001 apitacerto
+USER apitacerto
+# temporada atual; ao terminar, scrape_cbf.py recalcula as estatisticas
+CMD ["sh", "-c", "python scripts/scrape_cbf.py --season $(date +%Y)"]
+
 # Etapa 3: imagem final, so o venv + codigo + front montado (sem uv, sem Node)
 FROM python:3.12-slim AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \

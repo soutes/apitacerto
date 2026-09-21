@@ -18,6 +18,7 @@ from __future__ import annotations
 import re
 import ssl
 import time
+from pathlib import Path
 
 import httpx
 import truststore
@@ -110,18 +111,49 @@ def _canonical_team_name(name: str) -> str:
     return stripped
 
 
+# O servidor da CBF manda a cadeia errada: o certificado dela e emitido por
+# "Sectigo Public Server Authentication CA OV R36", mas o intermediario
+# enviado e outro (Sectigo RSA OV Secure Server CA). O Windows baixa o certo
+# sozinho (AIA); o Linux (servidor, Docker, CI) nao, e a conexao falha com
+# "unable to get local issuer certificate". O intermediario publico da
+# Sectigo vai junto (http://crt.sectigo.com/SectigoPublicServerAuthenticationCAOVR36.crt,
+# assinado pela raiz Sectigo Public Server Authentication Root R46, valido
+# ate 2036).
+CBF_INTERMEDIATE_CA = Path(__file__).parent / "certs" / "sectigo-public-server-authentication-ca-ov-r36.pem"
+
+
 def make_client() -> httpx.Client:
-    # certifi (bundle padrao do httpx) as vezes nao tem a cadeia certa pra
-    # cbf.com.br neste ambiente, mesmo com curl/Windows confiando nela --
-    # truststore usa o keystore nativo do SO em vez do bundle do certifi.
+    # truststore usa o keystore nativo do SO em vez do bundle do certifi
     ctx = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ctx.load_verify_locations(cafile=str(CBF_INTERMEDIATE_CA))
     return httpx.Client(base_url=BASE_URL, headers={"User-Agent": USER_AGENT}, timeout=30, verify=ctx)
 
 
-def fetch_round(client: httpx.Client, competition_id: int, round_num: int) -> dict:
-    resp = client.get(f"/api/cbf/jogos/campeonato/{competition_id}/rodada/{round_num}/fase")
-    resp.raise_for_status()
-    return resp.json()
+RETRY_WAITS = (5, 15, 45)  # segundos entre tentativas; a ultima falha propaga
+
+
+def fetch_round(client: httpx.Client, competition_id: int, round_num: int,
+                waits: tuple[float, ...] = RETRY_WAITS) -> dict:
+    # a API da CBF devolve 502/503 de vez em quando; o job semanal roda sem
+    # ninguem olhando, entao falha passageira (5xx, timeout, conexao) tenta
+    # de novo. Erro 4xx nao: e pedido errado, repetir nao resolve.
+    url = f"/api/cbf/jogos/campeonato/{competition_id}/rodada/{round_num}/fase"
+    for attempt, wait in enumerate((*waits, None)):
+        try:
+            resp = client.get(url)
+            if resp.status_code < 500:
+                resp.raise_for_status()
+                return resp.json()
+            error: Exception = httpx.HTTPStatusError(
+                f"{resp.status_code} em {url}", request=resp.request, response=resp)
+        except httpx.TransportError as exc:
+            error = exc
+        if wait is None:
+            raise error
+        print(f"  [aviso] rodada {round_num}: {error} -- tentando de novo em {wait}s "
+              f"({attempt + 1}/{len(waits)})")
+        time.sleep(wait)
+    raise AssertionError("inalcancavel")
 
 
 def _split_local(local: str | None) -> tuple[str | None, str | None, str | None]:

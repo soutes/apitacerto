@@ -51,6 +51,23 @@ services:
     mem_limit: 256m
     restart: unless-stopped
 
+  # atualizacao semanal (scraping da temporada atual + estatisticas).
+  # Nao sobe com o `up`: roda pelo timer do systemd (deploy/apitacerto-refresh.*)
+  #   docker compose -f compose.prod.yaml run --rm refresh
+  refresh:
+    profiles: ["jobs"]
+    image: ${APITACERTO_JOBS_IMAGE:-apitacerto-jobs:local}
+    environment:
+      DATABASE_URL: *db-url
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # pico medido: ~850 MB (statsmodels). Limite baixo de RAM + swap: quem
+    # fica lento e o job da madrugada, nao o site
+    mem_limit: 512m
+    memswap_limit: 2g
+    restart: "no"
+
   caddy:
     image: caddy:2-alpine
     ports:

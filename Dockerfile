@@ -22,6 +22,20 @@ COPY backend/pyproject.toml backend/uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 
+# Alvo de teste: mesma base + dependencias dev (pytest, httpx) e os testes.
+# Nao e o padrao do `docker build` (o ultimo estagio, runtime, e).
+# docker compose --profile test run --rm test
+FROM deps AS test
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project
+ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1
+COPY backend/app ./app
+COPY backend/scripts ./scripts
+COPY backend/seed ./seed
+COPY backend/tests ./tests
+COPY backend/tests_integration ./tests_integration
+CMD ["pytest", "-v", "tests_integration"]
+
 # Etapa 3: imagem final, so o venv + codigo + front montado (sem uv, sem Node)
 FROM python:3.12-slim AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -31,6 +45,7 @@ WORKDIR /app
 COPY --from=deps /opt/venv /opt/venv
 COPY backend/app ./app
 COPY backend/scripts ./scripts
+COPY backend/seed ./seed
 COPY --from=frontend /frontend/dist ./static
 
 RUN useradd --create-home --uid 10001 apitacerto && chown -R apitacerto /app

@@ -10,7 +10,5 @@ _docs
 backend/.venv
 backend/.pytest_cache
 backend/.ruff_cache
-backend/tests
-backend/tests_integration
 frontend/node_modules
 frontend/dist

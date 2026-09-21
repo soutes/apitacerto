@@ -120,6 +120,33 @@ vazio e mostra o mock. Para apontar para um Postgres:
 roda sem root, sem Node, sem uv e sem numpy/scipy, e tem `HEALTHCHECK`
 em `/health`.
 
+### Com Docker Compose (Postgres + dados + app)
+
+```bash
+docker compose up --build
+```
+
+Abre em http://localhost:8000 já com os dados reais de 2018–2026 e as
+estatísticas. Três serviços:
+
+- `postgres` — Postgres 17, dados no volume `pgdata`;
+- `seed` — carrega `backend/seed/apitacerto.json.gz` (exportado do banco
+  local com `uv run python scripts/seed.py export`) e termina. Num banco que
+  já tem jogos não faz nada. Assim nada depende da API da CBF estar no ar;
+- `app` — a imagem acima. Fala com o banco em `postgres:5432`: dentro do
+  Compose cada serviço é achado pelo nome, `localhost` seria o próprio
+  container.
+
+Testes de integração dentro do Compose (banco separado `apitacerto_test`):
+
+```bash
+docker compose --profile test run --rm --build test
+```
+
+`docker compose down` para tudo e mantém os dados; `down -v` apaga. Senha
+e porta vêm do `.env` (ver `.env.example`); sem ele, valores de
+desenvolvimento local.
+
 ## Dados
 
 Cobertura: 2018–2026 (2026 é a temporada em andamento). Fonte primária:
@@ -276,6 +303,34 @@ empty SQLite and shows mock data. To point it at Postgres:
 `-p 8000:8000` publishes the container's port 8000 on your machine. The
 image runs as non-root, without Node, uv or numpy/scipy, and has a
 `HEALTHCHECK` on `/health`.
+
+### With Docker Compose (Postgres + data + app)
+
+```bash
+docker compose up --build
+```
+
+Open http://localhost:8000, already loaded with the real 2018–2026 data and
+statistics. Three services:
+
+- `postgres` — Postgres 17, data in the `pgdata` volume;
+- `seed` — loads `backend/seed/apitacerto.json.gz` (exported from the local
+  database with `uv run python scripts/seed.py export`) and exits. On a
+  database that already has matches it does nothing, so nothing depends on
+  the CBF API being up;
+- `app` — the image above. It reaches the database at `postgres:5432`:
+  inside Compose each service is found by its name, and `localhost` would be
+  the container itself.
+
+Integration tests inside Compose (separate `apitacerto_test` database):
+
+```bash
+docker compose --profile test run --rm --build test
+```
+
+`docker compose down` stops everything and keeps the data; `down -v` deletes
+it. Password and port come from `.env` (see `.env.example`); without it,
+local development defaults.
 
 ## Data
 

@@ -227,3 +227,15 @@ def test_last_updated_reflects_latest_ingestion_log(db_session):
 
     res = client.get("/dashboard", params={"season": SEASON})
     assert res.json()["dataCompleteness"]["lastUpdated"] == "2026-09-08T10:00:00+00:00"
+
+
+def test_filter_names_sorted_the_same_on_any_database(db_session):
+    # SQLite ordena por codigo de caractere, Postgres pelo locale: a API
+    # ordena ela mesma, ignorando acento e maiuscula
+    for i, name in enumerate(["CSA", "Ceará", "Ávila FC", "avaí", "Bahia"]):
+        db_session.add(Team(api_id=500 + i, name=name))
+    db_session.commit()
+    from app.queries import get_filter_options
+
+    teams = get_filter_options(db_session)["teams"]
+    assert teams == ["avaí", "Ávila FC", "Bahia", "Ceará", "CSA"]

@@ -12,7 +12,9 @@ favorece ou persegue algum clube. Sem Power BI, sem Looker: frontend próprio
 Feito para o [HW2 do AI Dev Tools Zoomcamp](https://courses.datatalks.club/ai-dev-tools-2026/homework/hw2)
 — opção "Sports-league scoreboard".
 
-Ver spec completa em [`_docs/specs.md`](_docs/specs.md).
+Ver spec completa em [`_docs/specs.md`](_docs/specs.md). No ar em
+https://147-15-76-139.sslip.io. Homework 3 (testes, Docker, Kubernetes,
+CI/CD): [`_docs/homework3.md`](_docs/homework3.md).
 
 ## Telas
 

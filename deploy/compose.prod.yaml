@@ -1,6 +1,8 @@
 # Producao na Oracle (VM.Standard.E2.1.Micro: 1 GB de RAM + 2 GB de swap).
 # Fica em /opt/apitacerto no servidor, ao lado de um .env (so no servidor,
-# nunca no git) com POSTGRES_PASSWORD e APITACERTO_IMAGE.
+# nunca no git) com POSTGRES_PASSWORD, APITACERTO_IMAGE e
+# APITACERTO_JOBS_IMAGE (ghcr.io/soutes/apitacerto[-jobs]:latest, publicadas
+# pelo CI; o timer apitacerto-update baixa a versao nova sozinho).
 #
 #   docker compose -f compose.prod.yaml up -d
 #

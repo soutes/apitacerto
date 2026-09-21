@@ -164,6 +164,23 @@ kubectl port-forward service/apitacerto 8001:8000
 
 Abre em http://localhost:8001. Para apagar tudo: `kind delete cluster --name apitacerto`.
 
+### CI/CD (GitHub Actions, roda local com act)
+
+`.github/workflows/ci.yml` tem dois jobs:
+
+1. `test` — testes do backend, lint e build do front, testes de integração
+   com Postgres (Compose);
+2. `deploy` — só roda se `test` passou (`needs: test`): monta a imagem com
+   tag única (commit + horário), carrega no kind, aplica `k8s/`, espera o
+   rollout e confere `/health`.
+
+Se um teste falha, o deploy nem começa e a versão que já está no cluster
+continua no ar. Para rodar local (com o cluster kind criado):
+
+```bash
+act push -P ubuntu-latest=catthehacker/ubuntu:act-latest --network kind
+```
+
 ## Dados
 
 Cobertura: 2018–2026 (2026 é a temporada em andamento). Fonte primária:
@@ -365,6 +382,23 @@ kubectl port-forward service/apitacerto 8001:8000
 ```
 
 Open http://localhost:8001. To delete everything: `kind delete cluster --name apitacerto`.
+
+### CI/CD (GitHub Actions, runs locally with act)
+
+`.github/workflows/ci.yml` has two jobs:
+
+1. `test` — backend tests, frontend lint and build, Postgres integration
+   tests (Compose);
+2. `deploy` — runs only if `test` passed (`needs: test`): builds the image
+   with a unique tag (commit + timestamp), loads it into kind, applies
+   `k8s/`, waits for the rollout and checks `/health`.
+
+If a test fails, the deploy never starts and the version already in the
+cluster keeps running. To run it locally (with the kind cluster created):
+
+```bash
+act push -P ubuntu-latest=catthehacker/ubuntu:act-latest --network kind
+```
 
 ## Data
 

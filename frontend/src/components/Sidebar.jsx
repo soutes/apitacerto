@@ -13,7 +13,7 @@ export default function Sidebar({ active, onChange, dataBlurb }) {
     <nav className="sidebar" aria-label="Navegação principal">
       <div className="sidebar-logo">
         <Logo />
-        <span>ApitaCerto</span>
+        <span>ApitaCerto v2</span>
       </div>
       <div className="sidebar-nav" role="tablist" aria-orientation="vertical">
         {NAV.map((item) => (

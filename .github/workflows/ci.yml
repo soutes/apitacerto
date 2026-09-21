@@ -88,7 +88,11 @@ jobs:
           kind load docker-image "apitacerto:${TAG}" --name "$KIND_CLUSTER"
           # Job e imutavel: recria (a carga e idempotente, banco cheio = nada muda)
           kubectl delete job apitacerto-seed --ignore-not-found
-          sed "s|apitacerto:local|apitacerto:${TAG}|g" k8s/*.yaml | kubectl apply -f -
+          # troca a tag arquivo por arquivo (concatenar os YAML sem "---"
+          # funde o ultimo objeto de um com o primeiro do outro)
+          mkdir -p /tmp/k8s
+          for f in k8s/*.yaml; do sed "s|apitacerto:local|apitacerto:${TAG}|g" "$f" > "/tmp/k8s/$(basename "$f")"; done
+          kubectl apply -f /tmp/k8s/
           kubectl wait --for=condition=complete job/apitacerto-seed --timeout=300s
           kubectl rollout status deployment/apitacerto --timeout=300s
 

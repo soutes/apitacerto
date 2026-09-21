@@ -1,8 +1,14 @@
+import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app import mock_store, queries
@@ -28,6 +34,17 @@ app.add_middleware(
 )
 
 
+@app.get("/health")
+def health(db: Session = Depends(get_db)):
+    # readiness do Kubernetes e smoke test do CI: so fica pronto quando o
+    # banco responde, entao o pod nao recebe trafego antes do Postgres subir
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        return JSONResponse(status_code=503, content={"status": "error", "database": "unreachable"})
+    return {"status": "ok", "database": "ok"}
+
+
 @app.get("/filters")
 def get_filters(season: Optional[int] = None, db: Session = Depends(get_db)):
     real = queries.get_filter_options(db, season)
@@ -43,17 +60,6 @@ def get_filters(season: Optional[int] = None, db: Session = Depends(get_db)):
         "referees": mock_store.REFEREES,
         "seasons": mock_store.SEASONS,
     }
-
-
-@app.get("/favoritism")
-def get_favoritism(season: Optional[int] = None, db: Session = Depends(get_db)):
-    # so pra aba Indice de Favorecimento: season omitido = "Todos", junta
-    # todas as temporadas ja ingeridas nos pares time x arbitro (ganha
-    # amostra pro n>=5). As outras abas continuam presas ao /dashboard,
-    # que exige season -- classificacao/serie temporal nao fazem sentido
-    # agregadas entre anos.
-    heatmap = queries.build_heatmap(db, season)
-    return {"heatmap": heatmap}
 
 
 @app.get("/season-overview")
@@ -72,7 +78,7 @@ def get_season_overview(season: int = Query(..., ge=MIN_SEASON, le=2100), db: Se
 
 @app.get("/statistics")
 def get_statistics(season: Optional[int] = None, db: Session = Depends(get_db)):
-    # aba Dados estatisticos (spec secao 9): so LE o JSON que
+    # aba Favorecimento (spec secao 9): so LE o JSON que
     # scripts/compute_stats.py calculou offline. Importar app.analysis aqui
     # levaria numpy/statsmodels pro pacote da funcao serverless (spec 9.6).
     key = str(season) if season is not None else "all"
@@ -115,3 +121,13 @@ def get_dashboard(
         "kpis": kpis, "timeseries": timeseries, "heatmap": heatmap,
         "dataCompleteness": data_completeness,
     }
+
+
+def mount_frontend(target: FastAPI, static_dir: str | Path) -> None:
+    # Na imagem Docker a API tambem serve o build do React (mesma origem,
+    # sem CORS). Montado por ultimo: as rotas da API acima tem prioridade.
+    target.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")
+
+
+if os.environ.get("STATIC_DIR"):
+    mount_frontend(app, os.environ["STATIC_DIR"])

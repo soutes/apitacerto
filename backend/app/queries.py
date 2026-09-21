@@ -6,14 +6,23 @@ main.py and the OpenAPI contract don't change between Fase 3/4 and Fase 5.
 from __future__ import annotations
 
 import re
+import unicodedata
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import Fixture, IngestionLog, MatchEvent, Referee, Team
-from app.stats import favoritism_index, kpis_for  # re-exported for main.py
+from app.stats import kpis_for, pair_rows  # re-exported for main.py
 
 CARD_TYPES = ("YELLOW_CARD", "RED_CARD")
+
+
+def name_sort_key(name: str) -> str:
+    # ordem alfabetica igual em qualquer banco: o ORDER BY do SQLite e por
+    # codigo de caractere ("CSA" antes de "Ceara", acentuado no fim) e o do
+    # Postgres segue o locale -- a mesma lista saia em ordens diferentes
+    decomposed = unicodedata.normalize("NFKD", name)
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).casefold()
 
 
 def get_filter_options(db: Session, season: int | None = None) -> dict:
@@ -23,13 +32,13 @@ def get_filter_options(db: Session, season: int | None = None) -> dict:
         home = select(Fixture.home_team_id).where(Fixture.season == season)
         away = select(Fixture.away_team_id).where(Fixture.season == season)
         team_ids = home.union(away).subquery()
-        teams_stmt = select(Team.name).where(Team.id.in_(select(team_ids))).order_by(Team.name)
+        teams_stmt = select(Team.name).where(Team.id.in_(select(team_ids)))
     else:
-        teams_stmt = select(Team.name).order_by(Team.name)
-    teams = db.scalars(teams_stmt).all()
-    referees = db.scalars(select(Referee.name).order_by(Referee.name)).all()
+        teams_stmt = select(Team.name)
+    teams = sorted(db.scalars(teams_stmt).all(), key=name_sort_key)
+    referees = sorted(db.scalars(select(Referee.name)).all(), key=name_sort_key)
     seasons = db.scalars(select(Fixture.season).distinct().order_by(Fixture.season)).all()
-    return {"teams": list(teams), "referees": list(referees), "seasons": list(seasons)}
+    return {"teams": teams, "referees": referees, "seasons": list(seasons)}
 
 
 def _round_number(round_label: str | None) -> int:
@@ -241,7 +250,7 @@ def build_heatmap(db: Session, season: int | None) -> list[dict]:
             goalsFor=f.away_score, goalsAgainst=f.home_score,
             yellow=ay, red=ar, yellowRival=hy, redRival=hr)
 
-    return favoritism_index(list(raw_by_pair.values()))
+    return pair_rows(list(raw_by_pair.values()))
 
 
 def timeseries_for(db: Session, team: str | None, season: int) -> list[dict]:

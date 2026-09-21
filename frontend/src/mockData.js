@@ -52,61 +52,17 @@ function pairStats(team, referee, season) {
   return { n, wins, draws, losses, goalsFor, goalsAgainst, yellow, red, yellowRival, redRival };
 }
 
-function winRate(s) {
-  return s.n ? s.wins / s.n : 0;
-}
-
-function cardsPerGame(yellow, red, n) {
-  return n ? (yellow * 1 + red * 3) / n : 0;
-}
-
-function mean(arr) {
-  return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-}
-function std(arr) {
-  const m = mean(arr);
-  return arr.length ? Math.sqrt(mean(arr.map((x) => (x - m) ** 2))) : 1;
-}
-
-const SAMPLE_FLOOR = 5;
-
-// Builds the full team x referee matrix for a season, with the
-// Indice de Favorecimento (spec section 6) computed leave-one-out.
+// Builds the full team x referee matrix for a season (same shape as the
+// backend's /dashboard heatmap cells).
 export function buildHeatmap(season) {
-  const raw = [];
+  const rows = [];
   for (const team of TEAMS) {
     for (const referee of REFEREES) {
-      raw.push({ team, referee, ...pairStats(team, referee, season) });
+      const { n, wins, draws, losses, goalsFor, goalsAgainst, yellow, red } = pairStats(team, referee, season);
+      rows.push({ team, referee, n, wins, draws, losses, goalsFor, goalsAgainst, yellow, red });
     }
   }
-
-  // baseline(team) = time contra TODOS os outros arbitros (leave-one-out)
-  const deltas = raw.map((row) => {
-    const others = raw.filter((r) => r.team === row.team && r.referee !== row.referee);
-    const baseWinRate = mean(others.map(winRate));
-    const baseCards = mean(others.map((r) => cardsPerGame(r.yellow, r.red, r.n)));
-    const baseCardsRival = mean(others.map((r) => cardsPerGame(r.yellowRival, r.redRival, r.n)));
-
-    const deltaWinRate = winRate(row) - baseWinRate;
-    const deltaCards = baseCards - cardsPerGame(row.yellow, row.red, row.n);
-    const deltaCardsRival = cardsPerGame(row.yellowRival, row.redRival, row.n) - baseCardsRival;
-    return { ...row, deltaWinRate, deltaCards, deltaCardsRival };
-  });
-
-  const eligible = deltas.filter((r) => r.n >= SAMPLE_FLOOR);
-  const zw = { m: mean(eligible.map((r) => r.deltaWinRate)), s: std(eligible.map((r) => r.deltaWinRate)) || 1 };
-  const zc = { m: mean(eligible.map((r) => r.deltaCards)), s: std(eligible.map((r) => r.deltaCards)) || 1 };
-  const zr = { m: mean(eligible.map((r) => r.deltaCardsRival)), s: std(eligible.map((r) => r.deltaCardsRival)) || 1 };
-
-  return deltas.map((row) => {
-    const insufficientSample = row.n < SAMPLE_FLOOR;
-    if (insufficientSample) return { ...row, index: null, insufficientSample };
-    const z1 = (row.deltaWinRate - zw.m) / zw.s;
-    const z2 = (row.deltaCards - zc.m) / zc.s;
-    const z3 = (row.deltaCardsRival - zr.m) / zr.s;
-    const index = (z1 + z2 + z3) / 3;
-    return { ...row, index, insufficientSample };
-  });
+  return rows;
 }
 
 export function kpisFor(heatmapRows, team, referee) {

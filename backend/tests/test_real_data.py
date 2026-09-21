@@ -67,14 +67,9 @@ def test_dashboard_uses_real_data_once_ingested(db_session):
     a_under_x = pairs[("Time A", "Arbitro X")]
     a_under_y = pairs[("Time A", "Arbitro Y")]
 
-    # ambos tem n=6, passam o piso de amostra
-    assert a_under_x["n"] == 6
-    assert not a_under_x["insufficientSample"]
-    assert not a_under_y["insufficientSample"]
-
-    # Time A ganha 100% sob X, 50% sob Y -- indice de X deve ser MAIOR
-    # (mais favoravel) que o de Y, refletindo o desvio real dos dados.
-    assert a_under_x["index"] > a_under_y["index"]
+    # contagens do par vem direto do banco: A ganha os 6 sob X, 3 de 6 sob Y
+    assert a_under_x["n"] == 6 and a_under_x["wins"] == 6 and a_under_x["yellow"] == 0
+    assert a_under_y["n"] == 6 and a_under_y["wins"] == 3 and a_under_y["yellow"] == 6
 
     # KPIs sem filtro somam as DUAS perspectivas (mandante e visitante) de
     # cada um dos 12 jogos -- 24 "jogos-time". Todos os 12 jogos tem
@@ -232,3 +227,15 @@ def test_last_updated_reflects_latest_ingestion_log(db_session):
 
     res = client.get("/dashboard", params={"season": SEASON})
     assert res.json()["dataCompleteness"]["lastUpdated"] == "2026-09-08T10:00:00+00:00"
+
+
+def test_filter_names_sorted_the_same_on_any_database(db_session):
+    # SQLite ordena por codigo de caractere, Postgres pelo locale: a API
+    # ordena ela mesma, ignorando acento e maiuscula
+    for i, name in enumerate(["CSA", "Ceará", "Ávila FC", "avaí", "Bahia"]):
+        db_session.add(Team(api_id=500 + i, name=name))
+    db_session.commit()
+    from app.queries import get_filter_options
+
+    teams = get_filter_options(db_session)["teams"]
+    assert teams == ["avaí", "Ávila FC", "Bahia", "Ceará", "CSA"]

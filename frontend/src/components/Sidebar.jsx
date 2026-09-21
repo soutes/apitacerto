@@ -5,8 +5,7 @@ const NAV = [
   { key: "classificacao", label: "Classificação" },
   { key: "arbitros", label: "Árbitros" },
   { key: "clubes", label: "Clubes" },
-  { key: "confrontos", label: "Favorecimento" },
-  { key: "estatisticas", label: "Dados estatísticos" },
+  { key: "estatisticas", label: "Favorecimento" },
 ];
 
 export default function Sidebar({ active, onChange, dataBlurb }) {
@@ -14,7 +13,7 @@ export default function Sidebar({ active, onChange, dataBlurb }) {
     <nav className="sidebar" aria-label="Navegação principal">
       <div className="sidebar-logo">
         <Logo />
-        <span>ApitaCerto</span>
+        <span>ApitaCerto v2</span>
       </div>
       <div className="sidebar-nav" role="tablist" aria-orientation="vertical">
         {NAV.map((item) => (

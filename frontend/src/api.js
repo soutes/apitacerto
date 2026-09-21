@@ -4,7 +4,9 @@
 
 import { TEAMS, REFEREES, SEASONS, buildHeatmap, kpisFor, timeseriesFor } from "./mockData";
 
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+// `??` e nao `||`: na imagem Docker o build usa VITE_BACKEND_URL="" (mesma
+// origem, a API serve o front), e string vazia tem que valer.
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8000";
 
 const USE_MOCK = false; // Fase 4: conectado ao backend real (ver _docs/specs.md)
 
@@ -21,18 +23,6 @@ export async function getFilters() {
   return res.json();
 }
 
-export async function getFavoritism({ season } = {}) {
-  if (USE_MOCK) {
-    await delay(120);
-    return { heatmap: buildHeatmap(season) };
-  }
-  const params = new URLSearchParams();
-  if (season) params.set("season", season); // omitido = "Todos" (backend agrega)
-  const res = await fetch(`${BACKEND_URL}/favoritism?${params.toString()}`);
-  if (!res.ok) throw new Error(`favoritism fetch failed: ${res.status}`);
-  return res.json();
-}
-
 export async function getSeasonOverview({ season }) {
   if (USE_MOCK) {
     await delay(120);
@@ -46,7 +36,7 @@ export async function getSeasonOverview({ season }) {
   return res.json();
 }
 
-// Aba Dados estatisticos: relatorio pre-calculado offline (backend so le).
+// Aba Favorecimento (spec secao 9): relatorio pre-calculado offline (backend so le).
 // season omitido = todas as temporadas. 404 = ainda nao calculado -> null.
 export async function getStatistics({ season } = {}) {
   const params = new URLSearchParams();

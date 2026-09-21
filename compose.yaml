@@ -1,0 +1,82 @@
+# ApitaCerto local: Postgres + carga inicial + API/front.
+#
+#   docker compose up --build          # sobe tudo em http://localhost:8000
+#   docker compose --profile test run --rm --build test   # testes de integracao
+#   docker compose down                # para (os dados ficam no volume)
+#   docker compose down -v             # para e apaga os dados
+#
+# Dentro da rede do Compose, cada servico e encontrado pelo nome: a API
+# fala com o banco em "postgres:5432", nao em localhost.
+
+x-db: &db
+  POSTGRES_USER: ${POSTGRES_USER:-apitacerto}
+  # senha so de desenvolvimento local; troque em .env (ver .env.example)
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-apitacerto-local}
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      <<: *db
+      POSTGRES_DB: apitacerto
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d apitacerto"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # carrega backend/seed/apitacerto.json.gz (3.420 jogos + estatisticas) e
+  # termina; num banco que ja tem jogos nao faz nada
+  seed:
+    build: .
+    image: apitacerto:local
+    command: ["python", "scripts/seed.py", "load"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-apitacerto}:${POSTGRES_PASSWORD:-apitacerto-local}@postgres:5432/apitacerto
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    image: apitacerto:local
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-apitacerto}:${POSTGRES_PASSWORD:-apitacerto-local}@postgres:5432/apitacerto
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # banco so dos testes (cada teste apaga o schema), sem volume: some no down
+  postgres-test:
+    profiles: ["test"]
+    image: postgres:17
+    environment:
+      <<: *db
+      POSTGRES_DB: apitacerto_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d apitacerto_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  test:
+    profiles: ["test"]
+    build:
+      context: .
+      target: test
+    image: apitacerto:test
+    environment:
+      INTEGRATION_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-apitacerto}:${POSTGRES_PASSWORD:-apitacerto-local}@postgres-test:5432/apitacerto_test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+
+volumes:
+  pgdata:

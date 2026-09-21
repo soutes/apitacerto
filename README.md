@@ -3,7 +3,7 @@
 *English below.*
 
 Dashboard interativo do Brasileirão Série A segmentado por árbitro — gols,
-cartões, V/E/D, classificação — com uma aba de **dados estatísticos** que
+cartões, V/E/D, classificação — com uma aba de **Favorecimento** que
 testa, com o método explicado embaixo de cada gráfico, se algum árbitro
 favorece ou persegue algum clube. Sem Power BI, sem Looker: frontend próprio
 (React) consumindo um backend próprio (FastAPI), dados persistidos em banco
@@ -21,14 +21,14 @@ Ver spec completa em [`_docs/specs.md`](_docs/specs.md).
 - **Classificação** — tabela oficial (vitória×3 + empate×1).
 - **Árbitros** — ranking por rigor (cartões/jogo) e viés de mandante.
 - **Clubes** — matriz clube × árbitro com seletor de indicador.
-- **Favorecimento** — matriz com o Índice de Favorecimento original
-  (spec seção 6). O diagnóstico de 14/09/2026 mostrou que esse índice não se
-  distingue do acaso; ele fica até a aba nova ser validada.
-- **Dados estatísticos** (nova) — ver abaixo.
+- **Favorecimento** — observado vs. esperado com teste estatístico, ver
+  abaixo. Substituiu em 21/09/2026 o antigo Índice de Favorecimento (spec
+  seção 6), retirado porque o diagnóstico de 14/09/2026 mostrou que ele não
+  se distingue do acaso.
 
-Clicar numa célula das matrizes abre o detalhe do par (KPIs e séries).
+Clicar numa célula da matriz de Clubes abre o detalhe do par (KPIs e séries).
 
-## Dados estatísticos — como funciona
+## Favorecimento — como funciona
 
 Tudo compara **observado com esperado**. O esperado de cada jogo considera
 mando, força e estilo de cada clube na temporada, adversário e rigor do
@@ -60,6 +60,25 @@ sem público (H2 apoiada, p = 0,018); a escala da CBF concentra alguns pares
 além do que as regras explicam — pergunta sobre a escala, não prova sobre o
 árbitro.
 
+## Arquitetura
+
+```
+navegador ──HTTP──> FastAPI (backend/app) ──SQLAlchemy──> Postgres / SQLite
+  React                  │  só lê o banco                     ▲
+  (frontend/)            └─ GET /health: API + banco ok?       │
+                                                               │
+             scripts offline (scrape_cbf.py, compute_stats.py) ┘
+             buscam a CBF e gravam no banco; nunca rodam dentro de um request
+```
+
+- O navegador só mostra: pede dados à API por HTTP e desenha os gráficos.
+- A API só lê do banco. Nada no caminho do request chama a CBF.
+- A ingestão (scraping + estatística pesada) é um passo separado, que grava
+  no banco o que a API depois lê pronto.
+- `GET /health` responde `200 {"status": "ok", "database": "ok"}` quando a
+  API e o banco estão de pé, e `503` quando o banco não responde. É a
+  readiness do Kubernetes e o smoke test do CI.
+
 ## Estrutura
 
 - `frontend/` — React + Vite + Recharts
@@ -74,13 +93,93 @@ além do que as regras explicam — pergunta sobre a escala, não prova sobre o
 
 - Frontend: `cd frontend && npm run dev` — http://localhost:5173
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
-- Testes: `cd backend && uv run pytest` (46 passando)
+- Testes: `cd backend && uv run pytest` (48 passando)
+- Testes de integração (Postgres real + API real por HTTP): ver
+  [`_docs/acceptance.md`](_docs/acceptance.md)
 - Estatísticas: `cd backend && uv run python scripts/compute_stats.py`
   (também roda sozinho ao fim do scraping)
 - Calibração: `cd backend && uv run python scripts/calibrate_stats.py`
 
 Frontend fala com o backend em `http://localhost:8000` (configurável via
 `VITE_BACKEND_URL`, ver `frontend/src/api.js`).
+
+### Com Docker
+
+Uma imagem só: o Node monta o front, e a API (FastAPI) serve o front e os
+dados na mesma porta.
+
+```bash
+docker build -t apitacerto:local .
+docker run --rm -p 8000:8000 apitacerto:local
+```
+
+Abre em http://localhost:8000. Sem `DATABASE_URL`, o container usa um SQLite
+vazio e mostra o mock. Para apontar para um Postgres:
+`-e DATABASE_URL=postgresql+psycopg://usuario:senha@host:5432/banco`.
+`-p 8000:8000` publica a porta 8000 do container na sua máquina. A imagem
+roda sem root, sem Node, sem uv e sem numpy/scipy, e tem `HEALTHCHECK`
+em `/health`.
+
+### Com Docker Compose (Postgres + dados + app)
+
+```bash
+docker compose up --build
+```
+
+Abre em http://localhost:8000 já com os dados reais de 2018–2026 e as
+estatísticas. Três serviços:
+
+- `postgres` — Postgres 17, dados no volume `pgdata`;
+- `seed` — carrega `backend/seed/apitacerto.json.gz` (exportado do banco
+  local com `uv run python scripts/seed.py export`) e termina. Num banco que
+  já tem jogos não faz nada. Assim nada depende da API da CBF estar no ar;
+- `app` — a imagem acima. Fala com o banco em `postgres:5432`: dentro do
+  Compose cada serviço é achado pelo nome, `localhost` seria o próprio
+  container.
+
+Testes de integração dentro do Compose (Postgres separado, `postgres-test`, sem volume):
+
+```bash
+docker compose --profile test run --rm --build test
+```
+
+`docker compose down` para tudo e mantém os dados; `down -v` apaga. Senha
+e porta vêm do `.env` (ver `.env.example`); sem ele, valores de
+desenvolvimento local.
+
+### Com Kubernetes local (kind)
+
+Mesma imagem, agora num cluster Kubernetes na sua máquina. `k8s/` tem:
+`postgres.yaml` (senha, disco persistente, banco e o nome `postgres`),
+`seed-job.yaml` (carga inicial, roda uma vez) e `app.yaml` (2 cópias da API,
+que só recebem acesso quando `/health` responde).
+
+```bash
+kind create cluster --name apitacerto
+kind load docker-image apitacerto:local --name apitacerto
+kubectl apply -f k8s/
+kubectl rollout status deployment/apitacerto
+kubectl port-forward service/apitacerto 8001:8000
+```
+
+Abre em http://localhost:8001. Para apagar tudo: `kind delete cluster --name apitacerto`.
+
+### CI/CD (GitHub Actions, roda local com act)
+
+`.github/workflows/ci.yml` tem dois jobs:
+
+1. `test` — testes do backend, lint e build do front, testes de integração
+   com Postgres (Compose);
+2. `deploy` — só roda se `test` passou (`needs: test`): monta a imagem com
+   tag única (commit + horário), carrega no kind, aplica `k8s/`, espera o
+   rollout e confere `/health`.
+
+Se um teste falha, o deploy nem começa e a versão que já está no cluster
+continua no ar. Para rodar local (com o cluster kind criado):
+
+```bash
+act push -P ubuntu-latest=catthehacker/ubuntu:act-latest --network kind
+```
 
 ## Dados
 
@@ -119,7 +218,7 @@ mock determinístico (não quebra o dashboard enquanto a ingestão progride).
 # ApitaCerto (English)
 
 Interactive dashboard of Brasileirão Série A broken down by referee — goals,
-cards, W/D/L, standings — with a **statistics** tab that tests, with the
+cards, W/D/L, standings — with a **Favoritism** tab that tests, with the
 method explained under every chart, whether any referee favors or targets any
 club. No Power BI, no Looker: a custom React frontend talking to a custom
 FastAPI backend, data persisted in a database (SQLAlchemy — SQLite locally,
@@ -137,14 +236,14 @@ Full spec in [`_docs/specs.md`](_docs/specs.md) (Portuguese).
 - **Standings** — official table (win×3 + draw×1).
 - **Referees** — ranking by strictness (cards/game) and home bias.
 - **Clubs** — club × referee matrix with a metric picker.
-- **Favoritism** — matrix with the original Favoritism Index (spec section
-  6). The 2026-09-14 diagnosis showed this index is indistinguishable from
-  chance; it stays until the new tab is validated.
-- **Statistics** (new) — see below.
+- **Favoritism** — observed vs. expected with statistical tests, see below.
+  On 2026-09-21 it replaced the old Favoritism Index (spec section 6),
+  removed because the 2026-09-14 diagnosis showed it is indistinguishable
+  from chance.
 
-Clicking a matrix cell opens the pair detail (KPIs and time series).
+Clicking a cell in the Clubs matrix opens the pair detail (KPIs and time series).
 
-## Statistics — how it works
+## Favoritism — how it works
 
 Everything compares **observed with expected**. Each match's expected value
 accounts for home advantage, each club's strength and style that season, the
@@ -177,6 +276,27 @@ behind closed doors (H2 supported, p = 0.018); CBF's assignment concentrates
 some pairs beyond what the rules explain — a question about assignment, not
 proof about the referee.
 
+## Architecture
+
+```
+browser ──HTTP──> FastAPI (backend/app) ──SQLAlchemy──> Postgres / SQLite
+  React                │  read-only on the database         ▲
+  (frontend/)          └─ GET /health: API + database up?    │
+                                                             │
+           offline scripts (scrape_cbf.py, compute_stats.py) ┘
+           fetch from the CBF and write to the database; never inside a request
+```
+
+- The browser only displays: it asks the API for data over HTTP and draws
+  the charts.
+- The API only reads from the database. Nothing in the request path calls
+  the CBF.
+- Ingestion (scraping + heavy statistics) is a separate step that writes to
+  the database what the API later reads ready-made.
+- `GET /health` returns `200 {"status": "ok", "database": "ok"}` when the
+  API and the database are up, and `503` when the database does not answer.
+  It is the Kubernetes readiness check and the CI smoke test.
+
 ## Structure
 
 - `frontend/` — React + Vite + Recharts
@@ -191,13 +311,94 @@ proof about the referee.
 
 - Frontend: `cd frontend && npm run dev` — http://localhost:5173
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
-- Tests: `cd backend && uv run pytest` (46 passing)
+- Tests: `cd backend && uv run pytest` (48 passing)
+- Integration tests (real Postgres + real API over HTTP): see
+  [`_docs/acceptance.md`](_docs/acceptance.md) (Portuguese)
 - Statistics: `cd backend && uv run python scripts/compute_stats.py`
   (also runs automatically at the end of scraping)
 - Calibration: `cd backend && uv run python scripts/calibrate_stats.py`
 
 The frontend talks to the backend at `http://localhost:8000` (configurable
 via `VITE_BACKEND_URL`, see `frontend/src/api.js`).
+
+### With Docker
+
+One image: Node builds the frontend, and the API (FastAPI) serves both the
+frontend and the data on the same port.
+
+```bash
+docker build -t apitacerto:local .
+docker run --rm -p 8000:8000 apitacerto:local
+```
+
+Open http://localhost:8000. Without `DATABASE_URL` the container uses an
+empty SQLite and shows mock data. To point it at Postgres:
+`-e DATABASE_URL=postgresql+psycopg://user:password@host:5432/db`.
+`-p 8000:8000` publishes the container's port 8000 on your machine. The
+image runs as non-root, without Node, uv or numpy/scipy, and has a
+`HEALTHCHECK` on `/health`.
+
+### With Docker Compose (Postgres + data + app)
+
+```bash
+docker compose up --build
+```
+
+Open http://localhost:8000, already loaded with the real 2018–2026 data and
+statistics. Three services:
+
+- `postgres` — Postgres 17, data in the `pgdata` volume;
+- `seed` — loads `backend/seed/apitacerto.json.gz` (exported from the local
+  database with `uv run python scripts/seed.py export`) and exits. On a
+  database that already has matches it does nothing, so nothing depends on
+  the CBF API being up;
+- `app` — the image above. It reaches the database at `postgres:5432`:
+  inside Compose each service is found by its name, and `localhost` would be
+  the container itself.
+
+Integration tests inside Compose (separate `postgres-test`, no volume):
+
+```bash
+docker compose --profile test run --rm --build test
+```
+
+`docker compose down` stops everything and keeps the data; `down -v` deletes
+it. Password and port come from `.env` (see `.env.example`); without it,
+local development defaults.
+
+### With local Kubernetes (kind)
+
+Same image, now in a Kubernetes cluster on your machine. `k8s/` holds:
+`postgres.yaml` (password, persistent disk, database and the `postgres`
+name), `seed-job.yaml` (initial load, runs once) and `app.yaml` (2 API
+replicas that only receive traffic once `/health` answers).
+
+```bash
+kind create cluster --name apitacerto
+kind load docker-image apitacerto:local --name apitacerto
+kubectl apply -f k8s/
+kubectl rollout status deployment/apitacerto
+kubectl port-forward service/apitacerto 8001:8000
+```
+
+Open http://localhost:8001. To delete everything: `kind delete cluster --name apitacerto`.
+
+### CI/CD (GitHub Actions, runs locally with act)
+
+`.github/workflows/ci.yml` has two jobs:
+
+1. `test` — backend tests, frontend lint and build, Postgres integration
+   tests (Compose);
+2. `deploy` — runs only if `test` passed (`needs: test`): builds the image
+   with a unique tag (commit + timestamp), loads it into kind, applies
+   `k8s/`, waits for the rollout and checks `/health`.
+
+If a test fails, the deploy never starts and the version already in the
+cluster keeps running. To run it locally (with the kind cluster created):
+
+```bash
+act push -P ubuntu-latest=catthehacker/ubuntu:act-latest --network kind
+```
 
 ## Data
 

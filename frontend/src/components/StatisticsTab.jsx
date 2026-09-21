@@ -12,7 +12,7 @@ import {
 } from "./stats/sections";
 import "./stats/stats.css";
 
-// Aba Dados estatisticos (spec secao 9). Seletor proprio: cada temporada ou
+// Aba Favorecimento (spec secao 9). Seletor proprio: cada temporada ou
 // todas juntas -- "todas" soma o observado - esperado de cada temporada.
 export default function StatisticsTab({ seasons, defaultSeason }) {
   const [season, setSeason] = useState(defaultSeason);

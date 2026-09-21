@@ -287,11 +287,11 @@ body { margin: 0; background: var(--page-bg); font-family: var(--font-ui); }
 .metric-picker label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); max-width: 220px; }
 .metric-picker select { padding: 6px 8px; font-size: 0.95rem; }
 
-/* ---- Confrontos (FavoritismTab): season-picker proprio ---- */
+/* ---- Favorecimento (StatisticsTab): season-picker proprio ---- */
 .season-picker { display: inline-flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); }
 .season-picker select { padding: 6px 10px; font-size: 0.95rem; }
 
-/* ---- matriz time x arbitro (PairMatrix, usado por Confrontos e Clubes) ---- */
+/* ---- matriz time x arbitro (PairMatrix, usado por Clubes) ---- */
 .heatmap-wrap { overflow-x: auto; }
 .heatmap { border-collapse: collapse; width: 100%; font-size: 0.8rem; }
 .heatmap th, .heatmap td { border: 1px solid var(--border); padding: 6px 8px; text-align: center; white-space: nowrap; }

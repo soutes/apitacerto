@@ -1,7 +1,7 @@
 // Escalas de cor pro PairMatrix (spec _docs/specs.md secao 6, skill
 // data-visualization: sequential de matiz unico pra contagem, diverging
 // pra algo que tem sinal). Cor nunca e a unica pista -- toda celula sempre
-// mostra o numero tambem (ver PairMatrix/FavoritismTab/MatrixTab).
+// mostra o numero tambem (ver PairMatrix/MatrixTab).
 
 export function divergingColor(value, maxAbs = 2) {
   const clamped = Math.max(-maxAbs, Math.min(maxAbs, value));
@@ -21,4 +21,3 @@ export function sequentialColor(value, max) {
   return `rgba(41, 98, 155, ${0.08 + t * 0.82})`;
 }
 
-export const INSUFFICIENT_SAMPLE_COLOR = "#e5e5e5";

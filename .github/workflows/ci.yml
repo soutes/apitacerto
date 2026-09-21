@@ -1,4 +1,5 @@
-# Testa, monta a imagem e so entao faz o deploy no Kubernetes local (kind).
+# Testa, monta a imagem e so entao faz o deploy no Kubernetes local (kind)
+# e, na main, publica as imagens de producao (job publish).
 # Se qualquer teste falhar, o job deploy nem comeca: a versao que ja esta no
 # cluster continua no ar.
 #
@@ -107,3 +108,31 @@ jobs:
           for i in $(seq 1 30); do curl -sf localhost:8000/health && break; sleep 1; done
           curl -sf localhost:8000/health | grep -q '"status":"ok"'
           curl -sf localhost:8000/ | grep -o '<title>[^<]*</title>'
+
+  # Producao (Oracle): so na main, so com os testes verdes. Publica as imagens
+  # no GHCR; o servidor confere a cada 5 min e atualiza sozinho
+  # (deploy/apitacerto-update.*). Nenhuma chave do servidor fica no GitHub.
+  publish:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login no GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Monta e publica as imagens (site e job semanal)
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          for target in runtime jobs; do
+            name=apitacerto; [ "$target" = jobs ] && name=apitacerto-jobs
+            docker build --target "$target" \
+              --label org.opencontainers.image.source=https://github.com/${{ github.repository }} \
+              -t "ghcr.io/soutes/$name:$SHA" -t "ghcr.io/soutes/$name:latest" .
+            docker push "ghcr.io/soutes/$name:$SHA"
+            docker push "ghcr.io/soutes/$name:latest"
+          done

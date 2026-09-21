@@ -1,0 +1,13 @@
+# Confere a cada 5 minutos se ha versao nova publicada pelo CI.
+#   instalar:  sudo cp apitacerto-update.* /etc/systemd/system/
+#              sudo systemctl daemon-reload
+#              sudo systemctl enable --now apitacerto-update.timer
+[Unit]
+Description=ApitaCerto - confere versao nova a cada 5 min
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target

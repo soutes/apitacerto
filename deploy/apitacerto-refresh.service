@@ -1,0 +1,16 @@
+# Atualizacao semanal do ApitaCerto: scraping da temporada atual na CBF +
+# recalculo das estatisticas. Disparado por apitacerto-refresh.timer.
+#   ver execucoes:  journalctl -u apitacerto-refresh --since "7 days ago"
+#   rodar agora:    sudo systemctl start apitacerto-refresh
+[Unit]
+Description=ApitaCerto - atualizacao semanal (CBF + estatisticas)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/opt/apitacerto
+ExecStart=/usr/bin/docker compose -f compose.prod.yaml run --rm refresh
+TimeoutStartSec=90min

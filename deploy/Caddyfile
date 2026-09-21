@@ -1,0 +1,12 @@
+# Nome com HTTPS automatico (Let's Encrypt), sem cadastro: sslip.io
+# transforma o IP em nome. Trocar pelo dominio proprio quando houver.
+147-15-76-139.sslip.io {
+	encode gzip
+	reverse_proxy app:8000
+}
+
+# Acesso direto pelo IP (so HTTP: certificado exige nome)
+:80 {
+	encode gzip
+	reverse_proxy app:8000
+}

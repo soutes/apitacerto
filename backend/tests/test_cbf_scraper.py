@@ -169,3 +169,48 @@ def test_ingest_stores_federation_category_var_and_period(db_session):
     assert periods and None not in periods
     # VAR tambem e arbitro -- mesma tabela, sem duplicar ninguem
     assert db_session.query(Referee).filter_by(name="Rodrigo Nunes de Sa").count() == 1
+
+
+def _client(responses):
+    import httpx
+
+    calls = iter(responses)
+
+    def handler(request):
+        item = next(calls)
+        if isinstance(item, Exception):
+            raise item
+        return httpx.Response(item, json={"jogos": []}, request=request)
+
+    return httpx.Client(base_url="https://cbf.test", transport=httpx.MockTransport(handler))
+
+
+def test_fetch_round_retries_transient_server_errors():
+    import httpx
+
+    from app.cbf_scraper import fetch_round
+
+    client = _client([502, httpx.ConnectTimeout("lento"), 200])
+    assert fetch_round(client, 1, 6, waits=(0, 0, 0)) == {"jogos": []}
+
+
+def test_fetch_round_gives_up_after_the_last_retry():
+    import httpx
+    import pytest
+
+    from app.cbf_scraper import fetch_round
+
+    client = _client([502, 503, 502])
+    with pytest.raises(httpx.HTTPStatusError):
+        fetch_round(client, 1, 6, waits=(0, 0))
+
+
+def test_fetch_round_does_not_retry_client_errors():
+    import httpx
+    import pytest
+
+    from app.cbf_scraper import fetch_round
+
+    client = _client([404])  # uma resposta so: se tentar de novo, StopIteration
+    with pytest.raises(httpx.HTTPStatusError):
+        fetch_round(client, 1, 99, waits=(0, 0))

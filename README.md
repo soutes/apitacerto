@@ -181,6 +181,19 @@ continua no ar. Para rodar local (com o cluster kind criado):
 act push -P ubuntu-latest=catthehacker/ubuntu:act-latest --network kind
 ```
 
+### Produção (Oracle Cloud, Always Free)
+
+No ar em https://147-15-76-139.sslip.io (e http://147.15.76.139), numa
+VM.Standard.E2.1.Micro grátis (1 GB de RAM + 2 GB de swap). Arquivos em
+`deploy/`:
+
+- `compose.prod.yaml` — Postgres, carga inicial, API e Caddy (HTTPS
+  automático). Só as portas 80/443 ficam abertas;
+- `apitacerto-refresh.*` — toda terça às 23h50 (Brasília) raspa a temporada
+  atual na CBF e recalcula as estatísticas;
+- `apitacerto-update.*` — a cada 5 min confere se o CI publicou imagem nova
+  no GHCR e atualiza. O CI só publica na `main` e com os testes verdes.
+
 ## Dados
 
 Cobertura: 2018–2026 (2026 é a temporada em andamento). Fonte primária:
@@ -399,6 +412,18 @@ cluster keeps running. To run it locally (with the kind cluster created):
 ```bash
 act push -P ubuntu-latest=catthehacker/ubuntu:act-latest --network kind
 ```
+
+### Production (Oracle Cloud, Always Free)
+
+Live at https://147-15-76-139.sslip.io (and http://147.15.76.139), on a free
+VM.Standard.E2.1.Micro (1 GB RAM + 2 GB swap). Files in `deploy/`:
+
+- `compose.prod.yaml` — Postgres, initial load, API and Caddy (automatic
+  HTTPS). Only ports 80/443 are open;
+- `apitacerto-refresh.*` — every Tuesday at 23:50 (Brasília) scrapes the
+  current season from the CBF and recomputes the statistics;
+- `apitacerto-update.*` — every 5 min checks whether CI published a new
+  image to GHCR and updates. CI only publishes from `main` with green tests.
 
 ## Data
 

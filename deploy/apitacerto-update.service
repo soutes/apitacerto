@@ -1,0 +1,17 @@
+# Atualiza o ApitaCerto quando o CI publica imagem nova no GHCR (so depois
+# dos testes passarem na main). `up -d` so recria o que mudou: sem imagem
+# nova, nada acontece. Disparado por apitacerto-update.timer.
+#   ver atualizacoes:  journalctl -u apitacerto-update --since today
+[Unit]
+Description=ApitaCerto - baixa a versao nova do GHCR, se houver
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/opt/apitacerto
+ExecStart=/usr/bin/docker compose -f compose.prod.yaml pull --quiet app seed refresh
+ExecStart=/usr/bin/docker compose -f compose.prod.yaml up -d
+ExecStartPost=/usr/bin/docker image prune -f

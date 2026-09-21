@@ -1,0 +1,90 @@
+# Producao na Oracle (VM.Standard.E2.1.Micro: 1 GB de RAM + 2 GB de swap).
+# Fica em /opt/apitacerto no servidor, ao lado de um .env (so no servidor,
+# nunca no git) com POSTGRES_PASSWORD, APITACERTO_IMAGE e
+# APITACERTO_JOBS_IMAGE (ghcr.io/soutes/apitacerto[-jobs]:latest, publicadas
+# pelo CI; o timer apitacerto-update baixa a versao nova sozinho).
+#
+#   docker compose -f compose.prod.yaml up -d
+#
+# Diferencas do compose.yaml local: Postgres configurado pequeno, Caddy na
+# frente (portas 80/443, HTTPS automatico), nenhuma porta do banco ou da API
+# exposta, limites de memoria.
+
+x-db-url: &db-url postgresql+psycopg://apitacerto:${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}@postgres:5432/apitacerto
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: apitacerto
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: apitacerto
+    # pouca memoria: o banco inteiro tem poucos MB
+    command: ["postgres", "-c", "shared_buffers=48MB", "-c", "max_connections=20", "-c", "work_mem=4MB"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apitacerto -d apitacerto"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    mem_limit: 256m
+    restart: unless-stopped
+
+  seed:
+    image: ${APITACERTO_IMAGE:-apitacerto:local}
+    command: ["python", "scripts/seed.py", "load"]
+    environment:
+      DATABASE_URL: *db-url
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    image: ${APITACERTO_IMAGE:-apitacerto:local}
+    environment:
+      DATABASE_URL: *db-url
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    mem_limit: 256m
+    restart: unless-stopped
+
+  # atualizacao semanal (scraping da temporada atual + estatisticas).
+  # Nao sobe com o `up`: roda pelo timer do systemd (deploy/apitacerto-refresh.*)
+  #   docker compose -f compose.prod.yaml run --rm refresh
+  refresh:
+    profiles: ["jobs"]
+    image: ${APITACERTO_JOBS_IMAGE:-apitacerto-jobs:local}
+    environment:
+      DATABASE_URL: *db-url
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # pico medido: ~850 MB (statsmodels). Limite baixo de RAM + swap: quem
+    # fica lento e o job da madrugada, nao o site
+    mem_limit: 512m
+    memswap_limit: 2g
+    restart: "no"
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    mem_limit: 64m
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

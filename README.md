@@ -94,6 +94,8 @@ navegador ──HTTP──> FastAPI (backend/app) ──SQLAlchemy──> Postgr
 - Frontend: `cd frontend && npm run dev` — http://localhost:5173
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
 - Testes: `cd backend && uv run pytest` (48 passando)
+- Testes de integração (Postgres real + API real por HTTP): ver
+  [`_docs/acceptance.md`](_docs/acceptance.md)
 - Estatísticas: `cd backend && uv run python scripts/compute_stats.py`
   (também roda sozinho ao fim do scraping)
 - Calibração: `cd backend && uv run python scripts/calibrate_stats.py`
@@ -232,6 +234,8 @@ browser ──HTTP──> FastAPI (backend/app) ──SQLAlchemy──> Postgres
 - Frontend: `cd frontend && npm run dev` — http://localhost:5173
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
 - Tests: `cd backend && uv run pytest` (48 passing)
+- Integration tests (real Postgres + real API over HTTP): see
+  [`_docs/acceptance.md`](_docs/acceptance.md) (Portuguese)
 - Statistics: `cd backend && uv run python scripts/compute_stats.py`
   (also runs automatically at the end of scraping)
 - Calibration: `cd backend && uv run python scripts/calibrate_stats.py`

@@ -4,7 +4,9 @@
 
 import { TEAMS, REFEREES, SEASONS, buildHeatmap, kpisFor, timeseriesFor } from "./mockData";
 
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+// `??` e nao `||`: na imagem Docker o build usa VITE_BACKEND_URL="" (mesma
+// origem, a API serve o front), e string vazia tem que valer.
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8000";
 
 const USE_MOCK = false; // Fase 4: conectado ao backend real (ver _docs/specs.md)
 

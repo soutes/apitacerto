@@ -103,6 +103,23 @@ navegador ──HTTP──> FastAPI (backend/app) ──SQLAlchemy──> Postgr
 Frontend fala com o backend em `http://localhost:8000` (configurável via
 `VITE_BACKEND_URL`, ver `frontend/src/api.js`).
 
+### Com Docker
+
+Uma imagem só: o Node monta o front, e a API (FastAPI) serve o front e os
+dados na mesma porta.
+
+```bash
+docker build -t apitacerto:local .
+docker run --rm -p 8000:8000 apitacerto:local
+```
+
+Abre em http://localhost:8000. Sem `DATABASE_URL`, o container usa um SQLite
+vazio e mostra o mock. Para apontar para um Postgres:
+`-e DATABASE_URL=postgresql+psycopg://usuario:senha@host:5432/banco`.
+`-p 8000:8000` publica a porta 8000 do container na sua máquina. A imagem
+roda sem root, sem Node, sem uv e sem numpy/scipy, e tem `HEALTHCHECK`
+em `/health`.
+
 ## Dados
 
 Cobertura: 2018–2026 (2026 é a temporada em andamento). Fonte primária:
@@ -242,6 +259,23 @@ browser ──HTTP──> FastAPI (backend/app) ──SQLAlchemy──> Postgres
 
 The frontend talks to the backend at `http://localhost:8000` (configurable
 via `VITE_BACKEND_URL`, see `frontend/src/api.js`).
+
+### With Docker
+
+One image: Node builds the frontend, and the API (FastAPI) serves both the
+frontend and the data on the same port.
+
+```bash
+docker build -t apitacerto:local .
+docker run --rm -p 8000:8000 apitacerto:local
+```
+
+Open http://localhost:8000. Without `DATABASE_URL` the container uses an
+empty SQLite and shows mock data. To point it at Postgres:
+`-e DATABASE_URL=postgresql+psycopg://user:password@host:5432/db`.
+`-p 8000:8000` publishes the container's port 8000 on your machine. The
+image runs as non-root, without Node, uv or numpy/scipy, and has a
+`HEALTHCHECK` on `/health`.
 
 ## Data
 

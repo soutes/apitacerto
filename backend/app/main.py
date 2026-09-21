@@ -1,9 +1,12 @@
+import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -118,3 +121,13 @@ def get_dashboard(
         "kpis": kpis, "timeseries": timeseries, "heatmap": heatmap,
         "dataCompleteness": data_completeness,
     }
+
+
+def mount_frontend(target: FastAPI, static_dir: str | Path) -> None:
+    # Na imagem Docker a API tambem serve o build do React (mesma origem,
+    # sem CORS). Montado por ultimo: as rotas da API acima tem prioridade.
+    target.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")
+
+
+if os.environ.get("STATIC_DIR"):
+    mount_frontend(app, os.environ["STATIC_DIR"])

@@ -59,17 +59,6 @@ def get_filters(season: Optional[int] = None, db: Session = Depends(get_db)):
     }
 
 
-@app.get("/favoritism")
-def get_favoritism(season: Optional[int] = None, db: Session = Depends(get_db)):
-    # so pra aba Indice de Favorecimento: season omitido = "Todos", junta
-    # todas as temporadas ja ingeridas nos pares time x arbitro (ganha
-    # amostra pro n>=5). As outras abas continuam presas ao /dashboard,
-    # que exige season -- classificacao/serie temporal nao fazem sentido
-    # agregadas entre anos.
-    heatmap = queries.build_heatmap(db, season)
-    return {"heatmap": heatmap}
-
-
 @app.get("/season-overview")
 def get_season_overview(season: int = Query(..., ge=MIN_SEASON, le=2100), db: Session = Depends(get_db)):
     # KPIs de temporada + rankings de arbitro (mais cartao, vies de mandante)
@@ -86,7 +75,7 @@ def get_season_overview(season: int = Query(..., ge=MIN_SEASON, le=2100), db: Se
 
 @app.get("/statistics")
 def get_statistics(season: Optional[int] = None, db: Session = Depends(get_db)):
-    # aba Dados estatisticos (spec secao 9): so LE o JSON que
+    # aba Favorecimento (spec secao 9): so LE o JSON que
     # scripts/compute_stats.py calculou offline. Importar app.analysis aqui
     # levaria numpy/statsmodels pro pacote da funcao serverless (spec 9.6).
     key = str(season) if season is not None else "all"

@@ -67,14 +67,9 @@ def test_dashboard_uses_real_data_once_ingested(db_session):
     a_under_x = pairs[("Time A", "Arbitro X")]
     a_under_y = pairs[("Time A", "Arbitro Y")]
 
-    # ambos tem n=6, passam o piso de amostra
-    assert a_under_x["n"] == 6
-    assert not a_under_x["insufficientSample"]
-    assert not a_under_y["insufficientSample"]
-
-    # Time A ganha 100% sob X, 50% sob Y -- indice de X deve ser MAIOR
-    # (mais favoravel) que o de Y, refletindo o desvio real dos dados.
-    assert a_under_x["index"] > a_under_y["index"]
+    # contagens do par vem direto do banco: A ganha os 6 sob X, 3 de 6 sob Y
+    assert a_under_x["n"] == 6 and a_under_x["wins"] == 6 and a_under_x["yellow"] == 0
+    assert a_under_y["n"] == 6 and a_under_y["wins"] == 3 and a_under_y["yellow"] == 6
 
     # KPIs sem filtro somam as DUAS perspectivas (mandante e visitante) de
     # cada um dos 12 jogos -- 24 "jogos-time". Todos os 12 jogos tem

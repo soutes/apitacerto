@@ -1,5 +1,6 @@
 `apitacerto` is a dashboard showing Brasileirão Série A team performance
-broken down by referee (goals, cards, W/D/L, win rate, favoritism index).
+broken down by referee (goals, cards, W/D/L, win rate), plus a Favoritism
+tab that tests referee x club favoritism against chance (spec section 9).
 See [_docs/specs.md](_docs/specs.md) for the full spec.
 
 This folder is independent from the rest of this repo (the `weekly` app at

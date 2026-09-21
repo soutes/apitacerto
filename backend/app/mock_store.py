@@ -8,7 +8,7 @@ from __future__ import annotations
 import hashlib
 import random
 
-from app.stats import favoritism_index, kpis_for  # re-exported for main.py
+from app.stats import kpis_for, pair_rows  # re-exported for main.py
 
 TEAMS = [
     "Palmeiras", "Flamengo", "Atletico-MG", "Botafogo",
@@ -59,7 +59,7 @@ def _pair_stats(team: str, referee: str, season: int) -> dict:
 
 def build_heatmap(season: int) -> list[dict]:
     raw = [_pair_stats(t, r, season) for t in TEAMS for r in REFEREES]
-    return favoritism_index(raw)
+    return pair_rows(raw)
 
 
 def timeseries_for(team: str | None, season: int) -> list[dict]:

@@ -46,8 +46,9 @@ def test_dashboard_shape_no_filters():
 
     assert len(body["heatmap"]) > 0
     cell = body["heatmap"][0]
-    assert set(cell.keys()) >= {
-        "team", "referee", "n", "insufficientSample", "index",
+    assert set(cell.keys()) == {
+        "team", "referee", "n", "wins", "draws", "losses",
+        "goalsFor", "goalsAgainst", "yellow", "red",
     }
 
 
@@ -64,15 +65,14 @@ def test_dashboard_unknown_team_returns_zeroed_kpis_not_error():
     assert res.json()["kpis"]["games"] == 0
 
 
-def test_heatmap_marks_low_sample_pairs_as_insufficient():
+def test_old_favoritism_index_is_gone():
+    # indice antigo retirado em 2026-09-21 (spec 9.8): nao distinguia do
+    # acaso. A pergunta de favorecimento e respondida pelo /statistics.
+    assert client.get("/favoritism").status_code == 404
     body = client.get("/dashboard", params={"season": 2023}).json()
     for cell in body["heatmap"]:
-        if cell["n"] < 5:
-            assert cell["insufficientSample"] is True
-            assert cell["index"] is None
-        else:
-            assert cell["insufficientSample"] is False
-            assert cell["index"] is not None
+        assert "index" not in cell
+        assert "insufficientSample" not in cell
 
 
 def test_cors_allows_frontend_origin():

@@ -11,7 +11,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import Fixture, IngestionLog, MatchEvent, Referee, Team
-from app.stats import favoritism_index, kpis_for  # re-exported for main.py
+from app.stats import kpis_for, pair_rows  # re-exported for main.py
 
 CARD_TYPES = ("YELLOW_CARD", "RED_CARD")
 
@@ -241,7 +241,7 @@ def build_heatmap(db: Session, season: int | None) -> list[dict]:
             goalsFor=f.away_score, goalsAgainst=f.home_score,
             yellow=ay, red=ar, yellowRival=hy, redRival=hr)
 
-    return favoritism_index(list(raw_by_pair.values()))
+    return pair_rows(list(raw_by_pair.values()))
 
 
 def timeseries_for(db: Session, team: str | None, season: int) -> list[dict]:

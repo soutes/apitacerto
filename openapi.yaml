@@ -4,9 +4,8 @@ info:
   version: "1.0"
   description: >
     Backend do dashboard ApitaCerto. Serve dados agregados do Brasileirao
-    Serie A (2018 em diante) segmentados por time e arbitro, incluindo o
-    Indice de Favorecimento (ver _docs/specs.md secao 6) e a aba Dados
-    estatisticos (secao 9).
+    Serie A (2018 em diante) segmentados por time e arbitro, e a aba
+    Favorecimento (ver _docs/specs.md secao 9).
 
 servers:
   - url: http://localhost:8000
@@ -58,33 +57,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/FilterOptions"
 
-  /favoritism:
-    get:
-      summary: >-
-        Heatmap time x arbitro pra aba Indice de Favorecimento. Season
-        omitido = "Todos", agrega todas as temporadas ja ingeridas (so
-        essa aba faz isso -- ganha amostra pro n>=5 do indice).
-      operationId: getFavoritism
-      parameters:
-        - name: season
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [heatmap]
-                properties:
-                  heatmap:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/HeatmapCell"
-
   /season-overview:
     get:
       summary: >-
@@ -110,7 +82,7 @@ paths:
   /statistics:
     get:
       summary: >-
-        Aba Dados estatisticos (spec secao 9): relatorio pre-calculado offline
+        Aba Favorecimento (spec secao 9): relatorio pre-calculado offline
         por scripts/compute_stats.py e so lido aqui. Season omitido = todas
         as temporadas juntas.
       operationId: getStatistics
@@ -202,7 +174,7 @@ components:
 
     HeatmapCell:
       type: object
-      required: [team, referee, n, insufficientSample]
+      required: [team, referee, n, wins, draws, losses, goalsFor, goalsAgainst, yellow, red]
       properties:
         team: { type: string }
         referee: { type: string }
@@ -210,15 +182,10 @@ components:
         wins: { type: integer }
         draws: { type: integer }
         losses: { type: integer }
+        goalsFor: { type: integer }
+        goalsAgainst: { type: integer }
         yellow: { type: integer }
         red: { type: integer }
-        insufficientSample:
-          type: boolean
-          description: "true quando n < 5 (piso de amostra, spec secao 6)"
-        index:
-          type: number
-          nullable: true
-          description: "Indice de Favorecimento; null quando insufficientSample"
 
     RefereeRanking:
       type: object

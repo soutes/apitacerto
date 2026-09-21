@@ -238,7 +238,12 @@ do brief original): perfil individual de árbitro/clube, coluna "Forma"
 vazio dedicado além do "—"/opacidade reduzida já usado nas linhas sem
 dado.
 
-## 6. Regra de negócio — Índice de Favorecimento
+## 6. Regra de negócio — Índice de Favorecimento (RETIRADO em 2026-09-21)
+
+> **Retirado do produto em 2026-09-21** (emenda em 9.8): o diagnóstico de
+> 2026-09-14 mostrou que o índice não se distingue do acaso. A seção fica
+> como registro histórico; a pergunta de favorecimento é respondida pela
+> seção 9 (aba Favorecimento).
 
 Objetivo do dashboard: sinalizar possíveis favorecimentos de árbitro a time.
 Não compara árbitro isolado — compara **o time sob esse árbitro vs o mesmo
@@ -518,8 +523,8 @@ campo, estilo/força do clube na temporada, adversário e rigor do árbitro.
 
 - Público por jogo (Boletim Financeiro em PDF) — dose-resposta de pressão
   da torcida fica para depois.
-- Troca das abas antigas (Favorecimento/Dashboard) pelo método novo —
-  depende da validação do usuário.
+- Troca da aba Dashboard pelo método novo — depende da validação do
+  usuário. (A aba Favorecimento antiga já foi trocada, ver 9.8.)
 
 ### 9.8 Emendas (datadas)
 
@@ -570,3 +575,11 @@ campo, estilo/força do clube na temporada, adversário e rigor do árbitro.
   acento ("America", "Botafogo de Futebol E Regatas", "Cruzeiro Esporte
   Clube", "Esporte Clube Bahia", "Csa", "Parana") e viravam clubes
   duplicados — mapeados em `TEAM_NAME_ALIASES`.
+- **2026-09-21, retirada do Índice de Favorecimento (seção 6)**: decisão do
+  usuário após o diagnóstico de 2026-09-14 (confiabilidade split-half ~0,20;
+  permutação: 3 destaques contra 2,5 esperados por acaso; nenhum par passa
+  Benjamini-Hochberg; o top-10 de 2022–24 não se repete em 2025–26). A aba
+  antiga e o endpoint `/favoritism` saem do produto; o campo `index` sai das
+  células do `/dashboard`. A aba "Dados estatísticos" (esta seção) passa a
+  se chamar **Favorecimento**. O método desta seção não muda. O código do
+  índice antigo continua no histórico do git.

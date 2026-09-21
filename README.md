@@ -3,7 +3,7 @@
 *English below.*
 
 Dashboard interativo do Brasileirão Série A segmentado por árbitro — gols,
-cartões, V/E/D, classificação — com uma aba de **dados estatísticos** que
+cartões, V/E/D, classificação — com uma aba de **Favorecimento** que
 testa, com o método explicado embaixo de cada gráfico, se algum árbitro
 favorece ou persegue algum clube. Sem Power BI, sem Looker: frontend próprio
 (React) consumindo um backend próprio (FastAPI), dados persistidos em banco
@@ -21,14 +21,14 @@ Ver spec completa em [`_docs/specs.md`](_docs/specs.md).
 - **Classificação** — tabela oficial (vitória×3 + empate×1).
 - **Árbitros** — ranking por rigor (cartões/jogo) e viés de mandante.
 - **Clubes** — matriz clube × árbitro com seletor de indicador.
-- **Favorecimento** — matriz com o Índice de Favorecimento original
-  (spec seção 6). O diagnóstico de 14/09/2026 mostrou que esse índice não se
-  distingue do acaso; ele fica até a aba nova ser validada.
-- **Dados estatísticos** (nova) — ver abaixo.
+- **Favorecimento** — observado vs. esperado com teste estatístico, ver
+  abaixo. Substituiu em 21/09/2026 o antigo Índice de Favorecimento (spec
+  seção 6), retirado porque o diagnóstico de 14/09/2026 mostrou que ele não
+  se distingue do acaso.
 
-Clicar numa célula das matrizes abre o detalhe do par (KPIs e séries).
+Clicar numa célula da matriz de Clubes abre o detalhe do par (KPIs e séries).
 
-## Dados estatísticos — como funciona
+## Favorecimento — como funciona
 
 Tudo compara **observado com esperado**. O esperado de cada jogo considera
 mando, força e estilo de cada clube na temporada, adversário e rigor do
@@ -138,7 +138,7 @@ mock determinístico (não quebra o dashboard enquanto a ingestão progride).
 # ApitaCerto (English)
 
 Interactive dashboard of Brasileirão Série A broken down by referee — goals,
-cards, W/D/L, standings — with a **statistics** tab that tests, with the
+cards, W/D/L, standings — with a **Favoritism** tab that tests, with the
 method explained under every chart, whether any referee favors or targets any
 club. No Power BI, no Looker: a custom React frontend talking to a custom
 FastAPI backend, data persisted in a database (SQLAlchemy — SQLite locally,
@@ -156,14 +156,14 @@ Full spec in [`_docs/specs.md`](_docs/specs.md) (Portuguese).
 - **Standings** — official table (win×3 + draw×1).
 - **Referees** — ranking by strictness (cards/game) and home bias.
 - **Clubs** — club × referee matrix with a metric picker.
-- **Favoritism** — matrix with the original Favoritism Index (spec section
-  6). The 2026-09-14 diagnosis showed this index is indistinguishable from
-  chance; it stays until the new tab is validated.
-- **Statistics** (new) — see below.
+- **Favoritism** — observed vs. expected with statistical tests, see below.
+  On 2026-09-21 it replaced the old Favoritism Index (spec section 6),
+  removed because the 2026-09-14 diagnosis showed it is indistinguishable
+  from chance.
 
-Clicking a matrix cell opens the pair detail (KPIs and time series).
+Clicking a cell in the Clubs matrix opens the pair detail (KPIs and time series).
 
-## Statistics — how it works
+## Favoritism — how it works
 
 Everything compares **observed with expected**. Each match's expected value
 accounts for home advantage, each club's strength and style that season, the

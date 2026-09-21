@@ -4,7 +4,6 @@ import Sidebar from "./components/Sidebar";
 import DashboardTab from "./components/DashboardTab";
 import StandingsTab from "./components/StandingsTab";
 import OverviewTab from "./components/OverviewTab";
-import FavoritismTab from "./components/FavoritismTab";
 import MatrixTab from "./components/MatrixTab";
 import StatisticsTab from "./components/StatisticsTab";
 import ScreenHeader from "./components/ScreenHeader";
@@ -114,21 +113,10 @@ export default function App() {
               <StandingsTab season={season} seasons={options.seasons} onChangeSeason={setSeason} rows={heatmapRows} />
             )}
 
-            {activeTab === "confrontos" && (
-              <div className="screen">
-                <ScreenHeader
-                  title="Favorecimento"
-                  subtitle="Matriz clube × árbitro — Índice de Favorecimento"
-                  showSeasonPicker={false}
-                />
-                <FavoritismTab seasons={options.seasons} onSelect={goToDetail} />
-              </div>
-            )}
-
             {activeTab === "estatisticas" && (
               <div className="screen">
                 <ScreenHeader
-                  title="Dados estatísticos"
+                  title="Favorecimento"
                   subtitle="Observado vs. esperado, com o método explicado embaixo de cada gráfico"
                   showSeasonPicker={false}
                 />

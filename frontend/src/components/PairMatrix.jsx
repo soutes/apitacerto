@@ -1,6 +1,5 @@
-// Grid generico time x arbitro. Tab 2 (Indice de Favorecimento) e Tab 3
-// (Tabela Geral) sao a mesma grade renderizando valores diferentes -- so
-// muda o `cellFor(row)` que cada aba passa.
+// Grid generico time x arbitro (aba Clubes). Cada indicador e a mesma
+// grade renderizando valores diferentes -- so muda o `cellFor(row)`.
 //
 // cellFor(row) -> { text, title, background } | null (null = celula em
 // branco, sem estilo -- usado quando o valor nao faz sentido pro par).

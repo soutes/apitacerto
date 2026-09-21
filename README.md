@@ -60,6 +60,25 @@ sem público (H2 apoiada, p = 0,018); a escala da CBF concentra alguns pares
 além do que as regras explicam — pergunta sobre a escala, não prova sobre o
 árbitro.
 
+## Arquitetura
+
+```
+navegador ──HTTP──> FastAPI (backend/app) ──SQLAlchemy──> Postgres / SQLite
+  React                  │  só lê o banco                     ▲
+  (frontend/)            └─ GET /health: API + banco ok?       │
+                                                               │
+             scripts offline (scrape_cbf.py, compute_stats.py) ┘
+             buscam a CBF e gravam no banco; nunca rodam dentro de um request
+```
+
+- O navegador só mostra: pede dados à API por HTTP e desenha os gráficos.
+- A API só lê do banco. Nada no caminho do request chama a CBF.
+- A ingestão (scraping + estatística pesada) é um passo separado, que grava
+  no banco o que a API depois lê pronto.
+- `GET /health` responde `200 {"status": "ok", "database": "ok"}` quando a
+  API e o banco estão de pé, e `503` quando o banco não responde. É a
+  readiness do Kubernetes e o smoke test do CI.
+
 ## Estrutura
 
 - `frontend/` — React + Vite + Recharts
@@ -74,7 +93,7 @@ além do que as regras explicam — pergunta sobre a escala, não prova sobre o
 
 - Frontend: `cd frontend && npm run dev` — http://localhost:5173
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
-- Testes: `cd backend && uv run pytest` (46 passando)
+- Testes: `cd backend && uv run pytest` (48 passando)
 - Estatísticas: `cd backend && uv run python scripts/compute_stats.py`
   (também roda sozinho ao fim do scraping)
 - Calibração: `cd backend && uv run python scripts/calibrate_stats.py`
@@ -177,6 +196,27 @@ behind closed doors (H2 supported, p = 0.018); CBF's assignment concentrates
 some pairs beyond what the rules explain — a question about assignment, not
 proof about the referee.
 
+## Architecture
+
+```
+browser ──HTTP──> FastAPI (backend/app) ──SQLAlchemy──> Postgres / SQLite
+  React                │  read-only on the database         ▲
+  (frontend/)          └─ GET /health: API + database up?    │
+                                                             │
+           offline scripts (scrape_cbf.py, compute_stats.py) ┘
+           fetch from the CBF and write to the database; never inside a request
+```
+
+- The browser only displays: it asks the API for data over HTTP and draws
+  the charts.
+- The API only reads from the database. Nothing in the request path calls
+  the CBF.
+- Ingestion (scraping + heavy statistics) is a separate step that writes to
+  the database what the API later reads ready-made.
+- `GET /health` returns `200 {"status": "ok", "database": "ok"}` when the
+  API and the database are up, and `503` when the database does not answer.
+  It is the Kubernetes readiness check and the CI smoke test.
+
 ## Structure
 
 - `frontend/` — React + Vite + Recharts
@@ -191,7 +231,7 @@ proof about the referee.
 
 - Frontend: `cd frontend && npm run dev` — http://localhost:5173
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
-- Tests: `cd backend && uv run pytest` (46 passing)
+- Tests: `cd backend && uv run pytest` (48 passing)
 - Statistics: `cd backend && uv run python scripts/compute_stats.py`
   (also runs automatically at the end of scraping)
 - Calibration: `cd backend && uv run python scripts/calibrate_stats.py`

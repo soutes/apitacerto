@@ -12,6 +12,30 @@ servers:
   - url: http://localhost:8000
 
 paths:
+  /health:
+    get:
+      summary: Saude da API e do banco (readiness do Kubernetes, smoke test do CI)
+      operationId: getHealth
+      responses:
+        "200":
+          description: API no ar e banco respondendo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  database: { type: string, example: ok }
+        "503":
+          description: Banco inacessivel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: error }
+                  database: { type: string, example: unreachable }
+
   /filters:
     get:
       summary: Opcoes disponiveis para os filtros do dashboard

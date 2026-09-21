@@ -3,6 +3,9 @@ from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app import mock_store, queries
@@ -26,6 +29,17 @@ app.add_middleware(
     allow_methods=["GET"],
     allow_headers=["*"],
 )
+
+
+@app.get("/health")
+def health(db: Session = Depends(get_db)):
+    # readiness do Kubernetes e smoke test do CI: so fica pronto quando o
+    # banco responde, entao o pod nao recebe trafego antes do Postgres subir
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        return JSONResponse(status_code=503, content={"status": "error", "database": "unreachable"})
+    return {"status": "ok", "database": "ok"}
 
 
 @app.get("/filters")

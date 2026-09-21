@@ -137,7 +137,7 @@ estatísticas. Três serviços:
   Compose cada serviço é achado pelo nome, `localhost` seria o próprio
   container.
 
-Testes de integração dentro do Compose (banco separado `apitacerto_test`):
+Testes de integração dentro do Compose (Postgres separado, `postgres-test`, sem volume):
 
 ```bash
 docker compose --profile test run --rm --build test
@@ -339,7 +339,7 @@ statistics. Three services:
   inside Compose each service is found by its name, and `localhost` would be
   the container itself.
 
-Integration tests inside Compose (separate `apitacerto_test` database):
+Integration tests inside Compose (separate `postgres-test`, no volume):
 
 ```bash
 docker compose --profile test run --rm --build test

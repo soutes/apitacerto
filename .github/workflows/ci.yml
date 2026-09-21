@@ -1,0 +1,101 @@
+# Testa, monta a imagem e so entao faz o deploy no Kubernetes local (kind).
+# Se qualquer teste falhar, o job deploy nem comeca: a versao que ja esta no
+# cluster continua no ar.
+#
+# Local, com act (ver README):
+#   act push -P ubuntu-latest=catthehacker/ubuntu:act-latest --network kind
+name: ci
+
+on:
+  push:
+    branches: [main, homework-3]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  COMPOSE_PROJECT_NAME: apitacerto-ci  # nunca mexe no Compose local do dev
+  KIND_CLUSTER: apitacerto
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.10.4"
+
+      - name: Testes unitarios (backend)
+        working-directory: backend
+        run: |
+          uv sync --frozen
+          uv run pytest -q
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Lint e build (frontend)
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+
+      - name: Testes de integracao (Postgres real, via Docker Compose)
+        run: docker compose --profile test run --rm --build test
+
+      - name: Limpa o Compose de teste
+        if: always()
+        run: docker compose --profile test down -v
+
+  deploy:
+    needs: test  # so roda se o job test passou
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instala kind e kubectl
+        run: |
+          curl -fsSLo /usr/local/bin/kind https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64
+          curl -fsSLo /usr/local/bin/kubectl https://dl.k8s.io/release/v1.34.1/bin/linux/amd64/kubectl
+          chmod +x /usr/local/bin/kind /usr/local/bin/kubectl
+
+      - name: Tag unica da imagem
+        # commit + horario: mesmo sem commit novo (act), cada deploy e uma
+        # imagem diferente e o Kubernetes troca os pods
+        run: echo "TAG=$(git rev-parse --short HEAD)-$(date +%Y%m%d%H%M%S)" >> "$GITHUB_ENV"
+
+      - name: Monta a imagem
+        run: docker build -t "apitacerto:${TAG}" .
+
+      - name: Cluster kind (cria se nao existir)
+        run: |
+          kind get clusters | grep -qx "$KIND_CLUSTER" || kind create cluster --name "$KIND_CLUSTER" --wait 120s
+          mkdir -p ~/.kube
+          if [ "${ACT:-}" = "true" ]; then
+            # dentro do act o job e um container na rede "kind" (--network kind):
+            # fala com o cluster pelo nome interno
+            kind get kubeconfig --internal --name "$KIND_CLUSTER" > ~/.kube/config
+          else
+            kind get kubeconfig --name "$KIND_CLUSTER" > ~/.kube/config
+          fi
+          kubectl cluster-info
+
+      - name: Deploy
+        run: |
+          kind load docker-image "apitacerto:${TAG}" --name "$KIND_CLUSTER"
+          # Job e imutavel: recria (a carga e idempotente, banco cheio = nada muda)
+          kubectl delete job apitacerto-seed --ignore-not-found
+          sed "s|apitacerto:local|apitacerto:${TAG}|g" k8s/*.yaml | kubectl apply -f -
+          kubectl wait --for=condition=complete job/apitacerto-seed --timeout=300s
+          kubectl rollout status deployment/apitacerto --timeout=300s
+
+      - name: Confere o deploy
+        run: |
+          kubectl get deployment apitacerto -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+          kubectl port-forward service/apitacerto 8000:8000 >/dev/null 2>&1 &
+          for i in $(seq 1 30); do curl -sf localhost:8000/health && break; sleep 1; done
+          curl -sf localhost:8000/health | grep -q '"status":"ok"'
+          curl -sf localhost:8000/ | grep -o '<title>[^<]*</title>'

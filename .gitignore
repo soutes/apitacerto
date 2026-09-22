@@ -25,3 +25,8 @@ dist/
 # artefatos de processo do design handoff, nao pertencem ao repo
 _docs/*.zip
 _docs/flip7-2-DESIGN.md
+
+# chaves SSH / privadas: nunca no git (o .pem publico da CBF fica)
+*.key
+id_rsa*
+id_ed25519*

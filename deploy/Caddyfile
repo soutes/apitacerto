@@ -10,3 +10,7 @@
 	encode gzip
 	reverse_proxy app:8000
 }
+
+# Outros sites hospedados nesta VM: um arquivo .caddy por site em
+# /opt/caddy-sites (montado em /etc/caddy/sites)
+import /etc/caddy/sites/*.caddy

@@ -77,8 +77,13 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # regras de outros sites nesta VM (ex.: soutes.caddy), um arquivo por site
+      - /opt/caddy-sites:/etc/caddy/sites:ro
       - caddy_data:/data
       - caddy_config:/config
+    # default: fala com a API; web: rede compartilhada com os outros sites
+    # (o banco e a API do ApitaCerto nao entram nela)
+    networks: [default, web]
     depends_on:
       - app
     mem_limit: 64m
@@ -88,3 +93,7 @@ volumes:
   pgdata:
   caddy_data:
   caddy_config:
+
+networks:
+  web:
+    external: true  # criar uma vez: docker network create web

@@ -1,0 +1,288 @@
+/* Aba Analises dos clubes -- reaproveita a base da aba Analises (analyses.css:
+   .an-tab, cards, filtros, rodape) e acrescenta os graficos proprios. Destino
+   final em escala ordinal: campeao (petroleo escuro), G-6 (petroleo), meio
+   (cinza), rebaixado (coral). */
+
+.ca-tab {
+  --fate-champion: #0d3b52;
+  --fate-top6: #006e9a;
+  --fate-mid: #b5b0a7;
+  --fate-relegated: #c43f3e;
+  --now: #1f2a37;
+  --label-w: 128px;
+  --dot: 9px;
+}
+
+.key-now { width: 10px; height: 10px; border-radius: 2px; background: var(--now); transform: rotate(45deg); }
+.key-champion { background: var(--fate-champion); }
+.key-top6 { background: var(--fate-top6); }
+.key-mid { background: var(--fate-mid); }
+.key-relegated { background: var(--fate-relegated); }
+
+/* ------------------------------------------------------------ controles */
+.ca-filters { align-items: flex-end; }
+.ca-round { flex: 2 1 260px; max-width: 420px; }
+.ca-round b { font: 800 13px/1 var(--font-ui); color: var(--ink); letter-spacing: 0; }
+.ca-round input[type="range"] { width: 100%; height: 42px; margin: 0; accent-color: var(--teal); cursor: pointer; }
+.ca-presets { display: flex; flex-wrap: wrap; gap: 6px; align-self: flex-end; padding-bottom: 4px; }
+.ca-presets button {
+  appearance: none;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  font: 700 12px/1 var(--font-ui);
+  color: var(--muted-2);
+  cursor: pointer;
+}
+.ca-presets button:hover { border-color: oklch(80% 0.04 195); color: var(--ink); }
+.ca-presets button.is-active { background: var(--teal); border-color: var(--teal); color: #fff; }
+.ca-presets button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+/* ------------------------------------------------------------ linha da tabela (histograma de pontos) */
+.ca-cut-headline { font-size: 15px; }
+.ca-strip { display: flex; flex-direction: column; gap: 6px; }
+.ca-strip-plot { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 4px 0; }
+.ca-lane { display: grid; grid-template-columns: var(--label-w) minmax(0, 1fr); align-items: end; min-height: 26px; }
+.ca-lane + .ca-lane { border-top: 1px solid var(--border-soft); }
+.ca-lane-label { align-self: center; padding-right: 10px; font: 700 12px/1.25 var(--font-ui); color: var(--muted-2); }
+.lane-now .ca-lane-label { color: var(--ink); }
+.ca-lane-track { position: relative; display: block; height: calc(var(--stack) * (var(--dot) + 2px) + 8px); }
+.ca-dot {
+  position: absolute;
+  bottom: calc(var(--level) * (var(--dot) + 2px) + 4px);
+  width: var(--dot);
+  height: var(--dot);
+  margin-left: calc(var(--dot) / -2);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px #fff;
+  cursor: default;
+  animation: an-pop .4s cubic-bezier(.2, .7, .2, 1) both;
+}
+.lane-champion .ca-dot { background: var(--fate-champion); }
+.lane-top6 .ca-dot { background: var(--fate-top6); }
+.lane-mid .ca-dot { background: var(--fate-mid); }
+.lane-relegated .ca-dot { background: var(--fate-relegated); }
+.ca-dot.is-now { background: var(--now); border-radius: 2px; transform: rotate(45deg) scale(1.05); }
+.ca-dot.is-dim { opacity: .28; }
+.ca-dot.is-mine { z-index: 2; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--teal); }
+.ca-dot em {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 5px);
+  transform: translateX(-50%);
+  font: 800 10px/1 var(--font-ui);
+  font-style: normal;
+  color: var(--teal-dark);
+  white-space: nowrap;
+}
+.ca-dot:hover { z-index: 3; transform: scale(1.35); }
+.ca-dot.is-now:hover { transform: rotate(45deg) scale(1.35); }
+
+/* zonas e linhas de corte: posicao relativa a trilha (desconta a coluna de rotulos) */
+.ca-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--label-w) + (100% - var(--label-w)) * var(--x0));
+  width: calc((100% - var(--label-w)) * (var(--x1) - var(--x0)));
+  pointer-events: none;
+}
+.ca-zone.tone-bad { background: color-mix(in oklch, var(--fate-relegated) 8%, transparent); }
+.ca-zone.tone-good { background: color-mix(in oklch, var(--fate-top6) 7%, transparent); }
+.ca-cutline {
+  position: absolute;
+  top: -4px;
+  bottom: 0;
+  left: calc(var(--label-w) + (100% - var(--label-w)) * var(--x));
+  border-left: 2px dashed currentColor;
+  pointer-events: none;
+}
+.ca-cutline.tone-bad { --c: var(--fate-relegated); color: var(--c); }
+.ca-cutline.tone-good { --c: var(--fate-top6); color: var(--c); }
+.ca-cutline span {
+  position: absolute;
+  top: -22px;
+  left: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--c);
+  color: #fff;
+  font: 700 11px/1.3 var(--font-ui);
+  white-space: nowrap;
+}
+.ca-cutline.is-right span { left: auto; right: 6px; }
+.ca-strip-plot { margin-top: 26px; }
+.ca-tip {
+  position: absolute;
+  z-index: 5;
+  top: -8px;
+  left: calc(var(--label-w) + (100% - var(--label-w)) * var(--x));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: max-content;
+  max-width: 260px;
+  padding: 8px 10px;
+  transform: translate(-50%, -100%);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px oklch(20% 0 0 / .14);
+  font: 500 12px/1.4 var(--font-ui);
+  color: var(--muted-2);
+  pointer-events: none;
+}
+.ca-tip b { color: var(--ink); }
+.ca-tip.is-right { transform: translate(-100%, -100%); }
+.ca-axis { display: grid; grid-template-columns: var(--label-w) minmax(0, 1fr); }
+.ca-axis-ticks { position: relative; height: 14px; font: 600 10.5px/1 var(--font-ui); color: var(--muted); font-variant-numeric: tabular-nums; }
+.ca-axis-ticks span { position: absolute; top: 0; transform: translateX(-50%); }
+.ca-now-flags { display: flex; flex-direction: column; gap: 6px; }
+.ca-now-flags p { margin: 0; font: 600 12.5px/1.6 var(--font-ui); color: var(--ink); }
+
+/* ------------------------------------------------------------ termometro */
+.ca-thermo { display: flex; flex-direction: column; }
+.ca-thermo-row {
+  display: grid;
+  grid-template-columns: 28px minmax(120px, 1.1fr) 64px minmax(160px, 2fr);
+  gap: 10px;
+  align-items: center;
+  padding: 6px 8px;
+  border-top: 1px solid var(--border-soft);
+  border-radius: 8px;
+}
+.ca-thermo-row.is-head { border-top: 0; padding-bottom: 4px; font: 700 10.5px/1.2 var(--font-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.ca-thermo-row.is-highlight { background: oklch(96.5% 0.03 195); box-shadow: inset 3px 0 0 var(--teal); }
+.ca-thermo-pos { font: 700 12px/1 var(--font-mono); color: var(--muted); }
+.ca-thermo-club { display: flex; flex-direction: column; gap: 2px; min-width: 0; font: 700 13px/1.25 var(--font-ui); color: var(--ink); }
+.ca-flag { font: 700 10.5px/1.2 var(--font-ui); }
+.ca-flag.bad { color: oklch(45% 0.16 25); }
+.ca-thermo-pts { font: 700 13px/1 var(--font-ui); color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
+.ca-thermo-pts small { font-weight: 500; color: var(--muted); }
+.ca-thermo-bar { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ca-stack { display: flex; gap: 2px; height: 12px; border-radius: 4px; overflow: hidden; background: var(--an-soft); }
+.ca-seg { display: block; height: 100%; }
+.ca-seg.fate-relegated { background: var(--fate-relegated); }
+.ca-seg.fate-mid { background: var(--fate-mid); }
+.ca-seg.fate-top6 { background: var(--fate-top6); }
+.ca-seg.fate-champion { background: var(--fate-champion); }
+.ca-thermo-read, .ca-thermo-few { font: 600 11.5px/1.2 var(--font-ui); color: var(--muted-2); }
+.ca-thermo-few { font-weight: 500; color: var(--muted); }
+
+/* ------------------------------------------------------------ 45 pontos (halteres) */
+.ca-dumbbells { display: flex; flex-direction: column; gap: 2px; }
+.ca-db-axis, .ca-db-row { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; align-items: center; }
+.ca-db-ticks { position: relative; height: 14px; margin: 0 8px; font: 600 10.5px/1 var(--font-ui); color: var(--muted); }
+.ca-db-ticks span { position: absolute; transform: translateX(-50%); }
+.ca-db-label { font: 700 12px/1 var(--font-mono); color: var(--muted-2); }
+.ca-db-track { position: relative; height: 28px; margin: 0 8px; }
+.ca-db-ref { position: absolute; top: 2px; bottom: 2px; width: 1px; background: oklch(70% 0.01 260); }
+.ca-db-seg { position: absolute; top: 50%; height: 3px; margin-top: -1.5px; background: oklch(82% 0.01 260); border-radius: 2px; }
+.ca-db-dot { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; box-shadow: 0 0 0 2px #fff; }
+.ca-db-dot.down { background: var(--fate-relegated); }
+.ca-db-dot.safe { background: var(--fate-top6); }
+.ca-db-dot em {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 700 10.5px/1 var(--font-ui);
+  font-style: normal;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------ posicoes (promovidos, campeoes) */
+.ca-pos-strip { position: relative; height: 64px; margin: 6px 10px 0; border-bottom: 1px solid var(--border); }
+.ca-pos-zone { position: absolute; top: 0; bottom: 0; }
+.ca-pos-zone.top { background: color-mix(in oklch, var(--fate-top6) 8%, transparent); }
+.ca-pos-zone.down { background: color-mix(in oklch, var(--fate-relegated) 8%, transparent); }
+.ca-pos-dot {
+  position: absolute;
+  bottom: calc(var(--level) * 13px + 4px);
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px #fff;
+}
+.ca-pos-dot.fate-relegated { background: var(--fate-relegated); }
+.ca-pos-dot.fate-mid { background: var(--fate-mid); }
+.ca-pos-dot.fate-top6 { background: var(--fate-top6); }
+.ca-pos-dot.fate-champion { background: var(--fate-champion); }
+.ca-pos-dot.is-mine { z-index: 2; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--teal); }
+.ca-pos-axis { position: relative; height: 14px; margin: 4px 10px 0; font: 600 10.5px/1 var(--font-ui); color: var(--muted); }
+.ca-pos-axis span { position: absolute; transform: translateX(-50%); }
+
+.ca-champs { display: flex; flex-direction: column; gap: 2px; }
+.ca-champs-head { font: 700 10.5px/1.2 var(--font-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.ca-champs .ca-pos-axis { margin-left: calc(132px + 18px); }
+.ca-champ-row { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 8px; align-items: center; }
+.ca-champ-label { font: 600 12px/1.25 var(--font-ui); color: var(--muted-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-champ-label b { color: var(--ink); }
+.ca-champ-track { position: relative; height: 26px; margin: 0 10px; background: linear-gradient(90deg, color-mix(in oklch, var(--fate-top6) 8%, transparent) 0 26.3%, transparent 26.3% 78.9%, color-mix(in oklch, var(--fate-relegated) 8%, transparent) 78.9%); border-radius: 6px; }
+.ca-champ-from, .ca-champ-to { position: absolute; top: 50%; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border-radius: 50%; box-shadow: 0 0 0 2px #fff; }
+.ca-champ-from { background: var(--fate-champion); }
+.ca-champ-to { background: var(--fate-top6); }
+.ca-champ-to.is-open { background: #fff; box-shadow: inset 0 0 0 2px var(--fate-top6), 0 0 0 2px #fff; }
+.ca-champ-seg { position: absolute; top: 50%; height: 3px; margin-top: -1.5px; background: oklch(80% 0.02 230); border-radius: 2px; }
+.ca-champ-to em { position: absolute; left: 14px; top: -2px; font: 700 11px/1 var(--font-ui); font-style: normal; color: var(--ink); white-space: nowrap; }
+
+/* ------------------------------------------------------------ turno x returno */
+.ca-turno { display: flex; flex-direction: column; }
+.ca-turno-row { display: grid; grid-template-columns: minmax(96px, 1fr) minmax(140px, 2fr) 150px; gap: 10px; align-items: center; padding: 5px 8px; border-radius: 8px; }
+.ca-turno-row.is-head { padding-bottom: 2px; }
+.ca-turno-row.is-highlight { background: oklch(96.5% 0.03 195); box-shadow: inset 3px 0 0 var(--teal); }
+.ca-turno-scale { position: relative; height: 12px; font: 600 10.5px/1 var(--font-ui); color: var(--muted); }
+.ca-turno-scale span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.ca-turno-scale span:first-child { transform: none; }
+.ca-turno-scale span:last-child { transform: translateX(-100%); }
+.ca-turno-name { font: 600 12.5px/1.25 var(--font-ui); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-turno-track { position: relative; height: 18px; background: linear-gradient(oklch(72% 0.01 260), oklch(72% 0.01 260)) center / 1px 100% no-repeat; }
+.ca-turno-dot { position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; box-shadow: 0 0 0 1.5px #fff; }
+.ca-turno-dot.up { background: var(--an-less); }
+.ca-turno-dot.down { background: var(--an-more); }
+.ca-turno-dot.flat { background: var(--fate-mid); }
+.ca-turno-count { display: flex; align-items: center; gap: 8px; justify-content: flex-end; font: 600 12px/1 var(--font-ui); color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------ primeiro gol */
+.ca-tiles-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ca-sub-head { font: 700 10.5px/1.2 var(--font-mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.ca-gap { align-self: center; font: 700 14px/1 var(--font-ui); color: var(--muted); }
+
+/* ------------------------------------------------------------ tendencias */
+.ca-trends { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.ca-trend { display: flex; flex-direction: column; gap: 8px; }
+.ca-trend-head { display: flex; flex-direction: column; gap: 2px; }
+.ca-trend-head b { font: 700 13px/1.3 var(--font-ui); color: var(--ink); }
+.ca-trend-head small { font: 500 12px/1.3 var(--font-ui); color: var(--muted-2); }
+.ca-trend-bars { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; align-items: end; height: 96px; padding-bottom: 16px; }
+.ca-trend-bar { position: relative; display: flex; align-items: flex-end; height: 100%; }
+.ca-trend-fill { display: block; width: 100%; max-width: 22px; margin: 0 auto; border-radius: 4px 4px 0 0; background: var(--an-less); transform-origin: bottom; animation: ca-grow-y .6s cubic-bezier(.2, .7, .2, 1) both; }
+.ca-trend-bar.is-open .ca-trend-fill { background: color-mix(in oklch, var(--an-less) 45%, white); }
+.ca-trend-bar em { position: absolute; bottom: -15px; left: 0; right: 0; text-align: center; font: 600 10px/1 var(--font-ui); font-style: normal; color: var(--muted); }
+@keyframes ca-grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* ------------------------------------------------------------ responsivo */
+@container an (max-width: 700px) {
+  .ca-tab { --label-w: 0px; --dot: 7px; }
+  .ca-lane { grid-template-columns: minmax(0, 1fr); }
+  .ca-lane-label { padding: 4px 0 0; font-size: 11px; }
+  .ca-axis { grid-template-columns: minmax(0, 1fr); }
+  .ca-axis > span:first-child { display: none; }
+  .ca-cutline span { display: none; }
+  .ca-strip-plot { margin-top: 4px; }
+  .ca-thermo-row { grid-template-columns: 22px minmax(0, 1fr) 56px; }
+  .ca-thermo-row.is-head span:last-child { display: none; }
+  .ca-thermo-bar { grid-column: 2 / -1; }
+  .ca-turno-row { grid-template-columns: minmax(80px, 1fr) minmax(110px, 1.6fr); }
+  .ca-turno-count { grid-column: 1 / -1; justify-content: flex-start; }
+  .ca-turno-row.is-head > span:last-child { display: none; }
+  .ca-trends { grid-template-columns: 1fr; }
+  .ca-champ-row { grid-template-columns: 104px minmax(0, 1fr); }
+  .ca-champs .ca-pos-axis { margin-left: calc(104px + 18px); }
+  .ca-presets, .ca-round { grid-column: 1 / -1; }
+  .ca-round { max-width: none; }
+}

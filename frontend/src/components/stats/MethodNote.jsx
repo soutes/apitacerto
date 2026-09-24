@@ -1,4 +1,4 @@
-// Explicacao que fica embaixo de cada grafico (pedido do usuario): como o
+// Explicacao tecnica de cada grafico, no painel "Como foi criado": como o
 // dado foi construido, metodo, quem criou, por que usamos, como ler.
 const ROWS = [
   ["built", "Como foi construído"],

@@ -14,31 +14,22 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import COPY from "../../statsCopy";
+import { LEVELS } from "../analyses/copy";
 import { displayClubName, displayRefereeName } from "../../nameFormat";
 import EvidenceChip from "./EvidenceChip";
 import FunnelChart from "./FunnelChart";
-import MethodNote from "./MethodNote";
 import PairTable from "./PairTable";
 import { fmt, fmtP, fmtPct, fmtSigned } from "./format";
 
-const TEAL = "oklch(50% 0.12 195)";
-const CORAL = "oklch(56% 0.17 25)";
-const AMBER = "oklch(70% 0.15 75)";
-const GREY = "oklch(80% 0.01 260)";
+// Parte tecnica de cada grafico da aba Analises: os numeros completos (z, p,
+// intervalos, funil, tabelas). Aparece so no painel "Como foi criado" -- a
+// visao principal fica com os graficos amigaveis (components/analyses).
 
-function Card({ copy, children }) {
-  return (
-    <section className="stat-card">
-      <div>
-        <h3>{copy.title}</h3>
-        {copy.subtitle && <div className="stat-sub">{copy.subtitle}</div>}
-      </div>
-      {children}
-      <MethodNote {...copy} />
-    </section>
-  );
-}
+const BLUE = "#006e9a";
+const CORAL = "#c43f3e";
+const AMBER = "#d48e00";
+const GREY = "#c9c6c0";
+const GRID = "oklch(92% 0.006 80)";
 
 function Kpi({ value, label }) {
   return (
@@ -67,6 +58,7 @@ const who = [
 ];
 const evidence = [
   { label: "z", num: true, render: (p) => fmtSigned(p.z, 1) },
+  { label: "p", num: true, render: (p) => fmtP(p.p) },
   { label: "Evidência", render: (p) => <EvidenceChip level={p.level} /> },
 ];
 const COUNT_COLUMNS = [
@@ -92,7 +84,7 @@ const EASE_COLUMNS = [
   { label: "Mesma categoria", render: (p) => <EvidenceChip level={p.sameCategory?.level} /> },
 ];
 
-// ------------------------------------------------------------ introducao
+// ------------------------------------------------------------ niveis + resumo
 const ANALYSES = [
   ["cards", "Cartões ao clube"],
   ["rivalCards", "Cartões ao adversário"],
@@ -100,20 +92,22 @@ const ANALYSES = [
   ["ease", "Jogos mais fáceis"],
 ];
 
-export function IntroSection({ report }) {
-  const { overview, pairs, partialSeasons } = report;
+export function IntroDetail({ report }) {
+  const { overview, pairs } = report;
   return (
-    <section className="stat-card">
-      <h3>{COPY.intro.title}</h3>
-      <p className="stat-note">{COPY.intro.body}</p>
+    <>
       <div className="legend-list">
-        {COPY.intro.levels.map(([level, text]) => (
+        {LEVELS.map(([level, text]) => (
           <div key={level} className="legend-item">
             <EvidenceChip level={level} />
             <span>{text}</span>
           </div>
         ))}
       </div>
+      <p className="stat-note">
+        Os níveis são fixos: sinal forte = sobrevive à correção de Benjamini-Hochberg (q ≤ 0,10); para acompanhar =
+        p &lt; 0,01 sem sobreviver à correção; fora da faixa normal = p &lt; 0,05.
+      </p>
       <div className="stat-kpis">
         <Kpi value={overview.matches} label="jogos no recorte" />
         <Kpi value={overview.pairsTested} label={`pares árbitro × clube com ${overview.floor}+ jogos`} />
@@ -125,9 +119,11 @@ export function IntroSection({ report }) {
             <tr>
               <th>Análise par a par</th>
               <th className="num">Testados</th>
+              <th className="num">Fora do normal (p &lt; 0,05)</th>
+              <th className="num">Acaso daria (5%)</th>
               <th className="num">Sinal forte</th>
-              <th className="num">Sinal fraco</th>
-              <th className="num">Fraco esperado só por acaso</th>
+              <th className="num">Para acompanhar</th>
+              <th className="num">Acaso daria (1%)</th>
             </tr>
           </thead>
           <tbody>
@@ -137,6 +133,8 @@ export function IntroSection({ report }) {
                 <tr key={key}>
                   <td>{label}</td>
                   <td className="num">{s.tested}</td>
+                  <td className="num">{s.above95}</td>
+                  <td className="num">~{fmt(s.expectedAbove95, 1)}</td>
                   <td className="num">{s.strong}</td>
                   <td className="num">{s.weak}</td>
                   <td className="num">~{fmt(s.expectedWeakByChance, 1)}</td>
@@ -146,42 +144,29 @@ export function IntroSection({ report }) {
           </tbody>
         </table>
       </div>
-      {partialSeasons.length > 0 && (
-        <p className="hint">
-          Temporada {partialSeasons.join(", ")} em andamento: os números mudam toda semana. Os vereditos das hipóteses
-          usam só temporadas encerradas.
-        </p>
-      )}
-      <p className="hint">
-        {COPY.intro.prereg}{" "}
-        <a href={COPY.intro.preregUrl} target="_blank" rel="noreferrer">
-          Ver o registro público
-        </a>
-        .
-      </p>
-    </section>
+    </>
   );
 }
 
 // ------------------------------------------------------------ L1
-export function LeagueSection({ league, selected }) {
+export function LeagueDetail({ league, selected }) {
   const rows = league.seasons.map((s) => ({
     ...s,
     cardsErr: s.cardsDiffCi[0] == null ? [0, 0] : [s.cardsDiff - s.cardsDiffCi[0], s.cardsDiffCi[1] - s.cardsDiff],
     pensErr: s.pensDiffCi[0] == null ? [0, 0] : [s.pensDiff - s.pensDiffCi[0], s.pensDiffCi[1] - s.pensDiff],
   }));
-  const color = (s) => (s === selected ? CORAL : s === 2020 ? AMBER : TEAL);
+  const color = (s) => (s === selected ? CORAL : s === 2020 ? AMBER : BLUE);
   const diffChart = (key, err, title) => (
     <div>
       <h4 className="chart-title">{title}</h4>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={rows} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="oklch(92% 0.006 80)" vertical={false} />
+          <CartesianGrid stroke={GRID} vertical={false} />
           <XAxis dataKey="season" tick={{ fontSize: 11 }} />
           <YAxis tickFormatter={(v) => fmt(v, 1)} tick={{ fontSize: 11 }} />
           <ReferenceLine y={0} stroke="oklch(55% 0.01 260)" />
           <Tooltip formatter={(v) => fmtSigned(v, 2)} labelFormatter={(s) => `Temporada ${s}${s === 2020 ? " (sem público)" : ""}`} />
-          <Bar dataKey={key} name="mandante − visitante" isAnimationActive={false}>
+          <Bar dataKey={key} name="mandante − visitante" isAnimationActive={false} maxBarSize={24} radius={[4, 4, 0, 0]}>
             {rows.map((r) => (
               <Cell key={r.season} fill={color(r.season)} />
             ))}
@@ -192,30 +177,60 @@ export function LeagueSection({ league, selected }) {
     </div>
   );
   return (
-    <Card copy={COPY.league}>
+    <>
       <div className="chart-pair">
-        {diffChart("cardsDiff", "cardsErr", "Cartões por jogo: mandante − visitante")}
-        {diffChart("pensDiff", "pensErr", "Gols de pênalti por jogo: mandante − visitante")}
+        {diffChart("cardsDiff", "cardsErr", "Cartões por jogo: mandante − visitante (IC 95%)")}
+        {diffChart("pensDiff", "pensErr", "Gols de pênalti por jogo: mandante − visitante (IC 95%)")}
       </div>
       <div>
         <h4 className="chart-title">Resultado do mandante (%)</h4>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={rows} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(92% 0.006 80)" vertical={false} />
+            <CartesianGrid stroke={GRID} vertical={false} />
             <XAxis dataKey="season" tick={{ fontSize: 11 }} />
             <YAxis unit="%" tick={{ fontSize: 11 }} domain={[0, 100]} />
             <Tooltip formatter={(v) => fmtPct(v)} labelFormatter={(s) => `Temporada ${s}`} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="homeWinPct" stackId="r" name="Vitória" fill={TEAL} isAnimationActive={false} />
-            <Bar dataKey="drawPct" stackId="r" name="Empate" fill={GREY} isAnimationActive={false} />
-            <Bar dataKey="awayWinPct" stackId="r" name="Derrota" fill={CORAL} isAnimationActive={false} />
+            <Bar dataKey="homeWinPct" stackId="r" name="Vitória" fill={BLUE} isAnimationActive={false} maxBarSize={24} />
+            <Bar dataKey="drawPct" stackId="r" name="Empate" fill={GREY} isAnimationActive={false} maxBarSize={24} />
+            <Bar dataKey="awayWinPct" stackId="r" name="Derrota" fill={CORAL} isAnimationActive={false} maxBarSize={24} />
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <p className="stat-note">
-        Em destaque: temporada selecionada (coral) e 2020, jogada sem público (âmbar).
-      </p>
-    </Card>
+      <p className="stat-note">Em destaque: temporada selecionada (coral) e 2020, jogada sem público (âmbar).</p>
+      <div className="table-wrap">
+        <table className="stats-table">
+          <thead>
+            <tr>
+              <th>Temporada</th>
+              <th className="num">Jogos</th>
+              <th className="num">Cartões casa</th>
+              <th className="num">Cartões fora</th>
+              <th className="num">Dif. (IC 95%)</th>
+              <th className="num">Pênalti dif.</th>
+              <th className="num">V / E / D casa</th>
+            </tr>
+          </thead>
+          <tbody>
+            {league.seasons.map((s) => (
+              <tr key={s.season}>
+                <td>{s.season}</td>
+                <td className="num">{s.matches}</td>
+                <td className="num">{fmt(s.homeCards, 2)}</td>
+                <td className="num">{fmt(s.awayCards, 2)}</td>
+                <td className="num">
+                  {fmtSigned(s.cardsDiff, 2)} [{fmt(s.cardsDiffCi[0], 2)}; {fmt(s.cardsDiffCi[1], 2)}]
+                </td>
+                <td className="num">{fmtSigned(s.pensDiff, 3)}</td>
+                <td className="num">
+                  {fmt(s.homeWinPct, 0)} / {fmt(s.drawPct, 0)} / {fmt(s.awayWinPct, 0)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -229,18 +244,12 @@ function ratioBar(value) {
   return { left: `${a}%`, width: `${Math.max(b - a, 0.8)}%` };
 }
 
-export function RefereeSection({ data }) {
+export function RefereeDetail({ data }) {
   const [showAll, setShowAll] = useState(false);
-  if (!data.referees.length) {
-    return (
-      <Card copy={COPY.referee}>
-        <p className="hint">Nenhum árbitro com {data.floorGames}+ jogos neste recorte.</p>
-      </Card>
-    );
-  }
+  if (!data.referees.length) return <p className="hint">Nenhum árbitro com {data.floorGames}+ jogos neste recorte.</p>;
   const refs = showAll ? data.referees : data.referees.slice(0, 12);
   return (
-    <Card copy={COPY.referee}>
+    <>
       <div className="stat-kpis">
         <Kpi value={data.referees.length} label={`árbitros com ${data.floorGames}+ jogos`} />
         <Kpi value={fmt(data.typicalReliability * 100, 0) + "%"} label="confiabilidade de um árbitro típico (quanto do número é sinal)" />
@@ -278,57 +287,40 @@ export function RefereeSection({ data }) {
           {showAll ? "Mostrar só os 12 mais rigorosos" : `Ver todos os ${data.referees.length} árbitros`}
         </button>
       )}
-    </Card>
+    </>
   );
 }
 
-// ------------------------------------------------------------ A1-A3
-export function PairSection({ kind, data }) {
-  const isCount = kind !== "points";
+// ------------------------------------------------------------ A1-A4
+export function PairDetail({ kind, data, points }) {
+  const isCount = kind === "cards" || kind === "rivalCards";
+  const isEase = kind === "ease";
   return (
-    <Card copy={COPY[kind]}>
+    <>
       <Summary summary={data.summary} />
-      {data.points.length === 0 ? (
+      {points.length === 0 ? (
         <p className="hint">Nenhum par com {data.floor}+ jogos neste recorte.</p>
       ) : (
         <>
           <FunnelChart
-            points={data.points}
+            points={points}
             funnel={data.funnel}
             xKey={isCount ? "expected" : "n"}
             yKey={isCount ? "ratio" : "perGame"}
             center={isCount ? 1 : 0}
             xLabel={isCount ? "cartões esperados no par" : "jogos do par"}
-            yLabel={isCount ? "observado ÷ esperado" : "pontos/jogo vs esperado"}
+            yLabel={isCount ? "observado ÷ esperado" : isEase ? "xPts/jogo vs sorteio" : "pontos/jogo vs esperado"}
           />
-          <PairTable points={data.points} columns={isCount ? COUNT_COLUMNS : POINT_COLUMNS} />
+          <PairTable points={points} columns={isCount ? COUNT_COLUMNS : isEase ? EASE_COLUMNS : POINT_COLUMNS} />
         </>
       )}
-    </Card>
-  );
-}
-
-// ------------------------------------------------------------ A4
-export function EaseSection({ data }) {
-  return (
-    <Card copy={COPY.ease}>
-      <Summary summary={data.summary} />
-      {data.points.length === 0 ? (
-        <p className="hint">Nenhum par com {data.floor}+ jogos neste recorte.</p>
-      ) : (
-        <>
-          <FunnelChart points={data.points} funnel={data.funnel} xKey="n" yKey="perGame" center={0}
-            xLabel="jogos do par" yLabel="xPts/jogo vs sorteio" />
-          <PairTable points={data.points} columns={EASE_COLUMNS} />
-        </>
-      )}
-    </Card>
+    </>
   );
 }
 
 // ------------------------------------------------------------ A5
-function RepeatTable({ repeats }) {
-  if (!repeats.pairs.length) return null;
+function RepeatTable({ pairs }) {
+  if (!pairs.length) return null;
   return (
     <div className="table-wrap">
       <table className="stats-table">
@@ -341,7 +333,7 @@ function RepeatTable({ repeats }) {
           </tr>
         </thead>
         <tbody>
-          {repeats.pairs.map((p) => (
+          {pairs.map((p) => (
             <tr key={`${p.team}|${p.referee}|${p.direction}`}>
               <td title={p.team}>{displayClubName(p.team)}</td>
               <td title={p.referee}>{displayRefereeName(p.referee)}</td>
@@ -355,34 +347,29 @@ function RepeatTable({ repeats }) {
   );
 }
 
-export function CrossSeasonSection({ data }) {
-  if (!data?.available) {
-    return (
-      <Card copy={COPY.cross}>
-        <p className="hint">Sem pares com jogos em temporadas seguidas.</p>
-      </Card>
-    );
-  }
+export function CrossDetail({ data, filter = () => true }) {
+  if (!data?.available) return <p className="hint">Sem pares com jogos em temporadas seguidas.</p>;
   const c = data.correlation;
   return (
-    <Card copy={COPY.cross}>
+    <>
       <div className="stat-kpis">
         <Kpi
           value={c ? fmt(c.r, 2) : "—"}
-          label={c ? `correlação entre uma temporada e a seguinte (IC 95%: ${fmt(c.lo, 2)} a ${fmt(c.hi, 2)}; ${c.n} comparações)` : "sem comparações suficientes"}
+          label={c ? `correlação entre uma temporada e a seguinte (IC 95%: ${fmt(c.lo, 2)} a ${fmt(c.hi, 2)}; p ${fmtP(c.p)}; ${c.n} comparações)` : "sem comparações suficientes"}
         />
         <Kpi
           value={`${data.favorRepeats.observed} vs ${fmt(data.favorRepeats.expected, 1)}`}
-          label="pares com sinal de favorecimento repetido em 2+ temporadas (observado vs. acaso)"
+          label={`pares com sinal a favor repetido em 2+ temporadas (observado vs. acaso; p ${fmtP(data.favorRepeats.p)})`}
         />
         <Kpi
           value={`${data.harshRepeats.observed} vs ${fmt(data.harshRepeats.expected, 1)}`}
-          label="árbitro mais duro com o mesmo clube em 2+ temporadas (observado vs. acaso)"
+          label={`árbitro mais duro com o mesmo clube em 2+ temporadas (observado vs. acaso; p ${fmtP(data.harshRepeats.p)})`}
         />
       </div>
+      <h4 className="chart-title">Cada ponto: o índice de um par numa temporada (→) e na seguinte (↑)</h4>
       <ResponsiveContainer width="100%" height={300}>
         <ScatterChart margin={{ top: 10, right: 16, bottom: 28, left: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="oklch(92% 0.006 80)" />
+          <CartesianGrid stroke={GRID} />
           <XAxis type="number" dataKey="x" domain={[-4, 4]} allowDataOverflow tickFormatter={(v) => fmt(v, 0)}
             label={{ value: "índice numa temporada", position: "insideBottom", offset: -16, fontSize: 12 }} />
           <YAxis type="number" dataKey="y" domain={[-4, 4]} allowDataOverflow tickFormatter={(v) => fmt(v, 0)}
@@ -404,16 +391,73 @@ export function CrossSeasonSection({ data }) {
               );
             }}
           />
-          <Scatter data={data.scatter} fill={TEAL} fillOpacity={0.45} isAnimationActive={false} />
+          <Scatter data={data.scatter} fill={BLUE} fillOpacity={0.45} isAnimationActive={false} />
         </ScatterChart>
       </ResponsiveContainer>
-      <RepeatTable repeats={data.favorRepeats} />
-      <RepeatTable repeats={data.harshRepeats} />
-    </Card>
+      <RepeatTable pairs={data.favorRepeats.pairs.filter(filter)} />
+      <RepeatTable pairs={data.harshRepeats.pairs.filter(filter)} />
+    </>
   );
 }
 
 // ------------------------------------------------------------ E1-E3
+export function FederationDetail({ fed }) {
+  if (!fed.total) return <p className="hint">Sem UF de árbitro e de clube neste recorte.</p>;
+  return (
+    <>
+      <div className="stat-kpis">
+        <Kpi value={fmtPct(fed.total.observedPct)} label={`dos jogos com árbitro da UF de um dos clubes (${fed.total.observedCount} de ${fed.total.matches})`} />
+        <Kpi value={fmtPct(fed.total.expectedPct)} label="se a escala fosse sorteio" />
+      </div>
+      <h4 className="chart-title">Por temporada</h4>
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart data={fed.seasons} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
+          <CartesianGrid stroke={GRID} vertical={false} />
+          <XAxis dataKey="season" tick={{ fontSize: 11 }} />
+          <YAxis unit="%" tick={{ fontSize: 11 }} />
+          <Tooltip formatter={(v) => fmtPct(v)} labelFormatter={(s) => `Temporada ${s}`} />
+          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Bar dataKey="observedPct" name="Observado" fill={BLUE} isAnimationActive={false} maxBarSize={24} radius={[4, 4, 0, 0]} />
+          <Bar dataKey="expectedPct" name="Sorteio" fill={GREY} isAnimationActive={false} maxBarSize={24} radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </>
+  );
+}
+
+export function CategoryDetail({ cat }) {
+  if (!cat.groups.length) return <p className="hint">Sem categoria de árbitro neste recorte.</p>;
+  return (
+    <>
+      <p className="stat-note">Árbitro FIFA em {fmtPct(cat.fifaSharePct)} de todos os jogos do recorte.</p>
+      <div className="table-wrap">
+        <table className="stats-table">
+          <thead>
+            <tr>
+              <th>Grupo de jogos</th>
+              <th className="num">Jogos</th>
+              <th className="num">FIFA no grupo</th>
+              <th className="num">FIFA nos demais</th>
+              <th className="num">p (Fisher)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cat.groups.map((g) => (
+              <tr key={g.group}>
+                <td>{g.group}</td>
+                <td className="num">{g.matches}</td>
+                <td className="num">{fmtPct(g.fifaPct)}</td>
+                <td className="num">{fmtPct(g.restPct)}</td>
+                <td className="num">{fmtP(g.p)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
 function ConcentrationSummary({ label, v }) {
   if (!v) return null;
   return (
@@ -437,72 +481,23 @@ const CONC_COLUMNS = [
   ...evidence,
 ];
 
-export function EscalaSection({ data }) {
-  const fed = data.federation;
-  const cat = data.category;
-  const conc = data.concentration;
+export function ConcentrationDetail({ conc, filter = () => true }) {
   return (
     <>
-      <Card copy={COPY.federation}>
-        {!fed.total ? (
-          <p className="hint">Sem UF de árbitro e de clube neste recorte.</p>
-        ) : (
-          <>
-            <div className="stat-kpis">
-              <Kpi value={fmtPct(fed.total.observedPct)} label={`dos jogos com árbitro da UF de um dos clubes (${fed.total.observedCount} de ${fed.total.matches})`} />
-              <Kpi value={fmtPct(fed.total.expectedPct)} label="se a escala fosse sorteio" />
-            </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={fed.seasons} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(92% 0.006 80)" vertical={false} />
-                <XAxis dataKey="season" tick={{ fontSize: 11 }} />
-                <YAxis unit="%" tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v) => fmtPct(v)} labelFormatter={(s) => `Temporada ${s}`} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="observedPct" name="Observado" fill={CORAL} isAnimationActive={false} />
-                <Bar dataKey="expectedPct" name="Sorteio" fill={GREY} isAnimationActive={false} />
-              </BarChart>
-            </ResponsiveContainer>
-          </>
-        )}
-      </Card>
-
-      <Card copy={COPY.category}>
-        {!cat.groups.length ? (
-          <p className="hint">Sem categoria de árbitro neste recorte.</p>
-        ) : (
-          <>
-            <p className="stat-note">Árbitro FIFA em {fmtPct(cat.fifaSharePct)} de todos os jogos do recorte.</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={cat.groups} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(92% 0.006 80)" vertical={false} />
-                <XAxis dataKey="group" tick={{ fontSize: 11 }} />
-                <YAxis unit="%" tick={{ fontSize: 11 }} domain={[0, 100]} />
-                <Tooltip formatter={(v) => fmtPct(v)} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="fifaPct" name="Árbitro FIFA no grupo" fill={TEAL} isAnimationActive={false} />
-                <Bar dataKey="restPct" name="Nos demais jogos" fill={GREY} isAnimationActive={false} />
-              </BarChart>
-            </ResponsiveContainer>
-            <p className="stat-note">
-              {cat.groups.map((g) => `${g.group}: ${g.matches} jogos, p ${fmtP(g.p)}`).join(" · ")}
-            </p>
-          </>
-        )}
-      </Card>
-
-      <Card copy={COPY.concentration}>
-        <div className="stat-kpis">
-          <ConcentrationSummary label="Regras: carga, rodada e federação" v={conc.plain} />
-          <ConcentrationSummary label="Regras + categoria do árbitro" v={conc.category} />
-        </div>
-        {conc.category?.top?.length > 0 && (
-          <>
-            <h4 className="chart-title">Pares mais acima do esperado (sorteio com categoria)</h4>
-            <PairTable points={conc.category.top} columns={CONC_COLUMNS} />
-          </>
-        )}
-      </Card>
+      <div className="stat-kpis">
+        <ConcentrationSummary label="Regras: carga, rodada e federação" v={conc.plain} />
+        <ConcentrationSummary label="Regras + categoria do árbitro" v={conc.category} />
+      </div>
+      {["plain", "category"].map((key) =>
+        conc[key]?.top?.filter(filter).length ? (
+          <div key={key}>
+            <h4 className="chart-title">
+              Pares mais acima do esperado ({key === "plain" ? "sorteio com as regras" : "sorteio com regras + categoria"})
+            </h4>
+            <PairTable points={conc[key].top.filter(filter)} columns={CONC_COLUMNS} />
+          </div>
+        ) : null,
+      )}
     </>
   );
 }
@@ -525,38 +520,35 @@ function Forest({ measure }) {
   );
 }
 
-export function HypothesesSection({ data }) {
-  return (
-    <Card copy={COPY.hypotheses}>
-      {data.map((h) => (
-        <div className="hyp-card" key={h.id}>
-          <div className="hyp-head">
-            <b>
-              {h.id} · {h.title}
-            </b>
-            <span className="hyp-status">
-              Temporadas {h.seasons}
-              {h.n ? ` · ${h.n} jogos` : ""}
+export function HypothesesDetail({ data }) {
+  return data.map((h) => (
+    <div className="hyp-card" key={h.id}>
+      <div className="hyp-head">
+        <b>
+          {h.id} · {h.title}
+        </b>
+        <span className="hyp-status">
+          Temporadas {h.seasons}
+          {h.n ? ` · ${h.n} jogos` : ""}
+          {h.alpha ? ` · α ${fmt(h.alpha, 4)}` : ""}
+        </span>
+      </div>
+      <p className="stat-note">Previsão registrada: {h.prediction}</p>
+      {h.missing || !h.measures.length ? (
+        <p className="hint">Sem dado suficiente para testar neste banco.</p>
+      ) : (
+        h.measures.map((m) => (
+          <div className="forest-row" key={m.label}>
+            <span>{m.label}</span>
+            <Forest measure={m} />
+            <span className="mono">
+              {fmt(m.estimate, 3)} [{fmt(m.ci[0], 2)}; {fmt(m.ci[1], 2)}] · p {fmtP(m.p)}
             </span>
+            <EvidenceChip level={m.verdict} />
           </div>
-          <p className="stat-note">Previsão registrada: {h.prediction}</p>
-          {h.missing || !h.measures.length ? (
-            <p className="hint">Sem dado suficiente para testar neste banco.</p>
-          ) : (
-            h.measures.map((m) => (
-              <div className="forest-row" key={m.label}>
-                <span>{m.label}</span>
-                <Forest measure={m} />
-                <span className="mono">
-                  {fmt(m.estimate, 3)} [{fmt(m.ci[0], 2)}; {fmt(m.ci[1], 2)}] · p {fmtP(m.p)}
-                </span>
-                <EvidenceChip level={m.verdict} />
-              </div>
-            ))
-          )}
-          <p className="hyp-status">{h.status}</p>
-        </div>
-      ))}
-    </Card>
-  );
+        ))
+      )}
+      <p className="hyp-status">{h.status}</p>
+    </div>
+  ));
 }

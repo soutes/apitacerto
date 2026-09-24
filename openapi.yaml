@@ -82,7 +82,7 @@ paths:
   /statistics:
     get:
       summary: >-
-        Aba Favorecimento (spec secao 9): relatorio pre-calculado offline
+        Aba Analises (spec secao 9): relatorio pre-calculado offline
         por scripts/compute_stats.py e so lido aqui. Season omitido = todas
         as temporadas juntas.
       operationId: getStatistics
@@ -102,6 +102,21 @@ paths:
                 $ref: "#/components/schemas/StatisticsReport"
         "404":
           description: Relatorio ainda nao calculado para esse recorte
+
+  /club-insights:
+    get:
+      summary: >-
+        Aba Analises dos clubes: trajetoria de pontos (acumulado jogo a jogo),
+        posicao final e destino (campeao, G-6, meio, rebaixado) de cada clube
+        em cada temporada, mais o efeito do primeiro gol. Sem arbitragem.
+      operationId: getClubInsights
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClubInsights"
 
   /dashboard:
     get:
@@ -278,6 +293,60 @@ components:
           items: { type: object }
         summary: { type: object, description: "testados, fortes, fracos, esperado por acaso" }
 
+    ClubInsights:
+      type: object
+      required: [seasons, firstGoal, comebacks]
+      properties:
+        seasons:
+          type: array
+          items:
+            type: object
+            required: [season, complete, teams]
+            properties:
+              season: { type: integer }
+              complete: { type: boolean, description: "todos os clubes com 38 jogos" }
+              games: { type: integer }
+              goalsPerGame: { type: number }
+              homeWinPct: { type: number }
+              drawPct: { type: number }
+              zeroZeroPct: { type: number }
+              teams:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    team: { type: string }
+                    position: { type: integer }
+                    fate:
+                      type: string
+                      nullable: true
+                      enum: [champion, top6, mid, relegated]
+                    promoted: { type: boolean }
+                    points:
+                      type: array
+                      description: pontos acumulados depois de cada jogo, em ordem de data
+                      items: { type: integer }
+                    wins: { type: integer }
+                    draws: { type: integer }
+                    losses: { type: integer }
+                    goalsFor: { type: integer }
+                    goalsAgainst: { type: integer }
+                    homePoints: { type: integer }
+                    awayPoints: { type: integer }
+                    homeGames: { type: integer }
+                    awayGames: { type: integer }
+        firstGoal:
+          type: object
+          additionalProperties: { type: integer }
+        comebacks:
+          type: array
+          items:
+            type: object
+            properties:
+              team: { type: string }
+              games: { type: integer }
+              pointsPerGame: { type: number }
+              wins: { type: integer }
     StatisticsReport:
       type: object
       required: [key, seasons, methodVersion, overview, pairs, escala, league, crossSeason, hypotheses, computedAt]

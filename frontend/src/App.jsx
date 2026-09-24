@@ -5,7 +5,10 @@ import DashboardTab from "./components/DashboardTab";
 import StandingsTab from "./components/StandingsTab";
 import OverviewTab from "./components/OverviewTab";
 import MatrixTab from "./components/MatrixTab";
-import StatisticsTab from "./components/StatisticsTab";
+import AnalysesTab from "./components/analyses/AnalysesTab";
+import { PLAIN } from "./components/analyses/copy";
+import ClubAnalysesTab from "./components/clubAnalyses/ClubAnalysesTab";
+import { HEADER as CLUB_HEADER } from "./components/clubAnalyses/copy";
 import ScreenHeader from "./components/ScreenHeader";
 import DataCompletenessBanner from "./components/DataCompletenessBanner";
 import "./App.css";
@@ -113,14 +116,17 @@ export default function App() {
               <StandingsTab season={season} seasons={options.seasons} onChangeSeason={setSeason} rows={heatmapRows} />
             )}
 
-            {activeTab === "estatisticas" && (
+            {activeTab === "analises" && (
               <div className="screen">
-                <ScreenHeader
-                  title="Favorecimento"
-                  subtitle="Observado vs. esperado, com o método explicado embaixo de cada gráfico"
-                  showSeasonPicker={false}
-                />
-                <StatisticsTab seasons={options.seasons} defaultSeason={season} />
+                <ScreenHeader title={PLAIN.header.title} subtitle={PLAIN.header.subtitle} showSeasonPicker={false} />
+                <AnalysesTab seasons={options.seasons} />
+              </div>
+            )}
+
+            {activeTab === "clubesAnalise" && (
+              <div className="screen">
+                <ScreenHeader title={CLUB_HEADER.title} subtitle={CLUB_HEADER.subtitle} showSeasonPicker={false} />
+                <ClubAnalysesTab />
               </div>
             )}
 

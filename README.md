@@ -3,9 +3,9 @@
 *English below.*
 
 Dashboard interativo do Brasileirão Série A segmentado por árbitro — gols,
-cartões, V/E/D, classificação — com uma aba de **Favorecimento** que
-testa, com o método explicado embaixo de cada gráfico, se algum árbitro
-favorece ou persegue algum clube. Sem Power BI, sem Looker: frontend próprio
+cartões, V/E/D, classificação — com uma aba de **Análises** que testa, em
+gráficos para qualquer torcedor ler, se algum árbitro favorece ou persegue
+algum clube (o método de cada gráfico fica a um clique, em "Como foi criado"). Sem Power BI, sem Looker: frontend próprio
 (React) consumindo um backend próprio (FastAPI), dados persistidos em banco
 (SQLAlchemy — SQLite local, Postgres/Neon em produção).
 
@@ -23,19 +23,27 @@ CI/CD): [`_docs/homework3.md`](_docs/homework3.md).
 - **Classificação** — tabela oficial (vitória×3 + empate×1).
 - **Árbitros** — ranking por rigor (cartões/jogo) e viés de mandante.
 - **Clubes** — matriz clube × árbitro com seletor de indicador.
-- **Favorecimento** — observado vs. esperado com teste estatístico, ver
-  abaixo. Substituiu em 21/09/2026 o antigo Índice de Favorecimento (spec
-  seção 6), retirado porque o diagnóstico de 14/09/2026 mostrou que ele não
-  se distingue do acaso.
+- **Análises** (antes "Favorecimento") — observado vs. esperado com teste
+  estatístico, ver abaixo. Filtros de temporada, clube e árbitro no topo;
+  a resposta curta primeiro, depois os gráficos. Substituiu em 21/09/2026 o
+  antigo Índice de Favorecimento (spec seção 6), retirado porque o
+  diagnóstico de 14/09/2026 mostrou que ele não se distingue do acaso.
+- **Análises dos clubes** — o que a tabela da rodada conta sobre o fim do
+  campeonato (linha do rebaixamento, G-6 e título rodada a rodada, termômetro
+  da temporada em andamento, a lenda dos 45 pontos) e os padrões de campanha
+  que se repetem (ou não) entre temporadas. Sem arbitragem; dados de
+  `GET /club-insights`.
 
 Clicar numa célula da matriz de Clubes abre o detalhe do par (KPIs e séries).
 
-## Favorecimento — como funciona
+## Análises — como funciona
 
 Tudo compara **observado com esperado**. O esperado de cada jogo considera
 mando, força e estilo de cada clube na temporada, adversário e rigor do
-árbitro (regressão de Poisson). Embaixo de cada gráfico, a tela explica como
-o dado foi construído, o método, quem criou e como ler.
+árbitro (regressão de Poisson). Cada gráfico tem o botão **Como foi criado**,
+que abre como o dado foi construído, o método, quem criou, como ler e os
+números completos (funil, z, p, intervalos, tabelas). O rodapé da aba junta
+o que vale para todos: as etiquetas, os limites do dado e o método aberto.
 
 - **Árbitro × clube** — cartões ao clube ("implicância"), cartões ao
   adversário, pontos acima do esperado e escala favorável ("o mesmo árbitro
@@ -233,9 +241,9 @@ mock determinístico (não quebra o dashboard enquanto a ingestão progride).
 # ApitaCerto (English)
 
 Interactive dashboard of Brasileirão Série A broken down by referee — goals,
-cards, W/D/L, standings — with a **Favoritism** tab that tests, with the
-method explained under every chart, whether any referee favors or targets any
-club. No Power BI, no Looker: a custom React frontend talking to a custom
+cards, W/D/L, standings — with an **Analyses** tab that tests, in charts any
+fan can read, whether any referee favors or targets any club (each chart's
+method is one click away, under "Como foi criado" / how it was made). No Power BI, no Looker: a custom React frontend talking to a custom
 FastAPI backend, data persisted in a database (SQLAlchemy — SQLite locally,
 Postgres/Neon in production).
 
@@ -251,20 +259,27 @@ Full spec in [`_docs/specs.md`](_docs/specs.md) (Portuguese).
 - **Standings** — official table (win×3 + draw×1).
 - **Referees** — ranking by strictness (cards/game) and home bias.
 - **Clubs** — club × referee matrix with a metric picker.
-- **Favoritism** — observed vs. expected with statistical tests, see below.
-  On 2026-09-21 it replaced the old Favoritism Index (spec section 6),
+- **Analyses** (formerly "Favoritism") — observed vs. expected with
+  statistical tests, see below. Season, club and referee filters on top; the
+  short answer first, then the charts. On 2026-09-21 it replaced the old Favoritism Index (spec section 6),
   removed because the 2026-09-14 diagnosis showed it is indistinguishable
   from chance.
+- **Club analyses** — what the table after round R says about how the season
+  ends (relegation, top-6 and title cut-offs round by round, a thermometer for
+  the season in progress, the "45 points" myth) and which campaign patterns
+  repeat across seasons. No refereeing; data from `GET /club-insights`.
 
 Clicking a cell in the Clubs matrix opens the pair detail (KPIs and time series).
 
-## Favoritism — how it works
+## Analyses — how it works
 
 Everything compares **observed with expected**. Each match's expected value
 accounts for home advantage, each club's strength and style that season, the
-opponent and the referee's strictness (Poisson regression). Under every
-chart, the screen explains how the data was built, the method, who created it
-and how to read it.
+opponent and the referee's strictness (Poisson regression). Every chart has a
+**Como foi criado** (how it was made) button that opens how the data was
+built, the method, who created it, how to read it and the full numbers
+(funnel, z, p, intervals, tables). The tab footer gathers what applies to all
+charts: the evidence labels, the data's limits and the open method.
 
 - **Referee × club** — cards to the club ("targeting"), cards to the
   opponent, points above expectation and favorable assignment ("the same

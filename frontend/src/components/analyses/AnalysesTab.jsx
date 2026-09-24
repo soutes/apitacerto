@@ -129,12 +129,12 @@ export default function AnalysesTab({ seasons }) {
           <div className="an-grid an-grid-3">
             <FederationCard fed={report.escala.federation} tag={leagueTag} />
             <CategoryCard cat={report.escala.category} tag={leagueTag} />
-            <ConcentrationCard conc={report.escala.concentration} filters={filters} />
+            <ConcentrationCard conc={report.escala.concentration} filters={filters} tag={leagueTag} />
           </div>
 
           <Section eyebrow="Provas mais duras" title="Testes que não dependem de um jogo só" />
           <div className="an-grid">
-            <RepeatCard data={report.crossSeason} filters={filters} />
+            <RepeatCard data={report.crossSeason} filters={filters} tag={leagueTag} />
             <HypothesisCards data={report.hypotheses} tag={leagueTag} />
           </div>
 

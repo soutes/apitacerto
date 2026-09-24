@@ -93,6 +93,23 @@ body { margin: 0; background: var(--page-bg); font-family: var(--font-ui); }
 .sidebar-footer-text { font: 600 12px/1.5 var(--font-ui); color: oklch(85% 0.005 255); }
 
 .app-main { flex: 1; min-width: 0; padding: 26px 28px 40px; display: flex; flex-direction: column; gap: 20px; }
+
+/* celular: a sidebar vira uma barra no topo com as abas rolando de lado */
+@media (max-width: 760px) {
+  .app-shell { flex-direction: column; }
+  .sidebar {
+    width: auto; height: auto; position: static;
+    flex-direction: row; align-items: center; gap: 12px;
+    padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--sidebar-border);
+  }
+  .sidebar-logo { padding: 0; flex: none; }
+  .sidebar-logo span { display: none; }
+  .sidebar-nav { flex-direction: row; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+  .nav-pill { flex: none; white-space: nowrap; min-height: 40px; padding: 0 14px; }
+  .sidebar-footer { display: none; }
+  .app-main { padding: 16px 16px 32px; }
+}
 .loading-text { color: var(--muted); }
 
 /* ====== Screen header (per-tab) ====== */
@@ -286,10 +303,6 @@ body { margin: 0; background: var(--page-bg); font-family: var(--font-ui); }
 .metric-picker { margin: 0; }
 .metric-picker label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); max-width: 220px; }
 .metric-picker select { padding: 6px 8px; font-size: 0.95rem; }
-
-/* ---- Favorecimento (StatisticsTab): season-picker proprio ---- */
-.season-picker { display: inline-flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); }
-.season-picker select { padding: 6px 10px; font-size: 0.95rem; }
 
 /* ---- matriz time x arbitro (PairMatrix, usado por Clubes) ---- */
 .heatmap-wrap { overflow-x: auto; }

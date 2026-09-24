@@ -1,21 +1,6 @@
-/* Aba Dados estatisticos (spec secao 9) -- usa os tokens de App.css */
+/* Parte tecnica da aba Analises (painel "Como foi criado") e etiquetas de
+   evidencia -- usa os tokens de App.css */
 
-.stats-tab { display: flex; flex-direction: column; gap: 20px; }
-.stats-toolbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.stats-meta { font: 500 11.5px/1.4 var(--font-ui); color: var(--muted); }
-
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  box-shadow: 0 6px 20px oklch(52% 0.12 195 / 0.06);
-}
-.stat-card h3 { margin: 0; font: 800 16px/1.3 var(--font-ui); color: var(--ink); }
-.stat-sub { margin-top: 4px; font: 500 12.5px/1.5 var(--font-ui); color: var(--muted-2); }
 .stat-note { margin: 0; font: 500 12.5px/1.55 var(--font-ui); color: var(--muted-2); }
 .stat-note b { color: var(--ink); }
 .chart-title { margin: 0 0 6px; font: 700 12.5px/1.3 var(--font-ui); color: var(--ink); }
@@ -36,17 +21,19 @@
 .legend-item { display: grid; grid-template-columns: 170px 1fr; gap: 10px; align-items: baseline; font: 500 12.5px/1.5 var(--font-ui); color: var(--muted-2); }
 @media (max-width: 700px) { .legend-item { grid-template-columns: 1fr; gap: 2px; } }
 
-/* explicacao embaixo de cada grafico */
+/* metodo de cada grafico (painel "Como foi criado") */
 .method-note { margin: 0; padding-top: 12px; border-top: 3px dashed oklch(90% 0.008 195); display: flex; flex-direction: column; gap: 8px; }
 .method-note-row { display: grid; grid-template-columns: 180px 1fr; gap: 12px; }
 .method-note dt { font: 700 10.5px/1.7 var(--font-mono); color: var(--teal-dark); text-transform: uppercase; letter-spacing: 0.04em; }
 .method-note dd { margin: 0; font: 500 12.5px/1.6 var(--font-ui); color: var(--muted-2); }
 @media (max-width: 700px) { .method-note-row { grid-template-columns: 1fr; gap: 2px; } }
 
-.chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 2px 9px; font: 700 10.5px/1.6 var(--font-ui); white-space: nowrap; }
-.chip-forte, .chip-apoia { background: oklch(93% 0.05 25); color: oklch(42% 0.15 25); }
-.chip-fraco { background: var(--amber-bg); color: var(--amber-text); }
-.chip-contraria { background: oklch(93% 0.04 195); color: var(--teal-dark); }
+.chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 3px 9px 3px 7px; font: 700 10.5px/1.5 var(--font-ui); white-space: nowrap; }
+.chip-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.chip-forte { background: oklch(93% 0.05 25); color: oklch(42% 0.15 25); }
+.chip-fraco { background: oklch(94% 0.07 85); color: oklch(40% 0.1 65); }
+.chip-apoia { background: oklch(93% 0.045 195); color: var(--teal-dark); }
+.chip-contraria { background: oklch(93% 0.04 235); color: oklch(40% 0.1 235); }
 .chip-acaso, .chip-sem-evidencia, .chip-sem-comparacao, .chip-sem-dado { background: oklch(95% 0.004 260); color: var(--muted-2); }
 
 .table-wrap { overflow-x: auto; }
@@ -122,5 +109,5 @@
 .forest-ci { position: absolute; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 2px; background: var(--ink); }
 .forest-dot { position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--coral); }
 
-.stats-tab .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.stats-tab .muted { color: var(--muted); font-weight: 500; }
+.an-drawer .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.an-drawer .muted { color: var(--muted); font-weight: 500; }

@@ -11,7 +11,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app import mock_store, queries
+from app import club_insights, mock_store, queries
 from app.db import ensure_schema, get_db
 from app.models import StatReport
 
@@ -87,6 +87,13 @@ def get_statistics(season: Optional[int] = None, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404,
                             detail="Estatísticas ainda não calculadas para esse recorte (rode scripts/compute_stats.py)")
     return {**report.payload, "computedAt": report.computed_at, "dataVersion": report.data_version}
+
+
+@app.get("/club-insights")
+def get_club_insights(db: Session = Depends(get_db)):
+    # aba Analises dos clubes: trajetoria de pontos e destino de cada clube
+    # em cada temporada. Conta leve em Python puro, sem arbitragem.
+    return club_insights.build_club_insights(db)
 
 
 @app.get("/dashboard")

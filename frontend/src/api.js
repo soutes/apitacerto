@@ -36,7 +36,7 @@ export async function getSeasonOverview({ season }) {
   return res.json();
 }
 
-// Aba Favorecimento (spec secao 9): relatorio pre-calculado offline (backend so le).
+// Aba Analises (spec secao 9): relatorio pre-calculado offline (backend so le).
 // season omitido = todas as temporadas. 404 = ainda nao calculado -> null.
 export async function getStatistics({ season } = {}) {
   const params = new URLSearchParams();
@@ -44,6 +44,13 @@ export async function getStatistics({ season } = {}) {
   const res = await fetch(`${BACKEND_URL}/statistics?${params.toString()}`);
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`statistics fetch failed: ${res.status}`);
+  return res.json();
+}
+
+// Aba Analises dos clubes: trajetorias de pontos e destino de cada clube.
+export async function getClubInsights() {
+  const res = await fetch(`${BACKEND_URL}/club-insights`);
+  if (!res.ok) throw new Error(`club-insights fetch failed: ${res.status}`);
   return res.json();
 }
 

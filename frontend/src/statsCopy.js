@@ -1,7 +1,8 @@
-// Textos da aba Dados estatisticos (spec secao 9). Cada grafico explica:
-// como o dado foi construido, o metodo, quem criou/referencia, por que usamos
-// e como ler (com os limites). Se mudar o metodo no backend
-// (app/analysis/*), mudar aqui tambem.
+// Textos tecnicos da aba Analises (spec secao 9), mostrados no painel "Como
+// foi criado" de cada grafico: como o dado foi construido, o metodo, quem
+// criou/referencia, por que usamos e como ler (com os limites). A versao em
+// linguagem de torcedor fica em components/analyses/copy.js. Se mudar o
+// metodo no backend (app/analysis/*), mudar aqui tambem.
 
 const COPY = {
   intro: {

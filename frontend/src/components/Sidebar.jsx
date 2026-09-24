@@ -5,7 +5,8 @@ const NAV = [
   { key: "classificacao", label: "Classificação" },
   { key: "arbitros", label: "Árbitros" },
   { key: "clubes", label: "Clubes" },
-  { key: "estatisticas", label: "Favorecimento" },
+  { key: "analises", label: "Análises" },
+  { key: "clubesAnalise", label: "Análises dos clubes" },
 ];
 
 export default function Sidebar({ active, onChange, dataBlurb }) {

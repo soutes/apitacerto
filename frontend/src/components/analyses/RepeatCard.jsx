@@ -10,9 +10,12 @@ import { AnalysisCard, CompareBar, Empty, Legend } from "./ui";
 const joinPt = (xs) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} e ${xs[xs.length - 1]}`);
 
 // Repeticao entre temporadas: favorecimento real deveria voltar no ano
-// seguinte; sorte nao volta.
-export default function RepeatCard({ data, filters }) {
+// seguinte; sorte nao volta. O "esperado por acaso" vem do backend para a
+// liga toda, entao manchete e barras nao mudam com filtro (card marcado
+// "Liga toda"); so a lista de duplas segue o filtro.
+export default function RepeatCard({ data, filters, tag }) {
   const filter = (p) => matchesFilters(p, filters);
+  const filtered = Boolean(filters.team || filters.referee);
   const blocks = data?.available
     ? [
         ["favorRepeats", "A favor do mesmo clube em 2+ temporadas", "a favor"],
@@ -28,6 +31,7 @@ export default function RepeatCard({ data, filters }) {
       className="span-4 md-full"
       title={PLAIN.cross.title}
       subtitle={PLAIN.cross.subtitle}
+      tag={tag}
       how={{ copy: COPY.cross, render: () => <CrossDetail data={data} filter={filter} /> }}
     >
       {!data?.available ? (
@@ -61,6 +65,10 @@ export default function RepeatCard({ data, filters }) {
               </div>
             ))}
           </div>
+          {filtered && <span className="an-list-head">Do filtro atual</span>}
+          {filtered && listed.length === 0 && (
+            <p className="an-note">Nenhuma dupla do filtro atual repetiu sinal em 2 ou mais temporadas.</p>
+          )}
           {listed.length > 0 && (
             <ul className="an-list">
               {listed.map((p) => (

@@ -117,8 +117,11 @@ const RULES = [
   ["plain", "Só as regras básicas"],
 ];
 
-export function ConcentrationCard({ conc, filters }) {
+// Manchete (qui-quadrado contra os sorteios) e da liga toda; com filtro, o
+// card fica marcado "Liga toda" e so a lista de duplas segue o filtro.
+export function ConcentrationCard({ conc, filters, tag }) {
   const [rule, setRule] = useState("category");
+  const filtered = Boolean(filters.team || filters.referee);
   const v = conc[rule] ?? conc.plain;
   const filter = (p) => matchesFilters(p, filters);
   const top = (v?.top ?? []).filter(filter).slice(0, 5);
@@ -128,6 +131,7 @@ export function ConcentrationCard({ conc, filters }) {
       className="span-4"
       title={PLAIN.concentration.title}
       subtitle={PLAIN.concentration.subtitle}
+      tag={tag}
       how={{ copy: COPY.concentration, render: () => <ConcentrationDetail conc={conc} filter={filter} /> }}
     >
       {!v ? (
@@ -153,9 +157,10 @@ export function ConcentrationCard({ conc, filters }) {
             )}
           </p>
           {top.length === 0 ? (
-            <Empty>{filters.team || filters.referee ? "O filtro atual não aparece entre as duplas mais repetidas." : "Nenhuma dupla se destaca."}</Empty>
+            <Empty>{filtered ? "O filtro atual não aparece entre as duplas mais repetidas." : "Nenhuma dupla se destaca."}</Empty>
           ) : (
             <>
+              {filtered && <span className="an-list-head">Do filtro atual, entre as duplas mais repetidas</span>}
               <Legend
                 items={[
                   ["found", "Jogos juntos"],

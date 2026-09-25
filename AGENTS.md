@@ -14,6 +14,7 @@ repo root) — separate stack, separate deps, separate AGENTS.md.
 - Backend: `cd backend && uv run uvicorn app.main:app --port 8000` — http://localhost:8000
 - Tests: `cd backend && uv run pytest`
 - Ingest (primary, CBF scraper, no daily limit): `cd backend && uv run python scripts/scrape_cbf.py --season 2018 --season 2019 --season 2020 --season 2021 --season 2022 --season 2023 --season 2024 --season 2025 --season 2026`
+- Ingest (seasons before the CBF API, Transfermarkt HTML, one-off load, pages cached in `backend/data/transfermarkt/`): `cd backend && uv run python scripts/scrape_transfermarkt.py --check --season 2007 ... --season 2017 --fill-referees 2018` to review, then the same without `--check` to write
 - Ingest (fallback, API-Football, rate-limited): `cd backend && uv run python scripts/ingest.py --max-requests 90`
 
 ## Rules

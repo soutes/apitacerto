@@ -265,6 +265,91 @@
 .ca-trend-bar em { position: absolute; bottom: -15px; left: 0; right: 0; text-align: center; font: 600 10px/1 var(--font-ui); font-style: normal; color: var(--muted); }
 @keyframes ca-grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 
+/* ------------------------------------------------------------ projeção */
+.key-range { width: 16px; height: 8px; border-radius: 4px; background: color-mix(in oklch, var(--fate-top6) 30%, white); }
+.key-exp { width: 11px; height: 11px; border-radius: 50%; background: var(--fate-top6); box-shadow: 0 0 0 2px #fff; }
+.key-line-0, .key-line-1, .key-line-2, .key-line-3, .key-line-rest { width: 16px; height: 3px; border-radius: 2px; }
+.key-line-0 { background: #006e9a; }
+.key-line-1 { background: #c43f3e; }
+.key-line-2 { background: #d48e00; }
+.key-line-3 { background: #6a4c93; }
+.key-line-rest { background: oklch(80% 0.01 260); }
+.ca-line-label { font: 700 11px var(--font-ui); fill: var(--ink); }
+
+.ca-proj { display: flex; flex-direction: column; }
+.ca-proj-row {
+  display: grid;
+  grid-template-columns: 26px minmax(120px, 1.15fr) minmax(180px, 2.6fr) 64px 64px 64px;
+  gap: 10px;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 8px;
+}
+.ca-proj-row.is-head { padding-bottom: 6px; font: 700 10.5px/1.2 var(--font-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.ca-proj-row.has-line { box-shadow: 0 1px 0 var(--border); margin-bottom: 3px; }
+.ca-proj-row.is-highlight { background: oklch(96.5% 0.03 195); box-shadow: inset 3px 0 0 var(--teal); }
+.ca-proj-pos { font: 700 12px/1 var(--font-mono); color: var(--muted); }
+.ca-proj-club { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ca-proj-club b { font: 700 13px/1.2 var(--font-ui); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-proj-club small { font: 500 11px/1.2 var(--font-ui); color: var(--muted); }
+.ca-proj-axis { position: relative; height: 12px; margin: 0 8px; text-transform: none; letter-spacing: 0; font-family: var(--font-ui); }
+.ca-proj-axis span { position: absolute; transform: translateX(-50%); }
+.ca-proj-bar { position: relative; height: 22px; margin: 0 8px; }
+.ca-proj-grid i { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--an-grid); }
+.ca-proj-seg { position: absolute; top: 50%; height: 2px; margin-top: -1px; background: oklch(78% 0.02 230); }
+.ca-proj-range { position: absolute; top: 50%; height: 10px; margin-top: -5px; border-radius: 5px; background: color-mix(in oklch, var(--fate-top6) 30%, white); animation: an-grow .6s cubic-bezier(.2, .7, .2, 1) both; transform-origin: left center; }
+.ca-proj-now { position: absolute; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 2px; background: var(--now); transform: rotate(45deg); box-shadow: 0 0 0 1.5px #fff; }
+.ca-proj-exp { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--fate-top6); box-shadow: 0 0 0 2px #fff; }
+.ca-proj-exp em { position: absolute; left: 50%; bottom: calc(100% + 3px); transform: translateX(-50%); font: 700 10.5px/1 var(--font-ui); font-style: normal; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.ca-chance {
+  display: inline-block;
+  min-width: 48px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font: 700 12px/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--ink);
+}
+.ca-chance.tone-title { background: color-mix(in oklch, var(--fate-champion) calc(var(--a) * 85%), var(--an-soft)); }
+.ca-chance.tone-top { background: color-mix(in oklch, var(--fate-top6) calc(var(--a) * 75%), var(--an-soft)); }
+.ca-chance.tone-drop { background: color-mix(in oklch, var(--fate-relegated) calc(var(--a) * 80%), var(--an-soft)); }
+.ca-chance.is-strong { color: #fff; }
+.ca-chance.is-zero { background: transparent; color: var(--muted); font-weight: 500; }
+
+.ca-heat-hint { display: none; margin: 0; text-align: left; }
+.ca-heat-wrap { overflow-x: auto; margin: 0 -4px; padding: 0 4px 4px; }
+.ca-heat {
+  display: grid;
+  grid-template-columns: 112px repeat(var(--cols), minmax(28px, 1fr));
+  gap: 2px;
+  min-width: 700px;
+  font-variant-numeric: tabular-nums;
+}
+.ca-heat-row { display: contents; }
+.ca-heat-corner { display: block; }
+.ca-heat-col { font: 700 10.5px/1 var(--font-mono); color: var(--muted); text-align: center; padding-bottom: 4px; }
+.ca-heat-club { font: 600 12px/26px var(--font-ui); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 6px; }
+.ca-heat-cell {
+  display: grid;
+  place-items: center;
+  height: 26px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--fate-top6) calc(var(--a) * 100%), #f4f7f9);
+  font: 700 10.5px/1 var(--font-ui);
+  color: var(--ink);
+}
+.ca-heat-cell.is-dark { color: #fff; }
+.ca-heat-col.has-line, .ca-heat-cell.has-line { box-shadow: 2px 0 0 #fff, 3px 0 0 var(--muted); }
+.ca-heat-row.is-highlight .ca-heat-club { color: var(--teal-dark); font-weight: 800; }
+.ca-heat-row.is-highlight .ca-heat-cell { outline: 1.5px solid var(--teal); outline-offset: -1.5px; }
+
+.ca-trust { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.ca-trust-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.ca-trust-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ca-trust-tiles .an-tile-value { font-size: 22px; }
+
 /* ------------------------------------------------------------ responsivo */
 @container an (max-width: 700px) {
   .ca-tab { --label-w: 0px; --dot: 7px; }
@@ -284,5 +369,13 @@
   .ca-champ-row { grid-template-columns: 104px minmax(0, 1fr); }
   .ca-champs .ca-pos-axis { margin-left: calc(104px + 18px); }
   .ca-presets, .ca-round { grid-column: 1 / -1; }
+  .ca-proj-row { grid-template-columns: 20px minmax(0, 1fr) 52px 52px 52px; gap: 6px; }
+  .ca-proj-row .ca-proj-bar { grid-column: 2 / -1; grid-row: 2; margin: 2px 4px 6px; }
+  .ca-proj-row.is-head .ca-proj-axis { display: none; }
+  .ca-chance { min-width: 44px; padding: 4px 4px; font-size: 11.5px; }
+  .ca-trust { grid-template-columns: 1fr; }
+  .ca-heat-hint { display: block; }
+  .ca-trust-tiles { grid-template-columns: 1fr 1fr 1fr; }
+  .ca-trust-tiles .an-tile-value { font-size: 18px; }
   .ca-round { max-width: none; }
 }

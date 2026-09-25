@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getClubInsights } from "../../api";
+import { getClubInsights, getProjection } from "../../api";
 import { displayClubName } from "../../nameFormat";
 import { fmt } from "../stats/format";
 import { AlertIcon, CheckIcon, Empty, StatTile } from "../analyses/ui";
@@ -8,6 +8,7 @@ import FortyFive from "./FortyFive";
 import LeaderCurve from "./LeaderCurve";
 import { FirstGoalCard, NextYearCard, PromotedCard, TrendsCard, TurnoCard } from "./PatternCards";
 import Thermometer from "./Thermometer";
+import { EvolutionChart, PositionHeatmap, ProjectionHero, ProjectionTable, TrustCard } from "./ProjectionCards";
 import { closedSeasons, currentSeason, cutoffs, gamesPlayed, pointsAt, roundRates } from "./derive";
 import "../stats/stats.css";
 import "../analyses/analyses.css";
@@ -118,9 +119,14 @@ export default function ClubAnalysesTab() {
   const [status, setStatus] = useState("loading");
   const [round, setRound] = useState(null);
   const [club, setClub] = useState("");
+  const [proj, setProj] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
+    // projecao e opcional: sem ela (ainda nao calculada) a aba segue normal
+    getProjection()
+      .then((p) => !cancelled && setProj(p))
+      .catch(() => {});
     getClubInsights()
       .then((d) => {
         if (cancelled) return;
@@ -182,6 +188,22 @@ export default function ClubAnalysesTab() {
       </div>
 
       <div className="an-body">
+        {proj && (
+          <>
+            <Section eyebrow={`Projeção ${proj.season}`} title="Como deve terminar o campeonato">
+              {fmt(proj.sims, 0)} simulações dos jogos que faltam, com a força de cada time medida em todos os jogos desde
+              2018 (os recentes pesam mais) e o mando de campo de cada partida.
+            </Section>
+            <ProjectionHero proj={proj} />
+            <div className="an-grid">
+              <ProjectionTable proj={proj} highlight={club} />
+              <EvolutionChart proj={proj} highlight={club} />
+              <PositionHeatmap proj={proj} highlight={club} />
+              <TrustCard proj={proj} />
+            </div>
+            <Section eyebrow="A tabela da rodada" title="O que a pontuação de hoje já disse no passado" />
+          </>
+        )}
         <Hero closed={closed} current={current} round={r} />
 
         <Section eyebrow="A tabela da rodada" title="Com esses pontos, dá para respirar?">

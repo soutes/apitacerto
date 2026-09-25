@@ -28,11 +28,27 @@ CI/CD): [`_docs/homework3.md`](_docs/homework3.md).
   a resposta curta primeiro, depois os gráficos. Substituiu em 21/09/2026 o
   antigo Índice de Favorecimento (spec seção 6), retirado porque o
   diagnóstico de 14/09/2026 mostrou que ele não se distingue do acaso.
-- **Análises dos clubes** — o que a tabela da rodada conta sobre o fim do
-  campeonato (linha do rebaixamento, G-6 e título rodada a rodada, termômetro
-  da temporada em andamento, a lenda dos 45 pontos) e os padrões de campanha
+- **Análises dos clubes** — projeção de como termina a temporada em
+  andamento (chances de título, G-4, G-6 e queda, tabela final mais provável,
+  chance por posição e a série das chances rodada a rodada), o que a tabela da
+  rodada conta sobre o fim do campeonato (linha do rebaixamento, G-6 e título
+  rodada a rodada, termômetro, a lenda dos 45 pontos) e os padrões de campanha
   que se repetem (ou não) entre temporadas. Sem arbitragem; dados de
-  `GET /club-insights`.
+  `GET /club-insights` e `GET /projection`.
+
+### Projeção da temporada
+
+Modelo de gols de Poisson (Maher, 1982) com ataque e defesa de cada clube e
+mando de campo (da liga + ajuste pequeno por clube), ajustado em todos os jogos
+desde 2018 com peso que cai com o tempo (Dixon & Coles, 1997): um jogo de 2
+anos atrás vale metade de um de hoje. Os jogos que faltam são simulados 20 mil
+vezes, sorteando também a força dos times dentro da incerteza do ajuste. As
+escolhas saíram de backtest em 2019–2025, projetando do mesmo ponto do
+campeonato: meia-vida de 2 anos acertou mais que usar só a temporada atual ou
+só os últimos meses; confronto direto e a correção de placares baixos de
+Dixon-Coles não melhoraram e ficaram de fora. Calculada offline junto com as
+estatísticas (`scripts/compute_stats.py`, também no job semanal);
+`app/analysis/projection.py`.
 
 Clicar numa célula da matriz de Clubes abre o detalhe do par (KPIs e séries).
 

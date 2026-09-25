@@ -37,8 +37,10 @@ Tudo que diz "p" é bicaudal. "Para acompanhar" segue a régua do projeto
 6. **Com VAR (2019+), as expulsões subiram 33%** (0,27 → 0,35 por jogo,
    p = 0,005). Gols de pênalti +25% (p = 0,07, não conclusivo); amarelos +4%
    (p = 0,13). Ressalva: só existe um ano sem VAR (2018). Risco baixo.
-7. **Cartões por jogo: 5,14 (2018) → 6,01 (2024)**, +17%. Vermelhos por jogo
-   quase dobraram no pico (0,27 → 0,43 em 2024). Risco baixo.
+7. **Mais cartão nos últimos 4 anos**: 5,73 por jogo em 2022–2025 contra
+   5,05 em 2018–2021 (+14%); vermelhos 0,370 contra 0,307 (+21%). Comparar
+   blocos de temporadas completas evita escolher o pico (2024: 6,01). Risco
+   baixo.
 8. **Última rodada tem 20% menos cartões** (4,36 × 5,42 por jogo, p = 0,001).
    Risco baixo.
 
@@ -56,9 +58,9 @@ Tudo que diz "p" é bicaudal. "Para acompanhar" segue a régua do projeto
     marcam 60% dos gols de bola rolando e 56% dos gols de pênalti (p = 0,15).
     Vermelhos: 45,5% dos cartões vermelhos contra 47,3% dos amarelos
     (p = 0,40). Risco baixo — derruba o mito.
-12. **Mas o time pequeno leva 23% mais amarelo quando o grande joga em casa**
-    — e só 2% a mais quando o grande joga fora. É a torcida, não o escudo.
-    Risco baixo.
+12. **Na casa do grande, o time pequeno leva 23% mais amarelo; na casa do
+    pequeno, os dois levam quase o mesmo (2% de diferença).** O que pesa é
+    jogar fora de casa, não enfrentar um grande. Risco baixo.
 13. **Nordeste × Sudeste**: 71 × 71 gols de pênalti, apesar de o Nordeste
     marcar 30% menos gols de bola rolando (562 × 812; p = 0,033 sem correção;
     entre 6 testes regionais, não sobrevive). Para acompanhar. Risco médio.

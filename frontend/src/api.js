@@ -54,6 +54,14 @@ export async function getClubInsights() {
   return res.json();
 }
 
+// Projecao do fim da temporada (calculada offline). 404 = ainda nao calculada -> null.
+export async function getProjection() {
+  const res = await fetch(`${BACKEND_URL}/projection`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`projection fetch failed: ${res.status}`);
+  return res.json();
+}
+
 export async function getDashboard({ season, team, referee }) {
   if (USE_MOCK) {
     await delay(150);

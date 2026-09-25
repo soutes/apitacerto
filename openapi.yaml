@@ -103,6 +103,24 @@ paths:
         "404":
           description: Relatorio ainda nao calculado para esse recorte
 
+  /projection:
+    get:
+      summary: >-
+        Projeção do fim da temporada em andamento (aba Análises dos clubes):
+        modelo de gols de Poisson com peso por recência (meia-vida de 2 anos)
+        e mando, simulado 20 mil vezes. Calculada offline pelo
+        scripts/compute_stats.py; aqui só é lida.
+      operationId: getProjection
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Projection"
+        "404":
+          description: Projeção ainda não calculada (ou nenhuma temporada em andamento)
+
   /club-insights:
     get:
       summary: >-
@@ -293,6 +311,40 @@ components:
           items: { type: object }
         summary: { type: object, description: "testados, fortes, fracos, esperado por acaso" }
 
+    Projection:
+      type: object
+      required: [season, gamesPlayed, gamesTotal, teams, evolution, backtest]
+      properties:
+        season: { type: integer }
+        gamesPlayed: { type: integer }
+        gamesTotal: { type: integer }
+        asOf: { type: string, format: date, description: "data do último jogo usado" }
+        sims: { type: integer }
+        method: { type: object }
+        teams:
+          type: array
+          description: ordenado pelos pontos esperados no fim
+          items:
+            type: object
+            properties:
+              team: { type: string }
+              points: { type: integer }
+              games: { type: integer }
+              expPoints: { type: number }
+              low: { type: integer, description: "percentil 10 dos pontos finais" }
+              high: { type: integer, description: "percentil 90 dos pontos finais" }
+              title: { type: number, description: "% de simulações campeão" }
+              top4: { type: number }
+              top6: { type: number }
+              relegation: { type: number }
+              positions: { type: array, items: { type: number }, description: "% por posição final, 1º a 20º" }
+        evolution:
+          type: array
+          description: a projeção refeita a cada 10 jogos da temporada
+          items: { type: object }
+        backtest: { type: object, description: "variantes testadas, erro por fase e calibração em 2019-2025" }
+        headToHead: { type: object, description: "teste do confronto direto como efeito próprio" }
+        computedAt: { type: string, format: date-time }
     ClubInsights:
       type: object
       required: [seasons, firstGoal, comebacks]

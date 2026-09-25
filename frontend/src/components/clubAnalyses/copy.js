@@ -90,6 +90,39 @@ export const HOW = {
     why: "Mede o peso do primeiro gol e quem mais consegue reagir.",
     read: "Clube forte vira mais porque é forte: o ranking mistura reação com qualidade do elenco.",
   },
+  projection: {
+    built:
+      "Todos os jogos com placar desde 2018 e a tabela oficial dos jogos que faltam na temporada em andamento (quem joga " +
+      "contra quem, e onde).",
+    method:
+      "Modelo de gols de Poisson: cada clube tem uma força de ataque e uma de defesa, e o mandante ganha um bônus (o da " +
+      "liga mais um ajuste pequeno para cada clube). Jogos antigos pesam menos: um jogo de 2 anos atrás vale metade de " +
+      "um de hoje. Depois, os jogos que faltam são sorteados 20 mil vezes (Monte Carlo), sorteando também a força dos " +
+      "times dentro da incerteza do ajuste. Cada simulação termina numa tabela final, com o desempate da CBF (pontos, " +
+      "vitórias, saldo, gols pró); as chances são a porcentagem de simulações em que cada coisa aconteceu.",
+    origin:
+      "Modelo de gols de Mike Maher (1982); peso que cai com o tempo, de Mark Dixon e Stuart Coles (1997) — a base dos " +
+      "modelos de casas de aposta. Monte Carlo: Metropolis e Ulam (1949).",
+    why:
+      "Testamos as alternativas nas temporadas 2019–2025, projetando do mesmo ponto do campeonato: meia-vida de 2 anos " +
+      "acertou mais do que olhar só a temporada atual ou só os últimos meses (o futebol tem muito acaso; pouco jogo " +
+      "engana). O confronto direto entre dois clubes não previu nada além da força atual deles, e a correção de " +
+      "placares baixos de Dixon-Coles não melhorou o acerto — os dois ficaram de fora.",
+    read:
+      "São chances, não certezas. O modelo não sabe de lesão, reforço, troca de técnico nem de time poupado. G-6 é a " +
+      "faixa que costuma dar Libertadores; o número exato de vagas muda de ano para ano. A projeção é recalculada toda " +
+      "semana, depois da rodada.",
+  },
+  projectionEvolution: {
+    built:
+      "A mesma projeção refeita a cada 10 jogos da temporada (uma rodada), usando só os jogos que já tinham acontecido " +
+      "até aquele ponto.",
+    method: "Mesmo modelo e mesma simulação da projeção atual, com 3 mil simulações por ponto da série.",
+    why: "Mostra quando cada briga começou a se definir e como uma sequência de resultados mudou as chances.",
+    read:
+      "No começo do campeonato os times têm poucos jogos na temporada e o modelo se apoia mais nas temporadas " +
+      "anteriores, então as chances mudam rápido. Em destaque, os clubes com mais chance hoje; em cinza, os demais.",
+  },
   trends: {
     built: "Média de gols por jogo, porcentagem de 0 x 0 e de vitórias do mandante em cada temporada.",
     method: "Contagem direta sobre todos os jogos com placar.",

@@ -10,9 +10,11 @@ from sqlalchemy.orm import Session
 from app.analysis import sections as sec
 from app.analysis.data import load_matches, season_in_progress, team_rows
 from app.analysis.modeling import fit_all, pair_tables, pool_pairs
+from app.analysis.projection import build_projection
 from app.models import Fixture, IngestionLog, MatchEvent, StatReport
 
 METHOD_VERSION = 1  # subir quando a metodologia mudar (spec 9: emenda datada)
+PROJECTION_KEY = "projection"
 
 
 def data_version(db: Session) -> str:
@@ -67,6 +69,11 @@ def build_reports(db: Session) -> dict[str, dict]:
 
 def compute_and_store(db: Session) -> list[str]:
     reports = build_reports(db)
+    # projecao do fim da temporada em andamento (aba Analises dos clubes);
+    # fora de temporada nao ha o que projetar e a chave antiga sai do banco
+    projection = build_projection(db)
+    if projection is not None:
+        reports[PROJECTION_KEY] = projection
     version = data_version(db)
     now = datetime.now(timezone.utc).isoformat()
     existing = {r.key: r for r in db.scalars(select(StatReport))}

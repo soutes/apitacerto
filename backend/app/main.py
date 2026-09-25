@@ -89,6 +89,17 @@ def get_statistics(season: Optional[int] = None, db: Session = Depends(get_db)):
     return {**report.payload, "computedAt": report.computed_at, "dataVersion": report.data_version}
 
 
+@app.get("/projection")
+def get_projection(db: Session = Depends(get_db)):
+    # projecao do fim da temporada em andamento, calculada offline pelo
+    # compute_stats (app.analysis.projection); aqui so le o JSON pronto.
+    report = db.get(StatReport, "projection")
+    if report is None:
+        raise HTTPException(status_code=404,
+                            detail="Projeção ainda não calculada (rode scripts/compute_stats.py)")
+    return {**report.payload, "computedAt": report.computed_at, "dataVersion": report.data_version}
+
+
 @app.get("/club-insights")
 def get_club_insights(db: Session = Depends(get_db)):
     # aba Analises dos clubes: trajetoria de pontos e destino de cada clube

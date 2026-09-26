@@ -15,7 +15,7 @@ from app import club_insights, mock_store, queries
 from app.db import ensure_schema, get_db
 from app.models import StatReport
 
-MIN_SEASON = 2018  # primeira temporada com competitionId conhecido (cbf_scraper.COMPETITION_IDS)
+MIN_SEASON = 2007  # 2007-2017 do Transfermarkt; CBF a partir de 2018 (scripts/scrape_transfermarkt.py)
 
 
 @asynccontextmanager

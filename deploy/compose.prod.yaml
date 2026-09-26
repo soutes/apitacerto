@@ -31,6 +31,10 @@ services:
     mem_limit: 256m
     restart: unless-stopped
 
+  # carga inicial; no `up` nao mexe em banco que ja tem jogos. Pra trocar o
+  # banco inteiro pelo seed da imagem (ex.: depois de ingerir temporadas
+  # antigas do Transfermarkt, que o job semanal nao busca):
+  #   docker compose -f compose.prod.yaml run --rm seed python scripts/seed.py load --replace
   seed:
     image: ${APITACERTO_IMAGE:-apitacerto:local}
     command: ["python", "scripts/seed.py", "load"]

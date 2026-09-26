@@ -38,7 +38,7 @@ export default function DataCompletenessBanner({ completeness }) {
       <span className={`footer-dot ${statusClass}`} />
       <span>{message}</span>
       {updatedText && <span>· Atualizado em {updatedText}</span>}
-      <span>· Fonte: <a href="https://www.cbf.com.br/futebol-brasileiro" target="_blank" rel="noreferrer">CBF</a></span>
+      <span>· Fonte: <a href="https://www.cbf.com.br/futebol-brasileiro" target="_blank" rel="noreferrer">CBF</a> (2018+) e <a href="https://www.transfermarkt.com/campeonato-brasileiro-serie-a/startseite/wettbewerb/BRA1" target="_blank" rel="noreferrer">Transfermarkt</a> (2007–2017)</span>
     </footer>
   );
 }

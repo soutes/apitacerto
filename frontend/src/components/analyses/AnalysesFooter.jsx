@@ -43,8 +43,13 @@ export default function AnalysesFooter({ report, computedAt }) {
           Súmulas e escalas oficiais publicadas pela{" "}
           <a href="https://www.cbf.com.br/futebol-brasileiro" target="_blank" rel="noreferrer">
             CBF
+          </a>{" "}
+          de 2018 em diante; de 2007 a 2017, a base colaborativa (não oficial) do{" "}
+          <a href="https://www.transfermarkt.com/campeonato-brasileiro-serie-a/startseite/wettbewerb/BRA1" target="_blank" rel="noreferrer">
+            Transfermarkt
           </a>
-          : {fmt(overview.matches, 0)} jogos da Série A neste recorte.
+          , conferida contra a CBF nos 380 jogos de 2018 (gols iguais, cartões 99% iguais).
+          {" "}{fmt(overview.matches, 0)} jogos da Série A neste recorte.
           {noReferee > 0 && ` ${fmt(noReferee, 0)} deles vieram sem o árbitro na escala publicada e só entram nas contas da liga.`}
         </p>
         <p>

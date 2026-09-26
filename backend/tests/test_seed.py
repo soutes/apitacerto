@@ -54,6 +54,19 @@ def test_load_does_not_touch_a_database_that_already_has_games(tmp_path):
         assert conn.scalar(select(func.count()).select_from(Fixture.__table__)) == 1
 
 
+def test_load_replace_swaps_the_whole_database(tmp_path):
+    source = create_engine(f"sqlite:///{tmp_path / 'src.db'}")
+    _populate(source)
+    seed_file = tmp_path / "seed.json.gz"
+    exported = export_seed(source, seed_file)
+
+    target = create_engine(f"sqlite:///{tmp_path / 'dst.db'}")
+    _populate(target)  # banco de producao ja com jogos
+    assert load_seed(target, seed_file, replace=True) == exported
+    with target.connect() as conn:
+        assert conn.scalar(select(func.count()).select_from(Fixture.__table__)) == 1
+
+
 def test_export_is_deterministic(tmp_path):
     source = create_engine(f"sqlite:///{tmp_path / 'src.db'}")
     _populate(source)

@@ -30,3 +30,9 @@ _docs/flip7-2-DESIGN.md
 *.key
 id_rsa*
 id_ed25519*
+
+# cache de paginas do Transfermarkt (scripts/scrape_transfermarkt.py)
+backend/data/
+backend/*.log
+backend/check.err
+backend/tm_cache.tgz

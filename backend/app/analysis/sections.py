@@ -476,7 +476,9 @@ def hypotheses(f: pd.DataFrame, closed_seasons: list[int]) -> list[dict]:
         "Registrada antes de ingerir 2018–2021.", d, "y2020",
         f"cards ~ {base} + home:y2020", "home:y2020", "Efeito mandante em 2020 ÷ demais temporadas (razão)"))
 
-    d3 = d[d.ref != MISSING_REF].copy()
+    # so jogo com categoria publicada: o Transfermarkt (2007-2017) nao traz a
+    # categoria, e sem isso todo arbitro FIFA daquela epoca contaria como nao-FIFA
+    d3 = d[(d.ref != MISSING_REF) & (d.ref_cat.fillna("") != "")].copy()
     d3["fifa"] = d3.ref_cat.fillna("").str.contains("FIFA").astype(int)
     out.append(single(
         "H3", "Categoria sob pressão (árbitro FIFA)",
@@ -484,10 +486,10 @@ def hypotheses(f: pd.DataFrame, closed_seasons: list[int]) -> list[dict]:
         "Estimativa pontual vista no diagnóstico (especificação colinear, descartada) — registrada com a nova.",
         d3, "fifa", f"cards ~ {base} + home:fifa", "home:fifa", "Efeito mandante com FIFA ÷ sem FIFA (razão)"))
 
-    d["pre_var"] = (d.season == 2018).astype(int)
+    d["pre_var"] = (d.season <= 2018).astype(int)  # VAR chegou a Serie A em 2019
     out.append(single(
         "H4", "VAR e pênaltis",
-        "A vantagem do mandante em gols de pênalti é menor com VAR (2019+) do que sem (2018).",
-        "Registrada antes de ingerir 2018.", d, "pre_var",
+        "A vantagem do mandante em gols de pênalti é menor com VAR (2019+) do que sem (até 2018).",
+        "Registrada antes de ingerir 2018; ampliada para 2007–2018 com os dados do Transfermarkt.", d, "pre_var",
         f"pen ~ {base} + home:pre_var", "home:pre_var", "Efeito mandante em pênaltis sem VAR ÷ com VAR (razão)"))
     return out

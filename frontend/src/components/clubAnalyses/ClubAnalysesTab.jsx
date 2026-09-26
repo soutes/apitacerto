@@ -192,7 +192,7 @@ export default function ClubAnalysesTab() {
           <>
             <Section eyebrow={`Projeção ${proj.season}`} title="Como deve terminar o campeonato">
               {fmt(proj.sims, 0)} simulações dos jogos que faltam, com a força de cada time medida em todos os jogos desde
-              2018 (os recentes pesam mais) e o mando de campo de cada partida.
+              2007 (os recentes pesam mais) e o mando de campo de cada partida.
             </Section>
             <ProjectionHero proj={proj} />
             <div className="an-grid">

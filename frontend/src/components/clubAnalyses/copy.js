@@ -21,14 +21,14 @@ const ROUND_NOTE =
 export const HOW = {
   cutoff: {
     built:
-      "Para cada clube em cada temporada completa (2018 em diante), os pontos que ele tinha depois de R jogos e onde " +
+      "Para cada clube em cada temporada completa (2007 em diante), os pontos que ele tinha depois de R jogos e onde " +
       "terminou o campeonato: campeão, G-6, meio da tabela ou rebaixado. " + ROUND_NOTE,
     method:
       "Contagem simples, sem modelo: a linha do rebaixamento é o menor número de pontos, na rodada R, de um clube que " +
       "escapou; a outra linha é o maior número de pontos de um clube que caiu. O mesmo vale para o G-6 e para o título.",
     why: "É a pergunta que todo torcedor faz no meio do campeonato: “com esses pontos, já dá para respirar?”.",
     read:
-      "“Nunca” quer dizer “nunca desde 2018”: são poucas temporadas, e um recorde pode cair no próximo ano. G-6 é a " +
+      "“Nunca” quer dizer “nunca desde 2007”: são poucas temporadas, e um recorde pode cair no próximo ano. G-6 é a " +
       "faixa que costuma dar Libertadores; o número exato de vagas muda de ano para ano.",
   },
   thermometer: {
@@ -58,7 +58,7 @@ export const HOW = {
     read: "A linha muda de ano para ano: depende de quantos pontos os times de baixo somaram naquela temporada.",
   },
   promoted: {
-    built: "Clubes que não estavam na Série A no ano anterior (dentro do banco, desde 2019) e onde terminaram.",
+    built: "Clubes que não estavam na Série A no ano anterior (dentro do banco, desde 2008) e onde terminaram.",
     method: "Contagem direta.",
     why: "Mede o tamanho do salto da Série B para a Série A.",
     read: "Clube que voltou depois de um ano fora conta como promovido.",
@@ -92,7 +92,7 @@ export const HOW = {
   },
   projection: {
     built:
-      "Todos os jogos com placar desde 2018 e a tabela oficial dos jogos que faltam na temporada em andamento (quem joga " +
+      "Todos os jogos com placar desde 2007 e a tabela oficial dos jogos que faltam na temporada em andamento (quem joga " +
       "contra quem, e onde).",
     method:
       "Modelo de gols de Poisson: cada clube tem uma força de ataque e uma de defesa, e o mandante ganha um bônus (o da " +

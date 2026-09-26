@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import re
 import sys
 from collections import Counter
 from datetime import datetime, timezone
@@ -93,7 +94,14 @@ TM_CLUBS: dict[int, tuple[str, str]] = {
 # faltando, abreviacao...).
 TM_REFEREE_ALIASES: dict[str, str] = {
     "Leandro Vuaden": "Leandro Pedro Vuaden",  # conferido em 2018: mesmos jogos nas duas fontes
+    "Paulo Henrique Schleinch Vollkopf": "Paulo Henrique Schleich Vollkopf",  # erro de digitacao no TM
+    # o proprio Transfermarkt tem dois cadastros (ids diferentes) pra mesma pessoa
+    "Franscisco Carlos do Nascimento": "Francisco Carlos do Nascimento",
+    "José Caldas de Souza": "José de Caldas Souza",
 }
+
+# homonimos o Transfermarkt desambigua com a UF: "Adriano de Carvalho (TO)"
+_UF_SUFFIX = re.compile(r"\s*\(([A-Z]{2})\)$")
 
 
 class Resolver:
@@ -124,19 +132,23 @@ class Resolver:
         return team
 
     def canonical_referee_name(self, name: str) -> str:
+        name = _UF_SUFFIX.sub("", name)
         return self._alias.get(normalize_name(name), name)
 
     def referee(self, tm: dict | None) -> Referee | None:
         if not tm:
             return None
-        key = normalize_name(self.canonical_referee_name(tm["name"]))
+        name = self.canonical_referee_name(tm["name"])
+        key = normalize_name(name)
         ref = self._refs.get(key)
         if ref:
             return ref
-        self.new_referees[tm["name"]] += 1
+        self.new_referees[name] += 1
         if not self.write:
             return None
-        ref = Referee(name=tm["name"])  # sem cbf_id nem UF: o Transfermarkt nao da a federacao
+        # sem cbf_id; UF so quando o Transfermarkt poe o sufixo (ele nao da a federacao)
+        uf = _UF_SUFFIX.search(tm["name"])
+        ref = Referee(name=name, uf=uf.group(1) if uf else None)
         self.db.add(ref)
         self.db.flush()
         self._refs[key] = ref
@@ -160,9 +172,11 @@ class Resolver:
 def _load_season(fetcher: Fetcher, season: int) -> list[dict]:
     schedule = parse_schedule(fetcher.get(schedule_path(season), f"schedule_{season}"))
     print(f"season {season}: {len(schedule)} jogos na tabela")
+    cached = fetcher.read_cached([f"match_{item['tm_id']}" for item in schedule])
     matches = []
     for i, item in enumerate(schedule, 1):
-        page = fetcher.get(match_path(item["tm_id"]), f"match_{item['tm_id']}")
+        key = f"match_{item['tm_id']}"
+        page = cached.get(key) or fetcher.get(match_path(item["tm_id"]), key)
         match = parse_match(page)
         match["tm_id"], match["round"] = item["tm_id"], match["round"] or item["round"]
         matches.append(match)

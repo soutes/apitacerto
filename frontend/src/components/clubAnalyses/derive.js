@@ -1,7 +1,7 @@
 // Contas da aba Analises dos clubes em cima de GET /club-insights. "Rodada R"
 // aqui = depois de R jogos do proprio clube (jogo adiado entra quando e
 // jogado), o que deixa todo mundo com o mesmo numero de jogos. "Nunca" vale
-// para as temporadas completas do banco (2018 em diante).
+// para as temporadas completas do banco (2007 em diante).
 
 export const FATE_ORDER = ["champion", "top6", "mid", "relegated"];
 

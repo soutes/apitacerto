@@ -19,6 +19,7 @@ import html as html_lib
 import re
 import time
 import unicodedata
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import httpx
@@ -69,6 +70,16 @@ class Fetcher:
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_text(text, encoding="utf-8")
         return text
+
+    def read_cached(self, cache_keys: list[str], workers: int = 16) -> dict[str, str]:
+        """Le do cache, em paralelo, as chaves que ja estao em disco. No
+        Windows o antivirus confere cada arquivo aberto (~1 s por ficha);
+        em paralelo cai pra ~0,3 s -- 4.500 fichas em minutos, nao horas."""
+        files = {k: self.cache_dir / f"{k}.html" for k in cache_keys}
+        present = [k for k, f in files.items() if f.exists()]
+        with ThreadPoolExecutor(workers) as ex:
+            texts = ex.map(lambda k: files[k].read_text(encoding="utf-8"), present)
+            return dict(zip(present, texts))
 
     def _download(self, path: str) -> str:
         for attempt, wait in enumerate((*self.waits, None)):

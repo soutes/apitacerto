@@ -98,3 +98,21 @@ def test_fetcher_reads_cache_without_network(tmp_path):
     fetcher = Fetcher(client=None, cache_dir=tmp_path, delay=0)  # client None: rede quebraria o teste
     assert fetcher.get("/qualquer", "match_1") == "<html>cache</html>"
     assert fetcher.downloaded == 0
+
+
+def test_resolver_strips_uf_suffix_and_applies_aliases(db_session):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    from scrape_transfermarkt import Resolver
+
+    from app.models import Referee
+
+    db_session.add(Referee(name="Leandro Pedro Vuaden", cbf_id=1, uf="RS"))
+    db_session.flush()
+    res = Resolver(db_session, write=True)
+    assert res.referee({"tm_id": 1163, "name": "Leandro Vuaden"}).name == "Leandro Pedro Vuaden"
+    new = res.referee({"tm_id": 1629, "name": "Adriano de Carvalho (TO)"})
+    assert (new.name, new.uf, new.cbf_id) == ("Adriano de Carvalho", "TO", None)
+    # duas grafias do mesmo arbitro no Transfermarkt viram um registro so
+    a = res.referee({"tm_id": 3052, "name": "Franscisco Carlos do Nascimento"})
+    assert a is res.referee({"tm_id": 9, "name": "Francisco Carlos do Nascimento"})

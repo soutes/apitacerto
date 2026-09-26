@@ -114,7 +114,7 @@ export const HYPOTHESES = {
     question: "O VAR reduziu pênaltis a favor do time da casa?",
     apoia: "Sim. Com VAR, a vantagem do time da casa em gols de pênalti ficou menor.",
     contraria: "Ao contrário do previsto: com VAR, a vantagem da casa em pênaltis aumentou.",
-    "sem evidência": "Não dá para afirmar. Só existe uma temporada sem VAR (2018), e a diferença ficou dentro do acaso.",
+    "sem evidência": "Não dá para afirmar. Com 12 temporadas sem VAR (2007–2018), a diferença ficou dentro do acaso.",
   },
 };
 

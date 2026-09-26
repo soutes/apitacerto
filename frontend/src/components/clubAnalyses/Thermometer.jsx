@@ -19,7 +19,7 @@ export default function Thermometer({ closed, current, highlight }) {
     <AnalysisCard
       className="span-12"
       title={`Termômetro ${current.season}: quem já esteve aqui, como terminou?`}
-      subtitle="Para cada clube, os casos de 2018 em diante com pontos parecidos (2 a mais ou a menos) depois do mesmo número de jogos — e o fim que tiveram."
+      subtitle="Para cada clube, os casos de 2007 em diante com pontos parecidos (2 a mais ou a menos) depois do mesmo número de jogos — e o fim que tiveram."
       how={{ copy: HOW.thermometer }}
     >
       <Legend
@@ -50,7 +50,7 @@ export default function Thermometer({ closed, current, highlight }) {
             <span role="cell" className="ca-thermo-bar">
               {r.peers < 3 ? (
                 <small className="ca-thermo-few">
-                  {r.peers === 0 ? "Nenhum caso parecido desde 2018" : `Só ${r.peers} caso${r.peers > 1 ? "s" : ""} parecido${r.peers > 1 ? "s" : ""}`}
+                  {r.peers === 0 ? "Nenhum caso parecido desde 2007" : `Só ${r.peers} caso${r.peers > 1 ? "s" : ""} parecido${r.peers > 1 ? "s" : ""}`}
                 </small>
               ) : (
                 <>

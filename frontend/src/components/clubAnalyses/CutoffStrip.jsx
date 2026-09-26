@@ -146,7 +146,7 @@ export default function CutoffStrip({ closed, current, round, highlight }) {
     <AnalysisCard
       className="span-12"
       title={`A linha da tabela depois de ${round} jogos`}
-      subtitle="Cada ponto é um clube em uma temporada (2018 em diante), na altura dos pontos que tinha nesta rodada — separado por como terminou o campeonato."
+      subtitle="Cada ponto é um clube em uma temporada (2007 em diante), na altura dos pontos que tinha nesta rodada — separado por como terminou o campeonato."
       how={{ copy: HOW.cutoff, render: () => <Detail cut={cut} current={now} round={round} /> }}
     >
       <div className="an-seg" role="group" aria-label="Linha de corte">

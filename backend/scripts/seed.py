@@ -8,8 +8,11 @@ nunca dependem da API da CBF estar no ar.
 Uso:
     uv run python scripts/seed.py export            # apitacerto.db -> seed/apitacerto.json.gz
     DATABASE_URL=postgresql+psycopg://... python scripts/seed.py load
+    DATABASE_URL=postgresql+psycopg://... python scripts/seed.py load --replace
 
-`load` e idempotente: banco que ja tem jogos nao e tocado.
+`load` e idempotente: banco que ja tem jogos nao e tocado. `--replace` apaga
+tudo e recarrega (uma transacao so) -- pra levar pra producao dado que nao
+vem do scraping semanal, como as temporadas antigas do Transfermarkt.
 """
 from __future__ import annotations
 
@@ -51,13 +54,14 @@ def export_seed(engine: Engine, path: Path = SEED_FILE) -> dict[str, int]:
     return {name: len(rows) for name, rows in data.items()}
 
 
-def load_seed(engine: Engine, path: Path = SEED_FILE) -> dict[str, int] | None:
+def load_seed(engine: Engine, path: Path = SEED_FILE, replace: bool = False) -> dict[str, int] | None:
     """Carrega o arquivo num banco vazio. Devolve None se o banco ja tinha
-    jogos (nada e alterado)."""
+    jogos (nada e alterado), a menos que replace=True."""
     ensure_schema(bind=engine)
-    with engine.connect() as conn:
-        if conn.scalar(select(func.count()).select_from(Fixture.__table__)):
-            return None
+    if not replace:
+        with engine.connect() as conn:
+            if conn.scalar(select(func.count()).select_from(Fixture.__table__)):
+                return None
 
     with gzip.open(path, "rb") as fh:
         doc = json.loads(fh.read().decode("utf-8"))
@@ -66,6 +70,9 @@ def load_seed(engine: Engine, path: Path = SEED_FILE) -> dict[str, int] | None:
 
     counts = {}
     with engine.begin() as conn:
+        if replace:
+            for table in reversed(_tables()):  # filhos antes dos pais (FKs)
+                conn.execute(table.delete())
         for table in _tables():
             rows = doc["tables"].get(table.name, [])
             for start in range(0, len(rows), 5000):
@@ -87,6 +94,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=["export", "load"])
     parser.add_argument("--file", type=Path, default=SEED_FILE)
+    parser.add_argument("--replace", action="store_true", help="load: apaga o banco e recarrega")
     args = parser.parse_args()
 
     if args.action == "export":
@@ -94,7 +102,7 @@ def main() -> None:
         print(f"exportado para {args.file}: {counts}")
         return
 
-    counts = load_seed(default_engine, args.file)
+    counts = load_seed(default_engine, args.file, replace=args.replace)
     if counts is None:
         print("banco ja tem jogos, seed nao aplicado")
     else:

@@ -222,7 +222,8 @@ VM.Standard.E2.1.Micro grátis (1 GB de RAM + 2 GB de swap). Arquivos em
 
 ## Dados
 
-Cobertura: 2018–2026 (2026 é a temporada em andamento). Fonte primária:
+Cobertura: 2007–2026 (2026 é a temporada em andamento; 2007–2017 vêm do
+Transfermarkt, via `scripts/scrape_transfermarkt.py`). Fonte primária de 2018 em diante:
 scraping da API JSON pública da CBF (sem limite diário — ver
 `_docs/specs.md` seção 3):
 

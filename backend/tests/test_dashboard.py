@@ -21,8 +21,9 @@ def test_dashboard_requires_season():
 
 
 def test_dashboard_rejects_season_outside_supported_range():
-    # COMPETITION_IDS da CBF comeca em 2018 (spec secao 9.5); antes disso, 422
-    assert client.get("/dashboard", params={"season": 2017}).status_code == 422
+    # Transfermarkt cobre 2007-2017, CBF 2018 em diante; antes disso, 422
+    assert client.get("/dashboard", params={"season": 2006}).status_code == 422
+    assert client.get("/dashboard", params={"season": 2007}).status_code == 200
     assert client.get("/dashboard", params={"season": 2101}).status_code == 422
     assert client.get("/dashboard", params={"season": 2018}).status_code == 200
     assert client.get("/dashboard", params={"season": 2026}).status_code == 200
